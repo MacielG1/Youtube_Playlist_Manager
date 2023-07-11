@@ -10,9 +10,10 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body className={`${font.className}  w-full `}>
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${font.className}`}>
         <App>{children}</App>
+
         <div id="modal-root"> </div>
       </body>
     </html>

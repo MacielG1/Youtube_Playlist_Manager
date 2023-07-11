@@ -9,7 +9,7 @@ export async function GET(req, { params }) {
 
   if (!res.ok) {
     console.log(`Error: ${res.status}, ${res.statusText}`);
-    return;
+    return null;
   }
   let data = await res.json();
   let playlistLength = data.items[0].contentDetails.itemCount;

@@ -93,6 +93,7 @@ import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from 
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { useEffect, useState } from "react";
 import spin from "@/assets/spinIcon.svg";
+import emptyBox from "@/assets/emptyBox.svg";
 import Image from "next/image";
 export default function AllPlaylists() {
   const [playlistItems, setPlaylistItems] = useState([]);
@@ -109,7 +110,9 @@ export default function AllPlaylists() {
   const {
     isPlLoading,
     isPlError,
+    isFetching: isPlFetching,
     data: plData,
+    isFetched: isPlFetched,
   } = useQuery({
     queryKey: ["playlists"],
     queryFn: getPlaylistsData,
@@ -117,7 +120,12 @@ export default function AllPlaylists() {
     refetchOnMount: false,
   });
 
-  const { isVidLoading, data: vidData } = useQuery({
+  const {
+    isVidLoading,
+    data: vidData,
+    isFetching: isVidFetching,
+    isFetched: isVidFetched,
+  } = useQuery({
     queryKey: ["videos"],
     queryFn: getVideosData,
     refetchOnWindowFocus: false,
@@ -146,10 +154,10 @@ export default function AllPlaylists() {
     }
   }, [videoItems]);
 
-  if (isPlLoading) {
+  if ((isPlFetching || isVidFetching) && !isPlFetched) {
     return (
-      <div className="mx-auto flex justify-center">
-        <Image src={spin} alt="skip 10 seconds" unoptimized width={32} height={32} />
+      <div className="mx-auto flex justify-center pt-2">
+        <Image src={spin} alt="skip 10 seconds" unoptimized width={24} height={24} className="animate-spin" />
       </div>
     );
   }
@@ -170,12 +178,18 @@ export default function AllPlaylists() {
 
   return (
     <>
+      {!vidData?.items?.length && !plData?.items?.length && (
+        <div className="flex items-center flex-col gap-4">
+          <h3 className="pt-10 text-neutral-400 text-xl">Please add a Youtube Playlist or Video link</h3>
+          <Image src={emptyBox} alt="skip 10 seconds" unoptimized width={52} height={52} />
+        </div>
+      )}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, setPlaylistItems)}>
         {playlistItems?.length > 0 && (
           <SortableContext items={playlistItems}>
             <>
               {videoItems?.length > 0 && (
-                <h2 className="md:pl-24 sm:pl-8 xl:pl-24 text-center md:text-left mt-6 text-zinc-300/90 font-semibold tracking-wide ">Playlists</h2>
+                <h2 className="md:pl-24 sm:pl-8 xl:pl-24 text-center md:text-left mt-6  text-zinc-300/90 font-semibold tracking-wide ">Playlists</h2>
               )}
               <div className="pl-3 sm:pl-7 pt-4 grid grid-cols-1 gap-y-2  xs:grid-cols-2  md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 mx-4 lg:mx-6 2xl:mx-8 place-items-center">
                 {playlistItems?.map((playlist) => (

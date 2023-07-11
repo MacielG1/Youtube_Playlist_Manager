@@ -77,7 +77,7 @@ export default function Input() {
           type="text"
           value={addedURL}
           onChange={handleInputChange}
-          placeholder="Enter a Youtube Playlist or Video URL"
+          placeholder="Enter a URL"
           className=" w-[70vw] md:w-[30rem] min-w[1rem] text-neutral-400 text-lg px-3 border-gray-600 border-2 rounded-md bg-neutral-950  focus:outline-none focus:bg-neutral-950 placeholder-gray-400 placeholder:text-base focus:placeholder-neutral-500 focus:border-gray-500 "
         />
         <button
@@ -88,8 +88,6 @@ export default function Input() {
           <Image src={searchIcon} alt="add" unoptimized width={32} height={32} className="min-w-[1rem]" />
         </button>
       </div>
-
-      {isLoading && <div className="text-center text-gray-100">Loading...</div>}
     </nav>
   );
 }

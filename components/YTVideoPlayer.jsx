@@ -99,7 +99,7 @@ export default function YTVideoPlayer({ params }) {
             priority
             className="animate-spin flex justify-center items-center h-[25vh] md:h-[55vh]"
           />
-          <span class="sr-only">Loading...</span>
+          <span className="sr-only">Loading...</span>
         </div>
       )}
       <div className={`${isLoaded ? "visible" : "hidden"} flex justify-center items center `}>
