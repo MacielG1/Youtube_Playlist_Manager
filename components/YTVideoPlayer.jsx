@@ -1,15 +1,15 @@
 "use client";
-import Link from "next/link";
 import { useRef, useEffect, useState } from "react";
 import YouTube from "react-youtube";
 import skip10 from "@/assets/skip10.svg";
 import prev10 from "@/assets/prev10.svg";
 import Image from "next/image";
-import leftArrow from "@/assets/arrowLeft.svg";
 import getHeightWidth from "@/utils/getHeightWidth";
 import skip10seconds from "@/utils/skip10seconds";
 import rewind10seconds from "@/utils/rewind10seconds";
 import spinIcon from "@/assets/spinIcon.svg";
+import BackButton from "./BackButton";
+import saveVideoProgress from "@/utils/saveVideoProgress";
 
 export default function YTVideoPlayer({ params }) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -62,9 +62,7 @@ export default function YTVideoPlayer({ params }) {
 
   function onStateChange(e) {}
 
-  function onEnd(e) {
-    // pause the player
-  }
+  function onEnd(e) {}
 
   let initialTime;
 
@@ -88,11 +86,7 @@ export default function YTVideoPlayer({ params }) {
 
   return (
     <div className="flex flex-col justify-center items-center p-20 ">
-      <div className="px-4 py-2 absolute top-0 left-0">
-        <Link className=" text-neutral-400 hover:text-neutral-500 " href="/">
-          <Image src={leftArrow} alt="back button" unoptimized width={24} height={24} priority />
-        </Link>
-      </div>
+      <BackButton />
 
       {!isLoaded && (
         <div role="status">
@@ -139,14 +133,4 @@ export default function YTVideoPlayer({ params }) {
       )}
     </div>
   );
-}
-
-function saveVideoProgress(videoPlayer, videoId) {
-  const data = {
-    videoId,
-    initialTime: videoPlayer.getCurrentTime(),
-  };
-  let item = `v=${videoId}`;
-
-  localStorage.setItem(item, JSON.stringify(data));
 }

@@ -7,6 +7,8 @@ export async function POST(req, { params }) {
 
   const playlistsToFetch = params.playlistId;
 
+  if (!playlistsToFetch) return;
+
   let nextPageToken = "";
   let videos = [];
 
@@ -40,7 +42,7 @@ export async function POST(req, { params }) {
     }
 
     if (foundDuplicate) {
-      break; // Stop the outer loop if a duplicate video is found
+      break;
     }
 
     nextPageToken = data.nextPageToken;

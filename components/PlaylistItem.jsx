@@ -44,7 +44,7 @@ export default function PlaylistItem({ title, thumbnail, id, type }) {
 
       // remove playlist from playlists array
       let allPlaylists = JSON.parse(localStorage.getItem("playlists"));
-      let newPlaylists = allPlaylists.filter((pl) => pl !== id);
+      let newPlaylists = allPlaylists.filter((pl) => pl !== id) || [];
       localStorage.setItem("playlists", JSON.stringify(newPlaylists));
       mutate("playlist");
       queryClient.invalidateQueries({ queryKey: ["playlists"] });
@@ -54,6 +54,7 @@ export default function PlaylistItem({ title, thumbnail, id, type }) {
       // remove video from videos array
       let allVideos = JSON.parse(localStorage.getItem("videos"));
       let newVideos = allVideos.filter((v) => v !== id);
+
       localStorage.setItem("videos", JSON.stringify(newVideos));
       mutate("video");
       queryClient.invalidateQueries({ queryKey: ["videos"] });
@@ -83,7 +84,7 @@ export default function PlaylistItem({ title, thumbnail, id, type }) {
         <button
           onClick={() => onDelete(id)}
           disabled={isLoading}
-          className="bg-red-500 border-neutral-800 text-black    cursor-pointer  px-3 py-1 rounded-md hover:bg-[#df2e2e] transition duration-200"
+          className="bg-red-500 border-neutral-800 text-black    cursor-pointer  px-3 py-1 rounded-md hover:bg-[#d32828] transition duration-200"
         >
           Delete
         </button>
@@ -122,15 +123,13 @@ export default function PlaylistItem({ title, thumbnail, id, type }) {
           />
           <button
             onClick={openModal}
-            className="hidden group-hover:block absolute bg-neutral-800/80  text-white cursor-default top-0 right-0 p-1 hover:bg-neutral-900/90  hover:text-red-500 transition duration-300 rounded-bl-md"
+            className="opacity-0 group-hover:opacity-100 absolute bg-neutral-800/80  text-white  top-0 right-0 p-1 hover:bg-neutral-900/90  hover:text-red-500 group-hover:transition-opacity group-hover:duration-500 rounded-bl-md"
           >
             {closeIcon}
           </button>
         </div>
 
-        <h2 className="text-neutral-300 break-words text-center   text-sm font-normal h-10 overflow-hidden whitespace-normal max-w-[15rem] md:max-w-[19rem] ">
-          {title}
-        </h2>
+        <h2 className="text-neutral-300 break-words text-center   text-sm font-normal h-10 overflow-hidden whitespace-normal max-w-[15rem] md:max-w-[19rem] ">{title}</h2>
       </div>
 
       {isModalOpen && <Modal onClose={openModal} content={modalContent} />}

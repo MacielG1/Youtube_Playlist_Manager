@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-
-const API_KEY = process.env.YOUTUBE_API;
 export const runtime = "edge";
+const API_KEY = process.env.YOUTUBE_API;
+
 export async function GET(req, { params }) {
   const playlistId = params.playlistId;
 

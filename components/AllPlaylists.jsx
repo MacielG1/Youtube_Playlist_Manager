@@ -126,15 +126,11 @@ export default function AllPlaylists() {
 
   // useEffect related to the react-query data
   useEffect(() => {
-    if (plData?.items?.length > 0) {
-      setPlaylistItems(plData?.items || []);
-    }
+    setPlaylistItems(plData?.items || []);
   }, [plData]);
 
   useEffect(() => {
-    if (vidData?.items?.length > 0) {
-      setVideoItems(vidData?.items || []);
-    }
+    setVideoItems(vidData?.items || []);
   }, [vidData]);
 
   // useEffect related to the Drag and Drop functionality
@@ -150,12 +146,13 @@ export default function AllPlaylists() {
     }
   }, [videoItems]);
 
-  if (isPlLoading)
+  if (isPlLoading) {
     return (
       <div className="mx-auto flex justify-center">
         <Image src={spin} alt="skip 10 seconds" unoptimized width={32} height={32} />
       </div>
     );
+  }
   if (isPlError) return <div>Error</div>;
 
   function handleDragEnd(e, setter) {
