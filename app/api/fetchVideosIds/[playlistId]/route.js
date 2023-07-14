@@ -19,8 +19,8 @@ export async function POST(req, { params }) {
       `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistsToFetch}&maxResults=50&pageToken=${nextPageToken}&key=${API_KEY}`
     );
     if (!res.ok) {
-      console.log(res);
-      console.log("Error fetching in fetch_write_videos, Access Token Invalid", res.statusText);
+      console.log("Error in /api/fetch_write_videos/[playlistId]", res.status, res.statusText);
+      console.log("Access Token Invalid");
       throw new Error("ERROR");
     }
     let data = await res.json();

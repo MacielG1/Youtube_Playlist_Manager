@@ -1,7 +1,7 @@
 import "./globals.css";
 import { Open_Sans } from "next/font/google";
 import App from "@/components/App";
-import BackButton from "@/components/BackButton";
+
 const font = Open_Sans({ subsets: ["latin"] });
 
 export const metadata = {

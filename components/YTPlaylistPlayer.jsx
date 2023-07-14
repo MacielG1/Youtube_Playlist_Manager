@@ -11,8 +11,7 @@ import pointerLeft from "@/assets/pointerLeft.svg";
 import resetIcon from "@/assets/resetIcon.svg";
 import skip10 from "@/assets/skip10.svg";
 import prev10 from "@/assets/prev10.svg";
-import skip10seconds from "@/utils/skip10seconds";
-import rewind10seconds from "@/utils/rewind10seconds";
+import seekTime from "@/utils/seekTime";
 import spinIcon from "@/assets/spinIcon.svg";
 import BackButton from "./BackButton";
 import savePlaylistsProgress from "@/utils/savePlaylistProgress";
@@ -51,12 +50,13 @@ export default function YoutubePlayer({ params }) {
         // let recentThan1MIn = Date.now() - plVideos.updatedTime < 60 * 1000; // 1 min
 
         if (hasOnlyDate && !recentThan3days) {
-          // playlist allready added to storage but that are smaller than 200 videos
+          // if hasOnlyData the playlist was already added to storage but is smaller than 200 videos
 
           const playlistLength = await getPlaylistSize(playlistId);
           playlistLengthRef.current = playlistLength;
 
           if (playlistLength > 200) {
+            // if it became bigger than 200 videos, fetch the new ids
             await fetchVideosIds(playlistId, allIds, allVideosIdsRef);
           } else {
             localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ updatedTime: Date.now() }));
@@ -276,7 +276,8 @@ export default function YoutubePlayer({ params }) {
           </button>
           <button
             className=" text-neutral-400  cursor-pointer  duration-300 hover:text-neutral-500 transition  outline-none focus:text-neutral-500"
-            onClick={() => rewind10seconds(playingVideoRef, PlaylistPlayerRef)}
+            onClick={() => seekTime(playingVideoRef, PlaylistPlayerRef, -10)}
+            s
           >
             <Image src={prev10} alt="rewind 10 seconds" unoptimized width={32} height={32} className="min-w-[1.5rem]" />
           </button>
@@ -288,7 +289,8 @@ export default function YoutubePlayer({ params }) {
           </button>
           <button
             className=" cursor-pointer  text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500"
-            onClick={() => skip10seconds(playingVideoRef, PlaylistPlayerRef)}
+            onClick={() => seekTime(playingVideoRef, PlaylistPlayerRef, 10)}
+            s
           >
             <Image src={skip10} alt="skip 10 seconds" unoptimized width={32} height={32} className="min-w-[1.5rem]" />
           </button>

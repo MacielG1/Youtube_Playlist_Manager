@@ -8,7 +8,7 @@ export async function GET(req, { params }) {
   const res = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=contentDetails&id=${playlistId}&key=${API_KEY}`);
 
   if (!res.ok) {
-    console.log(`Error: ${res.status}, ${res.statusText}`);
+    console.log(`Error in /api/playlistSize/[playlistId]`, res.status, res.statusText);
     return null;
   }
   let data = await res.json();

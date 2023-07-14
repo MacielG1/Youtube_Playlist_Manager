@@ -7,7 +7,6 @@ import getChannelId from "@/utils/createChannelPlaylist";
 
 export default function Input() {
   const [addedURL, setAddedURL] = useState("");
-
   const queryClient = useQueryClient();
 
   const { mutate, isLoading } = useMutation({
@@ -48,7 +47,6 @@ export default function Input() {
       return;
     }
 
-    console.log(playlistID, videoId);
     // Saving specific video data
     if (videoId && !playlistID) {
       let videoKey = "v=" + videoId;
@@ -94,8 +92,8 @@ export default function Input() {
           value={addedURL}
           onChange={handleInputChange}
           placeholder="Enter a Video or Playlist URL or a Channel Name"
-          className=" w-[70vw] md:w-[30rem] min-w[1rem] text-neutral-400 text-lg px-3 border-neutral-600 border-2 rounded-md bg-neutral-950
-            focus-visible:bg-neutral-950 placeholder-gray-400 placeholder:text-base
+          className=" w-[70vw] md:w-[30rem] min-w[1rem] text-neutral-300 text-lg px-3 border-neutral-600 border-2 rounded-md bg-neutral-950
+            focus-visible:bg-neutral-950 placeholder-neutral-400 placeholder:text-base
             focus-visible:outline-none focus-visible:border-[3px] focus-visible:border-neutral-700
             focus:placeholder-neutral-500 focus:border-gray-500 "
         />

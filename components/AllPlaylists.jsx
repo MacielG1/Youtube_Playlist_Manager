@@ -184,7 +184,7 @@ export default function AllPlaylists() {
         <div className="flex items-center flex-col gap-3 pt-10">
           {/* <h1 className=" text-neutral-400 text-2xl font-semibold">Youtube Playlist Manager</h1> */}
 
-          <h3 className=" text-neutral-400 text-lg">No Items Added</h3>
+          <h3 className=" text-neutral-400 text-lg font-semibold tracking-wide">No Items Added</h3>
           <Image src={emptyBox} alt="skip 10 seconds" unoptimized width={52} height={52} />
           <Link
             href="/about"

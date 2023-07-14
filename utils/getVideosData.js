@@ -1,10 +1,10 @@
-export default async function getVideosData() {
-  const allVideos = JSON.parse(localStorage.getItem("videos")) || [];
+export default async function getData() {
+  let allVideos = JSON.parse(localStorage.getItem("videos"));
 
   const videosIds = allVideos.join(",");
 
   if (videosIds.length) {
-    let res = await fetch(`/api/videosData`, {
+    let res = await fetch(`${url}`, {
       headers: {
         "Content-Type": "application/json",
       },

@@ -11,7 +11,7 @@ export async function POST(req) {
   let res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videosIds}&key=${API_KEY}&maxResults=50`);
 
   if (!res.ok) {
-    console.log(`Error: ${res.status}, ${res.statusText}`);
+    console.log(`Error in /api/videosData`, res.status, res.statusText);
     return null;
   }
 

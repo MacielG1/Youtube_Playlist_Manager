@@ -11,13 +11,13 @@ export async function GET(req, { params }) {
   const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&q=${encodeURIComponent(name)}&type=channel&part=id`);
 
   if (!res.ok) {
-    console.log(`Error: ${res.status}, ${res.statusText}`);
+    console.log("Error in /api/channelId/[name]", res.status, res.statusText);
     return {};
   }
 
   let data = await res.json();
   if (!data) {
-    console.log("Error", res.statusText);
+    console.log("No Data", res.statusText);
     return {};
   }
 

@@ -17,12 +17,13 @@ export default function About() {
               <p className="relative mt-6 text-lg leading-8  text-neutral-300 sm:max-w-md lg:max-w-none">
                 You can add Youtube playlists that are either public or unlisted, or enter a channel name to create a playlist with all videos from it.
               </p>
-              <p className="relative mt-5 text-lg leading-8 text-neutral-300 sm:max-w-md lg:max-w-none ">
-                The app remembers where you last stopped watching. So the next time you click on the playlist, it'll continue playing from where you left off.
-              </p>
               <p className="relative mt-5 text-lg leading-8 text-neutral-300 sm:max-w-md lg:max-w-none">
                 You can also drag and drop the playlists to reorder them as you like.
               </p>
+              <p className="relative mt-5 text-lg leading-8 text-neutral-300 sm:max-w-md lg:max-w-none ">
+                The app remembers where you last stopped watching. So the next time you click on the playlist, it'll continue playing from where you left off.
+              </p>
+
               <div className="flex justify-center items-center py-4 max-w-lg">
                 <Link
                   href="/"
