@@ -93,7 +93,7 @@ import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from 
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { useEffect, useState } from "react";
 import spin from "@/assets/spinIcon.svg";
-import emptyBox from "@/assets/emptyBox.svg";
+import emptyBox from "@/assets/emptybox.svg";
 import Image from "next/image";
 import Link from "next/link";
 
