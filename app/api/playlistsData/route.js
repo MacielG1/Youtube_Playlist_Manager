@@ -17,11 +17,11 @@ export async function POST(req) {
   }
 
   let data = await res.json();
-  console.log(data.kind);
+  console.log("kind", data.kind);
   if (!data) {
     console.log("Error", res.statusText);
     return {};
   }
-  console.log("data", data);
+  // console.log("data", data);
   return NextResponse.json(data);
 }

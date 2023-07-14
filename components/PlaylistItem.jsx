@@ -104,7 +104,7 @@ export default function PlaylistItem({ title, thumbnail, id, type }) {
     }
   }
   return (
-    <div className="mt-2" ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div className="mt-2 outline-none" ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <div
         className={`flex flex-col group  items-center justify-center space-y-2  w-60 xs:w-52 md:w-56 lg:w-64 xl:w-[17.8rem] 3xl:w-80  ${
           isDragging ? "cursor-grabbing" : "cursor-pointer"

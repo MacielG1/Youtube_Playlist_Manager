@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import searchIcon from "@/assets/searchIcon.svg";
+import getChannelId from "@/utils/createChannelPlaylist";
 
 export default function Input() {
   const [addedURL, setAddedURL] = useState("");
@@ -17,11 +18,25 @@ export default function Input() {
     setAddedURL(e.target.value);
   }
 
-  const handleButtonClick = () => {
+  const handleButtonClick = async () => {
     if (!addedURL) return;
-    if (!addedURL.includes("youtube.com")) {
+
+    if (!addedURL.includes("list=")) {
+      let channelId = await getChannelId(addedURL);
+      console.log("channelId", channelId);
+
+      let playlistKey = "pl=" + channelId;
+      if (localStorage.getItem(playlistKey)) return;
+
+      localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0 }));
+
+      // Saving playlist to all playlists Array
+      const allPlaylists = JSON.parse(localStorage.getItem("playlists")) || [];
+      localStorage.setItem("playlists", JSON.stringify([...allPlaylists, channelId]));
+
+      mutate("playlist");
+      queryClient.invalidateQueries({ queryKey: ["playlists"] });
       setAddedURL("");
-      return;
     }
 
     let playlistID, videoId;
@@ -33,6 +48,7 @@ export default function Input() {
       return;
     }
 
+    console.log(playlistID, videoId);
     // Saving specific video data
     if (videoId && !playlistID) {
       let videoKey = "v=" + videoId;
@@ -71,14 +87,17 @@ export default function Input() {
   };
 
   return (
-    <nav className="sticky top-0 z-20 mb-2 mt-3 px-2">
+    <nav className="sticky top-0 z-20 mb-2 mt-4 px-2">
       <div className="flex justify-center gap-2 ">
         <input
           type="text"
           value={addedURL}
           onChange={handleInputChange}
-          placeholder="Enter a URL"
-          className=" w-[70vw] md:w-[30rem] min-w[1rem] text-neutral-400 text-lg px-3 border-gray-600 border-2 rounded-md bg-neutral-950  focus:outline-none focus:bg-neutral-950 placeholder-gray-400 placeholder:text-base focus:placeholder-neutral-500 focus:border-gray-500 "
+          placeholder="Enter a Video or Playlist URL or a Channel Name"
+          className=" w-[70vw] md:w-[30rem] min-w[1rem] text-neutral-400 text-lg px-3 border-neutral-600 border-2 rounded-md bg-neutral-950
+            focus-visible:bg-neutral-950 placeholder-gray-400 placeholder:text-base
+            focus-visible:outline-none focus-visible:border-[3px] focus-visible:border-neutral-700
+            focus:placeholder-neutral-500 focus:border-gray-500 "
         />
         <button
           disabled={isLoading}

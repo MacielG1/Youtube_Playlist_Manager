@@ -16,7 +16,7 @@ export async function POST(req) {
   }
 
   let data = await res.json();
-  console.log(data.kind);
+  console.log("kind videos ", data.kind);
   if (!data) {
     console.log("Error", res.statusText);
     return {};

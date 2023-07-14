@@ -1,16 +1,23 @@
+import getVideosSlice from "./getVideosSlice";
+
 export default async function loadPlaylist(Player, videoIds, page, index = 0) {
-  console.log("LOAD PLAYLIST", videoIds, page, index);
-  await Player.cuePlaylist(getVideosSlice(videoIds, page), index, 0.1);
+  const videosArr = getVideosSlice(videoIds, page);
+
+  await Player.cuePlaylist({ playlist: videosArr, index: index, startSeconds: 0.1 });
 
   setTimeout(async () => {
     const loadPlaylist = async () => {
       const state = await Player.getPlayerState();
+      console.log("ssssssssssss", state);
       if (state === 5) {
-        await Player.loadPlaylist(getVideosSlice(videoIds, page), index, 0.1);
+        await Player.loadPlaylist(videosArr, index, 0.1);
+        // setTimeout(() => {
+        //   Player.playVideo();
+        // }, 600);
       } else {
-        setTimeout(loadPlaylist, 1000); // Retry loading after a delay
+        setTimeout(loadPlaylist, 500); // Retry loading after a delay
       }
     };
-    loadPlaylist();
+    await loadPlaylist();
   }, 500);
 }

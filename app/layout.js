@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Open_Sans } from "next/font/google";
 import App from "@/components/App";
+import BackButton from "@/components/BackButton";
 const font = Open_Sans({ subsets: ["latin"] });
 
 export const metadata = {
@@ -13,7 +14,6 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <body className={`${font.className}`}>
         <App>{children}</App>
-
         <div id="modal-root"> </div>
       </body>
     </html>

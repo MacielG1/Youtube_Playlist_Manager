@@ -95,6 +95,8 @@ import { useEffect, useState } from "react";
 import spin from "@/assets/spinIcon.svg";
 import emptyBox from "@/assets/emptyBox.svg";
 import Image from "next/image";
+import Link from "next/link";
+
 export default function AllPlaylists() {
   const [playlistItems, setPlaylistItems] = useState([]);
   const [videoItems, setVideoItems] = useState([]);
@@ -179,9 +181,17 @@ export default function AllPlaylists() {
   return (
     <>
       {!vidData?.items?.length && !plData?.items?.length && (
-        <div className="flex items-center flex-col gap-4">
-          <h3 className="pt-10 text-neutral-400 text-xl">Please add a Youtube Playlist or Video link</h3>
+        <div className="flex items-center flex-col gap-3 pt-10">
+          {/* <h1 className=" text-neutral-400 text-2xl font-semibold">Youtube Playlist Manager</h1> */}
+
+          <h3 className=" text-neutral-400 text-lg">No Items Added</h3>
           <Image src={emptyBox} alt="skip 10 seconds" unoptimized width={52} height={52} />
+          <Link
+            href="/about"
+            className="bg-neutral-800 hover:bg-neutral-800/80 py-2 px-4 my-5 text-neutral-300 hover:text-neutral-300/80 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            Learn how it works
+          </Link>
         </div>
       )}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, setPlaylistItems)}>
