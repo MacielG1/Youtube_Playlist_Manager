@@ -20,12 +20,15 @@ export default function Input() {
   const handleButtonClick = async () => {
     if (!addedURL) return;
 
-    if (!addedURL.includes("list=")) {
-      let channelId = await getChannelId(addedURL);
-      console.log("channelId", channelId);
+    const isChannel = !/(list=|v=)/.test(addedURL);
 
+    if (isChannel) {
+      let channelId = await getChannelId(addedURL);
       let playlistKey = "pl=" + channelId;
-      if (localStorage.getItem(playlistKey)) return;
+      if (localStorage.getItem(playlistKey)) {
+        setAddedURL("");
+        return;
+      }
 
       localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0 }));
 
@@ -36,6 +39,7 @@ export default function Input() {
       mutate("playlist");
       queryClient.invalidateQueries({ queryKey: ["playlists"] });
       setAddedURL("");
+      return;
     }
 
     let playlistID, videoId;
@@ -59,10 +63,13 @@ export default function Input() {
       // Saving video to all videos Array
       const allVideos = JSON.parse(localStorage.getItem("videos")) || [];
       localStorage.setItem("videos", JSON.stringify([...allVideos, videoId]));
-    } else {
-      // if it's a playlist
 
+      mutate("video");
+      queryClient.invalidateQueries({ queryKey: ["videos"] });
+    } else if (playlistID) {
+      // if it's a playlist
       let playlistKey = "pl=" + playlistID;
+
       if (localStorage.getItem(playlistKey)) {
         setAddedURL("");
         return;
@@ -72,13 +79,9 @@ export default function Input() {
       // Saving playlist to all playlists Array
       const allPlaylists = JSON.parse(localStorage.getItem("playlists")) || [];
       localStorage.setItem("playlists", JSON.stringify([...allPlaylists, playlistID]));
-    }
-    if (playlistID) {
+
       mutate("playlist");
       queryClient.invalidateQueries({ queryKey: ["playlists"] });
-    } else {
-      mutate("video");
-      queryClient.invalidateQueries({ queryKey: ["videos"] });
     }
 
     setAddedURL("");

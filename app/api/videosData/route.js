@@ -6,8 +6,8 @@ export const runtime = "edge";
 export async function POST(req) {
   let { videosIds } = await req.json();
 
-  if (!videosIds) return;
-  console.log("Fetching videos data");
+  if (!videosIds) return {};
+
   let res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videosIds}&key=${API_KEY}&maxResults=50`);
 
   if (!res.ok) {
