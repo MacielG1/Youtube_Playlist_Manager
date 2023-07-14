@@ -21,7 +21,7 @@ export default function About() {
                 You can also drag and drop the playlists to reorder them as you like.
               </p>
               <p className="relative mt-5 text-lg leading-8 text-neutral-300 sm:max-w-md lg:max-w-none ">
-                The app remembers where you last stopped watching. So the next time you click on the playlist, it'll continue playing from where you left off.
+                The app remembers where you last stopped watching. So the next time you click on the playlist, it&apos;ll continue playing from where you left off.
               </p>
 
               <div className="flex justify-center items-center py-4 max-w-lg">
