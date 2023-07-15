@@ -3,7 +3,22 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import searchIcon from "@/assets/searchIcon.svg";
-import getChannelId from "@/utils/createChannelPlaylist";
+import createChannelPlaylist from "@/utils/createChannelPlaylist";
+import toast from "react-hot-toast";
+
+const toastError = {
+  duration: 2500,
+  style: {
+    border: "1px solid #9c0000",
+    padding: "12px",
+    color: "#a7a7a8",
+    backgroundColor: "#000",
+  },
+  iconTheme: {
+    primary: "#9c0000",
+    secondary: "#eee",
+  },
+};
 
 export default function Input() {
   const [addedURL, setAddedURL] = useState("");
@@ -18,16 +33,27 @@ export default function Input() {
   }
 
   const handleButtonClick = async () => {
-    if (!addedURL) return;
+    if (!addedURL) {
+      toast.error("Please Enter a URL!", toastError);
+      return;
+    }
 
     const isChannel = !/(list=|v=)/.test(addedURL);
 
     if (isChannel) {
-      let channelId = await getChannelId(addedURL);
-      let playlistKey = "pl=" + channelId;
+      const channelId = await createChannelPlaylist(addedURL);
+
+      if (!channelId) {
+        setAddedURL("");
+        toast.error("Invalid Input!", toastError);
+
+        return null;
+      }
+      const playlistKey = "pl=" + channelId;
       if (localStorage.getItem(playlistKey)) {
         setAddedURL("");
-        return;
+        toast.error("Playlist Already Added!", toastError);
+        return null;
       }
 
       localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0 }));
@@ -39,7 +65,7 @@ export default function Input() {
       mutate("playlist");
       queryClient.invalidateQueries({ queryKey: ["playlists"] });
       setAddedURL("");
-      return;
+      return null;
     }
 
     let playlistID, videoId;
@@ -83,8 +109,13 @@ export default function Input() {
       mutate("playlist");
       queryClient.invalidateQueries({ queryKey: ["playlists"] });
     }
-
     setAddedURL("");
+    if (!isChannel && !videoId && !playlistID) {
+      setAddedURL("");
+      toast.error("Please Enter a Valid URL!", toastError);
+
+      return;
+    }
   };
 
   return (

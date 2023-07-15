@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Open_Sans } from "next/font/google";
-import App from "@/components/App";
+import QueryProvider from "@/providers/QueryProvider";
+import ToastProvider from "@/providers/Toaster";
 
 const font = Open_Sans({ subsets: ["latin"] });
 
@@ -13,7 +14,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${font.className}`}>
-        <App>{children}</App>
+        <ToastProvider />
+        <QueryProvider>{children}</QueryProvider>
         <div id="modal-root"> </div>
       </body>
     </html>

@@ -8,18 +8,23 @@ export async function POST(req) {
 
   if (!videosIds) return {};
 
-  let res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videosIds}&key=${API_KEY}&maxResults=50`);
+  try {
+    let res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videosIds}&key=${API_KEY}&maxResults=50`);
 
-  if (!res.ok) {
-    console.log(`Error in /api/videosData`, res.status, res.statusText);
-    return null;
-  }
+    if (!res.ok) {
+      console.log(`Error in /api/videosData`, res.status, res.statusText);
+      return null;
+    }
 
-  let data = await res.json();
-  console.log("kind videos ", data.kind);
-  if (!data) {
-    console.log("Error", res.statusText);
-    return {};
+    let data = await res.json();
+    console.log("kind videos ", data.kind);
+    if (!data) {
+      console.log("Error", res.statusText);
+      return {};
+    }
+    return NextResponse.json(data);
+  } catch (e) {
+    console.log("Error in /api/videosData", e.status, e.statusText);
+    return new NextResponse("Error", { status: 404 });
   }
-  return NextResponse.json(data);
 }

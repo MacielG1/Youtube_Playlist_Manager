@@ -5,22 +5,29 @@ const API_KEY = process.env.YOUTUBE_API;
 export const runtime = "edge";
 
 export async function POST(req) {
-  let { playlistsIds } = await req.json();
+  const { playlistsIds } = await req.json();
   if (!playlistsIds) return;
+  console.log("playlistsIds", { playlistsIds });
 
   console.log("Fetching playlists data");
-  let res = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistsIds}&key=${API_KEY}&maxResults=50`);
 
-  if (!res.ok) {
-    console.log(`Error in /api/playlistsData`, res.status, res.statusText);
-    return {};
-  }
+  try {
+    let res = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistsIds}&key=${API_KEY}&maxResults=50`);
 
-  const data = await res.json();
-  console.log("kind", data.kind);
-  if (!data) {
-    console.log("Error", res.statusText);
-    return {};
+    if (!res.ok) {
+      console.log(`Error in /api/playlistsData`, res.status, res.statusText);
+      return {};
+    }
+
+    const data = await res.json();
+    console.log("kind", data.kind);
+    if (!data) {
+      console.log("Error", res.statusText);
+      return {};
+    }
+    return NextResponse.json(data);
+  } catch (e) {
+    console.log("Error in /api/playlistsData", e);
+    return new NextResponse("Error", { status: 404 });
   }
-  return NextResponse.json(data);
 }
