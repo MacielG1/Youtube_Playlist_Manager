@@ -19,6 +19,7 @@ import loadPlaylist from "@/utils/loadPlaylist";
 
 export default function YoutubePlayer({ params }) {
   const [isLoaded, setIsLoaded] = useState(false);
+
   const [currentVideoIndex, setCurrentVideoIndex] = useState(1);
 
   const pageRef = useRef(1);
@@ -170,13 +171,13 @@ export default function YoutubePlayer({ params }) {
     ({ currentItem: 0, initialTime: 0, currentPage: 0 });
   }
 
-  const { height, width } = getHeightWidth();
+  // const { height, width } = getHeightWidth();
 
   const plOptions = useMemo(() => {
     pageRef.current = currentPage || 1;
     return {
-      height: height || 540,
-      width: width || 960,
+      height: "100%",
+      width: "100%",
       playerVars: {
         autoplay: 1,
         listType: "playlist",
@@ -256,17 +257,20 @@ export default function YoutubePlayer({ params }) {
           <span className="sr-only">Loading...</span>
         </div>
       )}
-      <div className={`${isLoaded ? "visible" : "hidden"} flex justify-center items center `}>
-        <YouTube
-          ref={PlaylistPlayerRef}
-          opts={plOptions}
-          onReady={onReady}
-          onPlay={onPlay}
-          onPause={onPause}
-          onEnd={onEnd}
-          onError={onError}
-          onStateChange={onStateChange}
-        />
+      <div className="w-full min-w-[400px] max-w-[1200px]">
+        <div className={`${isLoaded ? "visible" : "hidden"} flex justify-center items center relative w-full overflow-hidden pb-[56.25%] `}>
+          <YouTube
+            ref={PlaylistPlayerRef}
+            opts={plOptions}
+            onReady={onReady}
+            onPlay={onPlay}
+            onPause={onPause}
+            onEnd={onEnd}
+            onError={onError}
+            onStateChange={onStateChange}
+            className="absolute top-0 left-0 right-0 w-full h-full border-none"
+          />
+        </div>
       </div>
 
       {isLoaded && (

@@ -72,11 +72,9 @@ export default function YTVideoPlayer({ params }) {
     initialTime = 0;
   }
 
-  const { height, width } = getHeightWidth();
-
   const vidOptions = {
-    height: height || 540,
-    width: width || 960,
+    height: "100%",
+    width: "100%",
     playerVars: {
       autoplay: 1,
       start: Math.floor(initialTime),
@@ -101,18 +99,21 @@ export default function YTVideoPlayer({ params }) {
           <span className="sr-only">Loading...</span>
         </div>
       )}
-      <div className={`${isLoaded ? "visible" : "hidden"} flex justify-center items center `}>
-        <YouTube
-          videoId={videoId}
-          ref={videoPlayerRef}
-          opts={vidOptions}
-          onReady={onReady}
-          onPlay={onPlay}
-          onPause={onPause}
-          onEnd={onEnd}
-          onError={onError}
-          onStateChange={onStateChange}
-        />
+      <div className="w-full min-w-[400px] max-w-[1200px]">
+        <div className={`${isLoaded ? "visible" : "hidden"} flex justify-center items center relative w-full overflow-hidden pb-[56.25%]`}>
+          <YouTube
+            videoId={videoId}
+            ref={videoPlayerRef}
+            opts={vidOptions}
+            onReady={onReady}
+            onPlay={onPlay}
+            onPause={onPause}
+            onEnd={onEnd}
+            onError={onError}
+            onStateChange={onStateChange}
+            className="absolute top-0 left-0 right-0 w-full h-full border-none"
+          />
+        </div>
       </div>
       {isLoaded && (
         <div className="flex gap-3 justify-center items-center my-2">

@@ -97,9 +97,11 @@ export default function PlaylistItem({ title, thumbnail, id, type }) {
   const noBlackBars = /(maxres|medium)/.test(thumbnailURL);
 
   function gotoLink() {
-    if (type === "playlist") {
+    if (type == "playlist") {
+      router.prefetch(`/playlist/pl?list=${id}`);
       router.push(`/playlist/pl?list=${id}`);
     } else {
+      router.prefetch(`/video/v?v=${id}`);
       router.push(`/video/v?v=${id}`);
     }
   }
