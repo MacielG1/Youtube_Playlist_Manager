@@ -82,7 +82,7 @@ export default function YTVideoPlayer({ params }) {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center p-20 ">
+    <div className="flex flex-col justify-center items-center pt-8 xl:pt-10 2xl-pt-12 ">
       <BackButton />
 
       {!isLoaded && (
@@ -99,8 +99,9 @@ export default function YTVideoPlayer({ params }) {
           <span className="sr-only">Loading...</span>
         </div>
       )}
-      <div className="w-full min-w-[400px] max-w-[1200px]">
-        <div className={`${isLoaded ? "visible" : "hidden"} flex justify-center items center relative w-full overflow-hidden pb-[56.25%]`}>
+
+      <div className="w-full min-w-[400px] max-w-[900px]  2xl:max-w-[1300px]   ">
+        <div className={`${isLoaded ? "visible" : "hidden"} flex justify-center items center relative w-full overflow-hidden pb-[56.25%] `}>
           <YouTube
             videoId={videoId}
             ref={videoPlayerRef}

@@ -162,44 +162,6 @@ export default function YoutubePlayer({ params }) {
       await loadPlaylist(e.target, allVideosIdsRef.current, nextPage);
     }
   }
-
-  let currentItem, initialTime, currentPage;
-
-  if (typeof window !== "undefined") {
-    ({ currentItem, initialTime, currentPage } = JSON.parse(localStorage.getItem(item)) || { currentItem: 0, initialTime: 0, currentPage: 1 });
-  } else {
-    ({ currentItem: 0, initialTime: 0, currentPage: 0 });
-  }
-
-  // const { height, width } = getHeightWidth();
-
-  const plOptions = useMemo(() => {
-    pageRef.current = currentPage || 1;
-    return {
-      height: "100%",
-      width: "100%",
-      playerVars: {
-        autoplay: 1,
-        listType: "playlist",
-        index: currentItem + 1,
-        start: Math.floor(initialTime) || 0 || 1,
-        origin: "https://localhost:3000",
-      },
-    };
-  }, []);
-
-  if (pageRef.current > 1) {
-    plOptions.playerVars.playlist = getVideosSlice(allIds, pageRef.current).join(",");
-  } else {
-    plOptions.playerVars.list = playlistId;
-  }
-
-  async function resetPlaylist() {
-    pageRef.current = 1;
-    await loadPlaylist(PlaylistPlayerRef.current.getInternalPlayer(), allVideosIdsRef.current, pageRef.current, 0);
-    setCurrentVideoIndex(1);
-  }
-
   async function previousVideo() {
     const player = PlaylistPlayerRef.current.getInternalPlayer();
     const index = await player.getPlaylistIndex();
@@ -240,8 +202,45 @@ export default function YoutubePlayer({ params }) {
     }
   }
 
+  let currentItem, initialTime, currentPage;
+
+  if (typeof window !== "undefined") {
+    ({ currentItem, initialTime, currentPage } = JSON.parse(localStorage.getItem(item)) || { currentItem: 0, initialTime: 0, currentPage: 1 });
+  } else {
+    ({ currentItem: 0, initialTime: 0, currentPage: 0 });
+  }
+
+  // const { height, width } = getHeightWidth();
+
+  const plOptions = useMemo(() => {
+    pageRef.current = currentPage || 1;
+    return {
+      height: "100%",
+      width: "100%",
+      playerVars: {
+        autoplay: 1,
+        listType: "playlist",
+        index: currentItem + 1,
+        start: Math.floor(initialTime) || 0 || 1,
+        origin: "https://localhost:3000",
+      },
+    };
+  }, []);
+
+  if (pageRef.current > 1) {
+    plOptions.playerVars.playlist = getVideosSlice(allIds, pageRef.current).join(",");
+  } else {
+    plOptions.playerVars.list = playlistId;
+  }
+
+  async function resetPlaylist() {
+    pageRef.current = 1;
+    await loadPlaylist(PlaylistPlayerRef.current.getInternalPlayer(), allVideosIdsRef.current, pageRef.current, 0);
+    setCurrentVideoIndex(1);
+  }
+
   return (
-    <div className="flex flex-col justify-center items-center p-20 ">
+    <div className="flex flex-col justify-center items-center pt-8 xl:pt-10 2xl-pt-12 ">
       <BackButton />
       {!isLoaded && (
         <div role="status">
@@ -257,7 +256,7 @@ export default function YoutubePlayer({ params }) {
           <span className="sr-only">Loading...</span>
         </div>
       )}
-      <div className="w-full min-w-[400px] max-w-[1200px]">
+      <div className="w-full min-w-[400px] max-w-[900px]  2xl:max-w-[1300px]   ">
         <div className={`${isLoaded ? "visible" : "hidden"} flex justify-center items center relative w-full overflow-hidden pb-[56.25%] `}>
           <YouTube
             ref={PlaylistPlayerRef}
