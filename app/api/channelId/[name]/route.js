@@ -61,8 +61,8 @@ export async function GET(req, { params }) {
       if (!channelId) {
         return new NextResponse("No Channel Found", { status: 404 });
       } else {
-        let playlistId = channelId.replace("UC", "UU");
-        return new NextResponse.json(playlistId);
+        const playlistId = channelId.replace("UC", "UU");
+        return NextResponse.json(playlistId);
       }
     }
   } catch (e) {

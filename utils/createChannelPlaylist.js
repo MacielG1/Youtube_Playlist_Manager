@@ -6,15 +6,17 @@ export default async function createChannelPlaylist(name) {
       },
       method: "GET",
     });
+    console.log("res", res);
     if (!res.ok) {
       return null;
     }
 
     const channelId = await res.json();
-
+    console.log("1", channelId);
     if (!channelId) {
       return null;
     }
+
     return channelId;
   } catch (e) {
     console.log(e);
