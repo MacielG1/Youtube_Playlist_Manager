@@ -71,7 +71,7 @@ export default function PlaylistItem({ title, thumbnail, id, type }) {
       <h2 className="text-lg sm:text-2xl text-red-500 font-semibold  tracking-wide">Confirm Deletion</h2>
 
       <h3 className="text-neutral-400 sm:text-lg text-center font-semibold px-5 pt-2 max-w-[16rem] xs:max-w-sm  sm:max-w-md break-words">
-        Delete {type} - <span className=" ">{title}</span>
+        Delete {type} - <span>{title}</span>
       </h3>
 
       <div className="flex gap-3 pt-3 text-lg">
@@ -98,10 +98,8 @@ export default function PlaylistItem({ title, thumbnail, id, type }) {
 
   function gotoLink() {
     if (type == "playlist") {
-      router.prefetch(`/playlist/pl?list=${id}`);
       router.push(`/playlist/pl?list=${id}`);
     } else {
-      router.prefetch(`/video/v?v=${id}`);
       router.push(`/video/v?v=${id}`);
     }
   }
