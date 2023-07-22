@@ -267,11 +267,18 @@ export default function AllPlaylists() {
           <SortableContext items={playlistItems}>
             <>
               {videoItems?.length > 0 && (
-                <h2 className="md:pl-24 sm:pl-8 xl:pl-24 text-center md:text-left mt-6  text-zinc-300/90 font-semibold tracking-wide ">Playlists</h2>
+                <h2 className="md:pl-24 sm:pl-8 xl:pl-24 text-center md:text-left mt-3 2xl:mt-5  text-zinc-300/90 font-semibold tracking-wide ">Playlists</h2>
               )}
               <div className="pl-3 sm:pl-7 pt-4 grid grid-cols-1 gap-y-2  xs:grid-cols-2  md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 mx-4 lg:mx-6 2xl:mx-8 place-items-center">
                 {playlistItems?.map((playlist) => (
-                  <PlaylistItem key={playlist.id} id={playlist.id} title={playlist.snippet.title} thumbnail={playlist.snippet.thumbnails} type={"playlist"} />
+                  <PlaylistItem
+                    key={playlist.id}
+                    id={playlist.id}
+                    title={playlist.snippet.title}
+                    thumbnail={playlist.snippet.thumbnails}
+                    type={"playlist"}
+                    setOnDelete={setPlaylistItems}
+                  />
                 ))}
               </div>
             </>
@@ -282,10 +289,17 @@ export default function AllPlaylists() {
         {videoItems?.length > 0 && (
           <SortableContext items={videoItems}>
             <>
-              <h1 className="md:pl-24 sm:pl-8 xl:pl-24  text-center md:text-left mt-6 text-zinc-300/90 font-semibold tracking-wide ">Videos</h1>
+              <h1 className="md:pl-24 sm:pl-8 xl:pl-24 text-center md:text-left mt-2 2xl:mt-5 text-zinc-300/90 font-semibold tracking-wide ">Videos</h1>
               <div className="pl-3 sm:pl-7 pt-4 grid grid-cols-1 gap-y-2 xs:grid-cols-2  md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 mx-4 lg:mx-6 2xl:mx-8 place-items-center">
                 {videoItems?.map((video) => (
-                  <PlaylistItem key={video.id} id={video.id} title={video.snippet.title} thumbnail={video.snippet.thumbnails} type={"video"} />
+                  <PlaylistItem
+                    key={video.id}
+                    id={video.id}
+                    title={video.snippet.title}
+                    thumbnail={video.snippet.thumbnails}
+                    type={"video"}
+                    setOnDelete={setVideoItems}
+                  />
                 ))}
               </div>
             </>

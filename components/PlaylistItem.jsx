@@ -1,5 +1,5 @@
 "use client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import Modal from "./Modal";
 import Image from "next/image";
@@ -23,7 +23,7 @@ let closeIcon = (
   </svg>
 );
 
-export default function PlaylistItem({ title, thumbnail, id, type }) {
+export default function PlaylistItem({ title, thumbnail, id, type, setOnDelete }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, disabled: isModalOpen });
@@ -31,7 +31,7 @@ export default function PlaylistItem({ title, thumbnail, id, type }) {
     transform: CSS.Transform.toString(transform),
     transition,
   };
-  const queryClient = useQueryClient();
+
   const router = useRouter();
   const { mutate, isLoading } = useMutation({
     mutationFn: () => onDelete,
@@ -43,21 +43,31 @@ export default function PlaylistItem({ title, thumbnail, id, type }) {
       localStorage.removeItem(`plVideos=${id}`);
 
       // remove playlist from playlists array
-      let allPlaylists = JSON.parse(localStorage.getItem("playlists"));
-      let newPlaylists = allPlaylists.filter((pl) => pl !== id) || [];
+      const allPlaylists = JSON.parse(localStorage.getItem("playlists")) || [];
+      const newPlaylists = allPlaylists.filter((pl) => pl !== id);
       localStorage.setItem("playlists", JSON.stringify(newPlaylists));
       mutate("playlist");
-      queryClient.invalidateQueries({ queryKey: ["playlists"] });
+
+      setOnDelete((prev) => {
+        const newPlsData = prev.filter((item) => item.id !== id);
+        return newPlsData;
+      });
+      setIsModalOpen(false);
     } else if (type === "video") {
       localStorage.removeItem(`v=${id}`);
 
       // remove video from videos array
-      let allVideos = JSON.parse(localStorage.getItem("videos"));
-      let newVideos = allVideos.filter((v) => v !== id);
+      const allVideos = JSON.parse(localStorage.getItem("videos")) || [];
+      const newVideos = allVideos.filter((v) => v !== id);
 
       localStorage.setItem("videos", JSON.stringify(newVideos));
       mutate("video");
-      queryClient.invalidateQueries({ queryKey: ["videos"] });
+
+      setOnDelete((prev) => {
+        const newVideosData = prev.filter((item) => item.id !== id);
+        return newVideosData;
+      });
+      setIsModalOpen(false);
     }
   }
 
