@@ -20,7 +20,7 @@ export async function POST(req) {
     }
 
     const data = await res.json();
-    console.log("kind", data.kind);
+
     if (!data) {
       console.log("Error", res.statusText);
       return {};

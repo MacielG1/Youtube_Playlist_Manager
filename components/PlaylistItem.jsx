@@ -108,9 +108,11 @@ export default function PlaylistItem({ title, thumbnail, id, type, setOnDelete }
 
   function gotoLink() {
     if (type == "playlist") {
-      router.push(`/playlist/pl?list=${id}`);
+      // router.push(`/playlist/pl?list=${id}`);
+      router.push(`/playlist/p?list=${id}&title=${title}`);
     } else {
-      router.push(`/video/v?v=${id}`);
+      // router.push(`/video/v?v=${id}`);
+      router.push(`/video/v?v=${id}&title=${title}`);
     }
   }
   return (

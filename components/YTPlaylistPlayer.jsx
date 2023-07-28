@@ -34,8 +34,10 @@ export default function YoutubePlayer({ params }) {
   let plVideos;
   if (typeof window !== "undefined") {
     plVideos = JSON.parse(localStorage.getItem(`plVideos=${playlistId}`));
+    console.log("plVideos", plVideos);
   } else {
     plVideos = [];
+    console.log("plVideos", plVideos);
   }
 
   let allIds = plVideos?.videosIds || [];
@@ -68,6 +70,10 @@ export default function YoutubePlayer({ params }) {
         } else if (allIds.length && recentThan1day) {
           allVideosIdsRef.current = allIds;
           playlistLengthRef.current = allIds.length;
+        } else if (!allIds.length) {
+          // if the playlist is small take the length from the player
+          let pl = await PlaylistPlayerRef.current.internalPlayer.getPlaylist();
+          playlistLengthRef.current = pl.length;
         }
       } else {
         // if it's a new playlist
@@ -280,7 +286,6 @@ export default function YoutubePlayer({ params }) {
           <button
             className=" text-neutral-400  cursor-pointer  duration-300 hover:text-neutral-500 transition  outline-none focus:text-neutral-500"
             onClick={() => seekTime(playingVideoRef, PlaylistPlayerRef, -10)}
-            s
           >
             <Image src={prev10} alt="rewind 10 seconds" unoptimized width={32} height={32} className="min-w-[1.5rem]" />
           </button>
@@ -293,7 +298,6 @@ export default function YoutubePlayer({ params }) {
           <button
             className=" cursor-pointer  text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500"
             onClick={() => seekTime(playingVideoRef, PlaylistPlayerRef, 10)}
-            s
           >
             <Image src={skip10} alt="skip 10 seconds" unoptimized width={32} height={32} className="min-w-[1.5rem]" />
           </button>
