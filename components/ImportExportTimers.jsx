@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 
 const toastSuccess = {
+  position: "top-center",
   style: {
     border: "1px solid #14ff76",
     padding: "12px",
@@ -69,7 +70,7 @@ export default function ImportExportTimers({ setModalOpen }) {
     link.href = URL.createObjectURL(fileToSave);
     link.download = "YT-Export.json";
 
-    toast.success("Downloading", toastSuccess);
+    toast.success("Exporting", toastSuccess);
 
     link.click(); // Simulate a click on the anchor to start the download
   }
