@@ -1,5 +1,6 @@
 export default async function getPlaylistsData() {
   const allPlaylists = JSON.parse(localStorage.getItem("playlists")) || [];
+  console.log("playlistData", allPlaylists);
 
   if (allPlaylists.length) {
     const playlistsIds = allPlaylists.join(",");

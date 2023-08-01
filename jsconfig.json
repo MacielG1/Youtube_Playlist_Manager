@@ -6,6 +6,7 @@
       "@utils/*": ["./utils/*"],
       "@assets/*": ["./assets/*"],
       "@providers/*": ["./providers/*"],
+      "@context/*": ["./context/*"],
     }
   }
 }

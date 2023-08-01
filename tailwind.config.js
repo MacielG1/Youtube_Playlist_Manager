@@ -13,7 +13,11 @@ module.exports = {
         "3xl": "1650px",
       },
     },
+    // colors: {
+    //   background: "rgb(var(--color-background) / <alpha-value>)",
+    //   foreground: "rgb(var(--color-foreground) / <alpha-value>)",
+    // },
   },
-
+  darkMode: "class",
   plugins: [],
 };

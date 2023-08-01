@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import searchIcon from "@/assets/searchIcon.svg";
 import createChannelPlaylist from "@/utils/createChannelPlaylist";
@@ -24,15 +24,11 @@ export default function Input() {
   const [addedURL, setAddedURL] = useState("");
   const queryClient = useQueryClient();
 
-  const { mutate, isLoading } = useMutation({
-    mutationFn: () => handleButtonClick,
-  });
-
   function handleInputChange(e) {
     setAddedURL(e.target.value);
   }
 
-  const handleButtonClick = async () => {
+  async function handleButtonClick() {
     if (!addedURL) {
       toast.error("Please Enter a URL!", toastError);
       return;
@@ -57,12 +53,10 @@ export default function Input() {
       }
 
       localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0 }));
-
       // Saving playlist to all playlists Array
       const allPlaylists = JSON.parse(localStorage.getItem("playlists")) || [];
       localStorage.setItem("playlists", JSON.stringify([...allPlaylists, channelId]));
 
-      mutate("playlist");
       queryClient.invalidateQueries({ queryKey: ["playlists"] });
       setAddedURL("");
       return null;
@@ -90,7 +84,6 @@ export default function Input() {
       const allVideos = JSON.parse(localStorage.getItem("videos")) || [];
       localStorage.setItem("videos", JSON.stringify([...allVideos, videoId]));
 
-      mutate("video");
       queryClient.invalidateQueries({ queryKey: ["videos"] });
     } else if (playlistID) {
       // if it's a playlist
@@ -106,7 +99,7 @@ export default function Input() {
       const allPlaylists = JSON.parse(localStorage.getItem("playlists")) || [];
       localStorage.setItem("playlists", JSON.stringify([...allPlaylists, playlistID]));
 
-      mutate("playlist");
+      // mutate();
       queryClient.invalidateQueries({ queryKey: ["playlists"] });
     }
     setAddedURL("");
@@ -116,25 +109,26 @@ export default function Input() {
 
       return;
     }
-  };
+  }
 
   return (
-    <nav className="sticky top-0 z-20 mb-2 mt-4 px-2">
+    <nav className="sticky top-0 z-20 mb-3 sm:mb-2 mt-1 sm:mt-4 px-2 ">
       <div className="flex justify-center gap-2 ">
         <input
           type="text"
           value={addedURL}
           onChange={handleInputChange}
           placeholder="Enter a Video or Playlist URL or a Channel Name"
-          className=" w-[70vw] md:w-[30rem] min-w[1rem] text-neutral-300 text-lg px-3 border-neutral-600 border-2 rounded-md bg-neutral-950
-            focus-visible:bg-neutral-950 placeholder-neutral-400 placeholder:text-base
-            focus-visible:outline-none focus-visible:border-[3px] focus-visible:border-neutral-700
-            focus:placeholder-neutral-500 focus:border-gray-500 "
+          className=" w-[65vw] md:w-[30rem] min-w[1rem] text-lg px-3 border-2 rounded-md placeholder:text-base focus-visible:outline-none focus-visible:border-[3px]
+           text-neutral-900 bg-neutral-300 border-neutral-600   
+            focus-visible:bg-neutral-200 placeholder-neutral-700 focus-visible:border-neutral-900 focus:placeholder-neutral-500 focus:border-gray-600  
+            dark:text-neutral-300 dark:bg-neutral-950 dark:border-neutral-600  
+            dark:focus-visible:bg-neutral-950 dark:placeholder-neutral-400 dark:focus-visible:border-neutral-700 dark:focus:placeholder-neutral-500 dark:focus:border-gray-500 
+            "
         />
         <button
-          disabled={isLoading}
           onClick={handleButtonClick}
-          className={`flex items-center justify-center rounded-lg  border border-blue-800 bg-blue-700  hover:bg-blue-700/80 text-gray-100 px-4 py-2 hover:border-blue-950 hover:text-gray-200 transition duration-300`}
+          className={`flex items-center justify-center rounded-lg  border border-blue-800 bg-blue-700  hover:bg-blue-800 text-gray-100 px-4 py-2 hover:border-blue-950 hover:text-gray-200 transition duration-300`}
         >
           <Image src={searchIcon} alt="add" unoptimized width={32} height={32} className="min-w-[1rem]" />
         </button>

@@ -7,27 +7,27 @@ export default function About() {
     <>
       <div className="relative isolate z-10 mt-32 sm:mt-40">
         <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-          <div className="mx-auto flex max-w-2xl flex-col gap-16 bg-white/5 px-6 py-16 ring-1 ring-white/10 sm:rounded-3xl sm:p-8 lg:mx-0 lg:max-w-none lg:flex-row lg:items-center lg:py-20 xl:gap-x-20 xl:px-20">
+          <div className="mx-auto flex max-w-2xl flex-col gap-16 bg-zinc-200/90 dark:bg-white/5 px-6 py-16 ring-1 ring-black/10 dark:ring-white/10 sm:rounded-3xl sm:p-8 lg:mx-0 lg:max-w-none lg:flex-row lg:items-center lg:py-20 xl:gap-x-20 xl:px-20">
             <Image src={exampleIMG} className="h-96 w-full flex-none rounded-2xl object-cover shadow-xl lg:h-auto lg:max-w-sm" alt="about image" priority />
             <div className="w-full flex-auto">
-              <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl text-center">How It Works!</h2>
-              <h2 className="relative mt-6 text-lg leading-8  text-neutral-300 sm:max-w-md lg:max-w-none">
+              <h2 className="text-3xl font-bold tracking-tight text-black dark:text-white sm:text-4xl text-center">How It Works!</h2>
+              <h2 className="relative mt-6 text-lg leading-8  text-neutral-600 dark:text-neutral-300 sm:max-w-md lg:max-w-none">
                 This app makes it easy for you to organize and control your playlists.
               </h2>
-              <p className="relative mt-6 text-lg leading-8  text-neutral-300 sm:max-w-md lg:max-w-none">
+              <p className="relative mt-6 text-lg leading-8  text-neutral-600 dark:text-neutral-300 sm:max-w-md lg:max-w-none">
                 You can add Youtube playlists that are either public or unlisted, or enter a channel name to create a playlist with all videos from it.
               </p>
-              <p className="relative mt-5 text-lg leading-8 text-neutral-300 sm:max-w-md lg:max-w-none">
+              <p className="relative mt-5 text-lg leading-8 text-neutral-600 dark:text-neutral-300 sm:max-w-md lg:max-w-none">
                 You can also drag and drop the playlists to reorder them as you like.
               </p>
-              <p className="relative mt-5 text-lg leading-8 text-neutral-300 sm:max-w-md lg:max-w-none ">
+              <p className="relative mt-5 text-lg leading-8 text-neutral-600 dark:text-neutral-300 sm:max-w-md lg:max-w-none ">
                 The app remembers where you last stopped watching. So the next time you click on the playlist, it&apos;ll continue playing from where you left off.
               </p>
 
               <div className="flex justify-center items-center py-4 max-w-lg">
                 <Link
                   href="/"
-                  className="bg-indigo-800 hover:bg-indigo-800/80 py-2 px-4 text-neutral-300 hover:text-neutral-300/80 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="bg-indigo-800 hover:bg-indigo-900 py-2 px-4 text-neutral-300 hover:text-neutral-200 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   Return
                 </Link>

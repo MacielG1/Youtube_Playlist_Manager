@@ -4,14 +4,22 @@ import YouTube from "react-youtube";
 import skip10 from "@/assets/skip10.svg";
 import prev10 from "@/assets/prev10.svg";
 import Image from "next/image";
-import getHeightWidth from "@/utils/getHeightWidth";
 import seekTime from "@/utils/seekTime";
 import spinIcon from "@/assets/spinIcon.svg";
 import BackButton from "./BackButton";
 import saveVideoProgress from "@/utils/saveVideoProgress";
+import { useRouter } from "next/navigation";
+import Modal from "./Modal";
+import closeIcon from "@/assets/closeIcon.svg";
+import DeleteModalContent from "./DeleteModalContent";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function YTVideoPlayer({ params }) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
   const videoPlayerRef = useRef();
   const playingVideoRef = useRef(false);
@@ -63,10 +71,25 @@ export default function YTVideoPlayer({ params }) {
 
   function onEnd(e) {}
 
+  function onDelete() {
+    localStorage.removeItem(`v=${videoId}`);
+
+    // remove playlist from playlists array
+    const allPlaylists = JSON.parse(localStorage.getItem("videos")) || [];
+    const newPlaylists = allPlaylists.filter((v) => v !== videoId);
+    localStorage.setItem("videos", JSON.stringify(newPlaylists));
+
+    queryClient.refetchQueries(["videos"]);
+
+    playingVideoRef.current = null;
+
+    router.replace("/");
+  }
+
   let initialTime;
 
   if (typeof window !== "undefined") {
-    initialTime = JSON.parse(localStorage.getItem(item)).initialTime || 0;
+    initialTime = JSON.parse(localStorage.getItem(item))?.initialTime || 0;
     console.log(initialTime);
   } else {
     initialTime = 0;
@@ -81,6 +104,11 @@ export default function YTVideoPlayer({ params }) {
     },
   };
 
+  function openModal(e) {
+    e.stopPropagation();
+    setIsModalOpen(!isModalOpen);
+  }
+
   return (
     <div className="flex flex-col justify-center items-center pt-8 xl:pt-10 2xl-pt-12 ">
       <BackButton />
@@ -93,6 +121,7 @@ export default function YTVideoPlayer({ params }) {
             unoptimized
             width={24}
             height={24}
+            style={{ width: "auto", height: "auto" }}
             priority
             className="animate-spin flex justify-center items-center h-[25vh] md:h-[55vh]"
           />
@@ -100,7 +129,7 @@ export default function YTVideoPlayer({ params }) {
         </div>
       )}
 
-      <div className="w-full min-w-[400px] max-w-[900px]  2xl:max-w-[1300px]   ">
+      <div className="w-full min-w-[400px] max-w-[95vw] md:max-w-[880px]  2xl:max-w-[1300px]   mt-4 2xl:mt-5  ">
         <div className={`${isLoaded ? "visible" : "hidden"} flex justify-center items center relative w-full overflow-hidden pb-[56.25%] `}>
           <YouTube
             videoId={videoId}
@@ -130,7 +159,16 @@ export default function YTVideoPlayer({ params }) {
           >
             <Image src={skip10} alt="skip 10 seconds" unoptimized width={32} height={32} />
           </button>
+          <button className=" cursor-pointer  text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500" onClick={openModal}>
+            <Image src={closeIcon} alt="skip 10 seconds" unoptimized width={22} height={22} className="min-w-[1.5rem]" />
+          </button>
         </div>
+      )}
+      {isModalOpen && (
+        <Modal
+          onClose={openModal}
+          content={<DeleteModalContent type="Video" id={videoId} title={params.title} isLoading={isLoaded} openModal={openModal} onDelete={onDelete} />}
+        />
       )}
     </div>
   );
