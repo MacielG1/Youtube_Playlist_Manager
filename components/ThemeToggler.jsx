@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
-import Sun from "@assets/Sun.svg";
-import Moon from "@assets/Moon.svg";
+import Sun from "@assets/sun.svg";
+import Moon from "@assets/moon.svg";
 
 export default function ThemeToggler() {
   const [isOpen, setIsOpen] = useState(false);
