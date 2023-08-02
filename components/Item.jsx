@@ -1,6 +1,6 @@
 "use client";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Modal from "./Modal";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
@@ -8,7 +8,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useRouter } from "next/navigation";
 import DeleteModalContent from "./DeleteModalContent";
 
-let closeIcon = (
+const closeIcon = (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
@@ -24,7 +24,7 @@ let closeIcon = (
   </svg>
 );
 
-export default function PlaylistItem({ title, thumbnail, id, type, setOnDelete }) {
+export default function Item({ title, thumbnail, id, type, setOnDelete }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, disabled: isModalOpen });
@@ -90,6 +90,19 @@ export default function PlaylistItem({ title, thumbnail, id, type, setOnDelete }
       router.push(`/video/v?v=${id}&title=${title}`);
     }
   }
+
+  // useEffect(() => {
+  //   console.log(type);
+  //   if (type === "Playlist") {
+  //     const item = JSON.parse(localStorage.getItem(`pl=${id}`));
+  //     const currentItem = item.currentItem || 0;
+  //     const page = item.page || 1;
+  //   } else if (type === "Video") {
+  //     const item = JSON.parse(localStorage.getItem(`v=${id}`));
+  //     const initialTime = item?.initialTime || 0;
+  //   }
+  // }, []);
+
   return (
     <div className="mt-2 outline-none" ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <div

@@ -3,7 +3,7 @@ import { Open_Sans } from "next/font/google";
 import QueryProvider from "@/providers/QueryProvider";
 import ToastProvider from "@/providers/Toaster";
 import ThemeProvider from "@/providers/ThemeProvider";
-import SettingsMenu from "@/components/SettingsMenu";
+import SettingsMenu from "@/components/Settings/SettingsMenu";
 
 const font = Open_Sans({ subsets: ["latin"] });
 

@@ -79,7 +79,12 @@ export default function YTVideoPlayer({ params }) {
     const newPlaylists = allPlaylists.filter((v) => v !== videoId);
     localStorage.setItem("videos", JSON.stringify(newPlaylists));
 
-    queryClient.refetchQueries(["videos"]);
+    queryClient.setQueryData(["videos"], (oldData) => {
+      return {
+        ...oldData,
+        items: oldData.items.filter((v) => v.id !== videoId),
+      };
+    });
 
     playingVideoRef.current = null;
 
@@ -101,6 +106,7 @@ export default function YTVideoPlayer({ params }) {
     playerVars: {
       autoplay: 1,
       start: Math.floor(initialTime),
+      origin: window.location.origin,
     },
   };
 
