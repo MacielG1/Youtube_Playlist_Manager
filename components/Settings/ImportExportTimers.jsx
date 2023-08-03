@@ -1,5 +1,5 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
+
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 
@@ -20,11 +20,6 @@ const toastSuccess = {
 export default function ImportExportTimers({ setModalOpen }) {
   const [isExportable, setIsExportable] = useState(false);
 
-  const { mutate, isLoading } = useMutation({
-    mutationFn: () => importTimers,
-  });
-
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -58,8 +53,6 @@ export default function ImportExportTimers({ setModalOpen }) {
         allVideoData.push({ [key]: JSON.parse(localStorage.getItem(key)) });
       }
     });
-
-    console.log(allPlaylistData);
 
     // Create a blob of the data
     const fileToSave = new Blob([JSON.stringify({ savedPlaylists, savedVideos, allPlaylistData, allVideoData })], {
@@ -104,15 +97,23 @@ export default function ImportExportTimers({ setModalOpen }) {
         }
       });
 
-      const mergedPlaylists = [...currentSavedPlaylists, ...jsonData.savedPlaylists];
-      const mergedVideos = [...currentSavedVideos, ...jsonData.savedVideos];
+      // Merging Playlists without duplicates
+      const existingPlaylistIds = {};
+      currentSavedPlaylists.forEach((playlist) => (existingPlaylistIds[playlist.id] = true));
+      const uniqueNewPlaylists = jsonData.savedPlaylists.filter((playlist) => !existingPlaylistIds[playlist.id]);
+      const mergedPlaylists = [...currentSavedPlaylists, ...uniqueNewPlaylists];
+
+      // Merging Videos without duplicates
+      const existingVideoIds = {};
+      currentSavedVideos.forEach((video) => (existingVideoIds[video.id] = true));
+      const uniqueNewVideos = jsonData.savedVideos.filter((video) => !existingVideoIds[video.id]);
+      const mergedVideos = [...currentSavedVideos, ...uniqueNewVideos];
+
       const mergedAllPlaylistData = [...currentAllPlaylistData, ...jsonData.allPlaylistData];
       const mergedAllVideoData = [...currentAllVideoData, ...jsonData.allVideoData];
 
       localStorage.setItem("playlists", JSON.stringify(mergedPlaylists));
       localStorage.setItem("videos", JSON.stringify(mergedVideos));
-
-      console.log(mergedAllPlaylistData, typeof mergedAllPlaylistData);
 
       mergedAllPlaylistData.forEach((playlist) => {
         const key = Object.keys(playlist)[0];
@@ -125,7 +126,7 @@ export default function ImportExportTimers({ setModalOpen }) {
 
         localStorage.setItem(key, JSON.stringify(video[key]));
       });
-      mutate();
+
       queryClient.refetchQueries(["playlists"]);
       queryClient.refetchQueries(["videos"]);
     };

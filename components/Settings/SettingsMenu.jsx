@@ -24,7 +24,6 @@ export default function SettingsMenu() {
   let content = (
     <div className="flex flex-col justify-center items-center">
       <ThemeToggler />
-
       <ImportExportTimers setModalOpen={setIsOpen} />
     </div>
   );

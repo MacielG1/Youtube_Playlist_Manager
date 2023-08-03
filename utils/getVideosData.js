@@ -5,17 +5,22 @@ export default async function getVideosData() {
 
   const videosIds = allVideos.join(",");
 
-  let res = await fetch("/api/videosData", {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    method: "POST",
-    body: JSON.stringify({ videosIds }),
-  });
-  let data = await res.json();
-  if (!data) {
-    console.log("Error", res.statusText);
+  try {
+    let res = await fetch("/api/videosData", {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      body: JSON.stringify({ videosIds }),
+    });
+    let data = await res.json();
+    if (!data) {
+      console.log("Error", res.statusText);
+      return {};
+    }
+    return data;
+  } catch (err) {
+    console.log("Error in getVideosData", err.message);
     return {};
   }
-  return data;
 }

@@ -1,9 +1,11 @@
 export default async function getPlaylistsData() {
   const allPlaylists = JSON.parse(localStorage.getItem("playlists")) || [];
-  console.log("playlistData", allPlaylists);
 
-  if (allPlaylists.length) {
-    const playlistsIds = allPlaylists.join(",");
+  if (!allPlaylists.length) return {};
+
+  const playlistsIds = allPlaylists.join(",");
+
+  try {
     const res = await fetch(`/api/playlistsData`, {
       headers: {
         "Content-Type": "application/json",
@@ -18,6 +20,8 @@ export default async function getPlaylistsData() {
     }
 
     return data;
+  } catch (error) {
+    console.log("Error in getPlaylistsData", error.message);
+    return {};
   }
-  return {};
 }

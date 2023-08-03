@@ -3,7 +3,7 @@ export default function saveVideoProgress(videoPlayer, videoId) {
     videoId,
     initialTime: videoPlayer.getCurrentTime(),
   };
-  let item = `v=${videoId}`;
+  const item = `v=${videoId}`;
 
   localStorage.setItem(item, JSON.stringify(data));
 }

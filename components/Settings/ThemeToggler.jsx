@@ -7,7 +7,7 @@ import Moon from "@assets/moon.svg";
 export default function ThemeToggler() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const { setTheme, theme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);

@@ -1,6 +1,6 @@
 "use client";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Modal from "./Modal";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
@@ -83,25 +83,11 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }) {
 
   function gotoLink() {
     if (type == "Playlist") {
-      // router.push(`/playlist/pl?list=${id}`);
       router.push(`/playlist/p?list=${id}&title=${title}`);
     } else {
-      // router.push(`/video/v?v=${id}`);
       router.push(`/video/v?v=${id}&title=${title}`);
     }
   }
-
-  // useEffect(() => {
-  //   console.log(type);
-  //   if (type === "Playlist") {
-  //     const item = JSON.parse(localStorage.getItem(`pl=${id}`));
-  //     const currentItem = item.currentItem || 0;
-  //     const page = item.page || 1;
-  //   } else if (type === "Video") {
-  //     const item = JSON.parse(localStorage.getItem(`v=${id}`));
-  //     const initialTime = item?.initialTime || 0;
-  //   }
-  // }, []);
 
   return (
     <div className="mt-2 outline-none" ref={setNodeRef} style={style} {...attributes} {...listeners}>

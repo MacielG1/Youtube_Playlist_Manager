@@ -8,12 +8,9 @@ export default async function loadPlaylist(Player, videoIds, page, index = 0) {
   setTimeout(async () => {
     const loadPlaylist = async () => {
       const state = await Player.getPlayerState();
-      console.log("ssssssssssss", state);
+
       if (state === 5) {
         await Player.loadPlaylist(videosArr, index, 0.1);
-        // setTimeout(() => {
-        //   Player.playVideo();
-        // }, 600);
       } else {
         setTimeout(loadPlaylist, 500); // Retry loading after a delay
       }
