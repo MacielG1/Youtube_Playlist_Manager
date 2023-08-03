@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import ModalSettings from "../ModalSettings";
+import ModalSettings from "../modals/ModalSettings";
 import ImportExportTimers from "./ImportExportTimers";
 import ThemeToggler from "./ThemeToggler";
+import DeleteAllData from "./DeleteAllData";
 
 const SettingIcon = (
   <svg
@@ -25,6 +26,7 @@ export default function SettingsMenu() {
     <div className="flex flex-col justify-center items-center">
       <ThemeToggler />
       <ImportExportTimers setModalOpen={setIsOpen} />
+      <DeleteAllData parentModalSetter={setIsOpen} />
     </div>
   );
 

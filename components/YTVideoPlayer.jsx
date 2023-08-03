@@ -9,10 +9,10 @@ import spinIcon from "@/assets/spinIcon.svg";
 import BackButton from "./BackButton";
 import saveVideoProgress from "@/utils/saveVideoProgress";
 import { useRouter } from "next/navigation";
-import Modal from "./Modal";
 import closeIcon from "@/assets/closeIcon.svg";
 import DeleteModalContent from "./DeleteModalContent";
 import { useQueryClient } from "@tanstack/react-query";
+import ModalDelete from "./modals/ModalDelete";
 
 export default function YTVideoPlayer({ params }) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -171,7 +171,7 @@ export default function YTVideoPlayer({ params }) {
         </div>
       )}
       {isModalOpen && (
-        <Modal
+        <ModalDelete
           onClose={openModal}
           content={<DeleteModalContent type="Video" id={videoId} title={params.title} isLoading={isLoaded} openModal={openModal} onDelete={onDelete} />}
         />

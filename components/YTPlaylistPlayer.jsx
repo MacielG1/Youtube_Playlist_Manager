@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useRef, useEffect, useState, useMemo } from "react";
-import Modal from "./Modal";
+import Modal from "./modals/ModalDelete";
 import YouTube from "react-youtube";
 import fetchVideosIds from "@/utils/fetchVideosIds";
 import getPlaylistSize from "@/utils/getPlaylistSize";
@@ -16,10 +16,11 @@ import spinIcon from "@/assets/spinIcon.svg";
 import BackButton from "./BackButton";
 import savePlaylistsProgress from "@/utils/savePlaylistProgress";
 import loadPlaylist from "@/utils/loadPlaylist";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import DeleteModalContent from "./DeleteModalContent";
 import closeIcon from "@/assets/closeIcon.svg";
+import ModalDelete from "./modals/ModalDelete";
 
 export default function YoutubePlayer({ params }) {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -347,7 +348,10 @@ export default function YoutubePlayer({ params }) {
         </div>
       )}
       {isModalOpen && (
-        <Modal onClose={openModal} content={<DeleteModalContent type="Playlist" id={playlistId} title={params.title} openModal={openModal} onDelete={onDelete} />} />
+        <ModalDelete
+          onClose={openModal}
+          content={<DeleteModalContent type="Playlist" id={playlistId} title={params.title} openModal={openModal} onDelete={onDelete} />}
+        />
       )}
     </div>
   );

@@ -5,7 +5,7 @@ export function Backdrop({ onClick }) {
   return <div className="fixed top-0 left-0 w-full h-screen z-20  bg-black/70" onClick={onClick}></div>;
 }
 
-export default function ModalSettings({ onClose, content }) {
+export default function ModalDelete({ onClose, content }) {
   let modal = (
     <>
       <Backdrop onClick={onClose} />

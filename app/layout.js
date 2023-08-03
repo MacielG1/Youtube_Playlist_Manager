@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
             {children}
           </ThemeProvider>
         </QueryProvider>
-        <div id="modal-root"> </div>
+        <div id="modal-root" />
       </body>
     </html>
   );

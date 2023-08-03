@@ -134,11 +134,14 @@ export default function ImportExportTimers({ setModalOpen }) {
   }
 
   return (
-    <div className="flex justify-center gap-3 py-2 mx-auto">
+    <div className="flex justify-center gap-2 py-2 mx-auto">
       <div className="grid w-20 max-w-sm items-center justify-center ">
         <label
           htmlFor="fileInput"
-          className="text-base hover:cursor-cell relative inline-flex items-center px-2 py-2 max-w-[5.2rem] text-white bg-neutral-800 hover:bg-neutral-900 hover:border border border-neutral-950 duration-300 rounded-md  font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:border focus-visible:border-neutral-400 "
+          className={`text-base hover:cursor-cell relative inline-flex items-center px-2 py-2 
+           text-white bg-neutral-800 hover:bg-neutral-900 hover:border border border-neutral-950 
+           duration-300 rounded-md  font-medium ring-offset-background transition-colors focus-visible:outline-none 
+           focus-visible:border focus-visible:border-neutral-400 ${isExportable ? "max-w-[5.2rem]" : " pl-6 w-[6.5rem] max-w-[7rem]"}`}
         >
           <span>Import</span>
           <input type="file" id="fileInput" accept=".json" className="sr-only" onChange={importTimers} />

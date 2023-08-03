@@ -1,7 +1,7 @@
 export default function DeleteModalContent({ type, title, id, openModal, onDelete }) {
   return (
     <div className="flex flex-col gap-4 items-center justify-center  px-2 pt-2 pb-6 max-w-[16rem] xs:max-w-sm sm:max-w-md">
-      <h2 className="text-lg sm:text-2xl text-red-500 font-semibold  tracking-wide">Confirm Deletion</h2>
+      <h2 className="text-lg sm:text-2xl text-red-500 font-semibold tracking-wide">Confirm Deletion</h2>
 
       <h3 className="text-neutral-800 dark:text-neutral-400 sm:text-lg text-center font-semibold px-5 pt-2 max-w-[16rem] xs:max-w-sm  sm:max-w-md break-words">
         Delete {type} - <span>{title}</span>

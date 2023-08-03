@@ -1,12 +1,12 @@
 "use client";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import Modal from "./Modal";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useRouter } from "next/navigation";
 import DeleteModalContent from "./DeleteModalContent";
+import ModalDelete from "./modals/ModalDelete";
 
 const closeIcon = (
   <svg
@@ -121,7 +121,10 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }) {
       </div>
 
       {isModalOpen && (
-        <Modal onClose={openModal} content={<DeleteModalContent type={type} id={id} title={title} isLoading={isLoading} openModal={openModal} onDelete={onDelete} />} />
+        <ModalDelete
+          onClose={openModal}
+          content={<DeleteModalContent type={type} id={id} title={title} isLoading={isLoading} openModal={openModal} onDelete={onDelete} />}
+        />
       )}
     </div>
   );
