@@ -1,7 +1,6 @@
 "use client";
 import Image from "next/image";
 import { useRef, useEffect, useState, useMemo } from "react";
-import Modal from "./modals/ModalDelete";
 import YouTube from "react-youtube";
 import fetchVideosIds from "@/utils/fetchVideosIds";
 import getPlaylistSize from "@/utils/getPlaylistSize";
@@ -81,7 +80,7 @@ export default function YoutubePlayer({ params }) {
           playlistLengthRef.current = allIds.length;
         } else if (!allIds.length) {
           // if the playlist is small take the length from the player
-          let pl = await PlaylistPlayerRef.current.internalPlayer.getPlaylist();
+          const pl = await PlaylistPlayerRef.current.internalPlayer.getPlaylist();
           playlistLengthRef.current = pl.length;
         }
       } else {
@@ -131,9 +130,6 @@ export default function YoutubePlayer({ params }) {
   }
 
   async function onPause(e) {
-    console.log(e.target.getPlayerState());
-    console.log(await e.target.getPlaylistIndex());
-    console.log("ON PAUSE", pageRef.current);
     savePlaylistsProgress(e.target, playlistId, pageRef.current);
   }
   async function onError(e) {
@@ -336,14 +332,11 @@ export default function YoutubePlayer({ params }) {
             <Image src={skip10} alt="skip 10 seconds" unoptimized width={32} height={32} className="min-w-[1.5rem]" />
           </button>
 
-          <span className="min-w-[5rem] text-xl text-[#7b7e83]">
+          <span className="pl-3 min-w-[5rem] text-xl text-[#7b7e83]">
             {currentVideoIndex} / {playlistLengthRef.current}
           </span>
-          <button
-            className="pl-4 cursor-pointer  text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500"
-            onClick={openModal}
-          >
-            <Image src={closeIcon} alt="skip 10 seconds" unoptimized width={22} height={22} className="min-w-[1.5rem]" />
+          <button className=" cursor-pointer  text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500" onClick={openModal}>
+            <Image src={closeIcon} alt="skip 10 seconds" unoptimized width={21} height={21} className="min-w-[1.4rem]" />
           </button>
         </div>
       )}

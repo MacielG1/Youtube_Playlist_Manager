@@ -35,7 +35,7 @@ export default function SettingsMenu() {
   }
 
   return (
-    <div className="p-1 sm:p-2 sm:py-4 sm:px-10 flex justify-end sm:absolute top-0 right-0 z-30">
+    <div className="p-1 sm:p-2 sm:py-4 md:py-5 sm:px-10 flex justify-end sm:absolute top-0 right-0 z-30">
       <div className="relative">
         <div onClick={ToggleModal}>
           <span>{SettingIcon}</span>

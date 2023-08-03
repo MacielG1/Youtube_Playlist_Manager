@@ -42,7 +42,6 @@ export default function YTVideoPlayer({ params }) {
   }, []);
 
   function onReady(e) {
-    console.log("READY");
     setIsLoaded(true);
 
     const intervalId = setInterval(() => {
@@ -87,7 +86,6 @@ export default function YTVideoPlayer({ params }) {
     });
 
     playingVideoRef.current = null;
-
     router.replace("/");
   }
 
@@ -95,7 +93,6 @@ export default function YTVideoPlayer({ params }) {
 
   if (typeof window !== "undefined") {
     initialTime = JSON.parse(localStorage.getItem(item))?.initialTime || 0;
-    console.log(initialTime);
   } else {
     initialTime = 0;
   }
@@ -165,7 +162,7 @@ export default function YTVideoPlayer({ params }) {
           >
             <Image src={skip10} alt="skip 10 seconds" unoptimized width={32} height={32} />
           </button>
-          <button className=" cursor-pointer  text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500" onClick={openModal}>
+          <button className="cursor-pointer text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500" onClick={openModal}>
             <Image src={closeIcon} alt="skip 10 seconds" unoptimized width={22} height={22} className="min-w-[1.5rem]" />
           </button>
         </div>

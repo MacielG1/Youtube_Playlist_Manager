@@ -1,5 +1,4 @@
 import { useQueryClient } from "@tanstack/react-query";
-
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
 
@@ -143,7 +142,8 @@ export default function ImportExportTimers({ setModalOpen }) {
            duration-300 rounded-md  font-medium ring-offset-background transition-colors focus-visible:outline-none 
            focus-visible:border focus-visible:border-neutral-400 ${isExportable ? "max-w-[5.2rem]" : " pl-6 w-[6.5rem] max-w-[7rem]"}`}
         >
-          <span>Import</span>
+          Import
+          {/* Screen Reader */}
           <input type="file" id="fileInput" accept=".json" className="sr-only" onChange={importTimers} />
         </label>
       </div>
