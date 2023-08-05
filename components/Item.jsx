@@ -104,18 +104,18 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }) {
             width={300}
             height={300}
             className={`rounded-xl  hover:scale-105 transition duration-300 ${noBlackBars ? "-my-[1px]" : "-my-[32px]"} `}
-            unoptimized
             priority
           />
           <button
             onClick={openModal}
             className="opacity-0 group-hover:opacity-100 absolute bg-neutral-800  text-white  top-0 right-0 p-1 hover:bg-neutral-900  hover:text-red-500 group-hover:transition-opacity group-hover:duration-500 rounded-bl-md"
+            aria-label="Delete Button"
           >
             {closeIcon}
           </button>
         </div>
 
-        <h2 className="text-black dark:text-neutral-300 break-words text-center text-sm font-normal h-10 overflow-hidden whitespace-normal max-w-[15rem] md:max-w-[19rem]">
+        <h2 className="text-black dark:text-white break-words text-center text-sm font-normal h-10 overflow-hidden whitespace-normal max-w-[15rem] md:max-w-[19rem]">
           {title}
         </h2>
       </div>

@@ -31,13 +31,18 @@ export default function DeleteAllData({ parentModalSetter }) {
     setIsModalOpen((prev) => !prev);
   }
 
+  function onCancelDelete() {
+    setIsModalOpen(false);
+    parentModalSetter(false);
+  }
+
   const content = (
     <div className="flex flex-col gap-4 items-center justify-center  px-2 pt-2 pb-6 max-w-[16rem] xs:max-w-sm sm:max-w-md">
       <h2 className="text-lg sm:text-2xl text-red-500 font-semibold tracking-wide">Delete All Data</h2>
       <p className="text-lg">This will delete all of your saved data</p>
       <div className="flex gap-3 pt-3 text-lg">
         <button
-          onClick={() => setIsModalOpen(false)}
+          onClick={onCancelDelete}
           className="bg-gray-600/90 font-semibold border-neutral-800 text-neutral-300 hover:text-neutral-200  cursor-pointer  px-3 py-1 rounded-md hover:bg-gray-700 transition duration-200"
         >
           Cancel
