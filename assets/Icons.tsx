@@ -28,14 +28,14 @@ export const Icons = {
   closeIcon: (props: SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 32 32" fill="none">
       <path
-        fill-rule="evenodd"
+        fillRule="evenodd"
         stroke="currentColor"
-        clip-rule="evenodd"
+        clipRule="evenodd"
         d="M16 31C24.2843 31 31 24.2843 31 16C31 7.71573 24.2843 1 16 1C7.71573 1 1 7.71573 1 16C1 24.2843 7.71573 31 16 31Z"
-        stroke-width="2"
+        strokeWidth="2"
       />
-      <path d="M9 9L24 24" stroke="currentColor" stroke-width="2" stroke-linecap="square" />
-      <path d="M8.49512 23.4586L24.5049 9.54144" stroke="currentColor" stroke-width="2" stroke-linecap="square" />
+      <path d="M9 9L24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="square" />
+      <path d="M8.49512 23.4586L24.5049 9.54144" stroke="currentColor" strokeWidth="2" strokeLinecap="square" />
     </svg>
   ),
   deleteIcon: (props: SVGProps<SVGSVGElement>) => (
@@ -69,38 +69,29 @@ export const Icons = {
     </svg>
   ),
   rewind10: (props: SVGProps<SVGSVGElement>) => (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" stroke-width="3" stroke="currentColor" fill="none">
-      <polyline points="9.57 15.41 12.17 24.05 20.81 21.44" stroke-linecap="round" />
-      <path d="M26.93,41.41V23a.09.09,0,0,0-.16-.07s-2.58,3.69-4.17,4.78" stroke-linecap="round" />
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" strokeWidth="3" stroke="currentColor" fill="none">
+      <polyline points="9.57 15.41 12.17 24.05 20.81 21.44" strokeLinecap="round" />
+      <path d="M26.93,41.41V23a.09.09,0,0,0-.16-.07s-2.58,3.69-4.17,4.78" strokeLinecap="round" />
       <rect x="32.19" y="22.52" width="11.41" height="18.89" rx="5.7" />
-      <path d="M12.14,23.94a21.91,21.91,0,1,1-.91,13.25" stroke-linecap="round" />
+      <path d="M12.14,23.94a21.91,21.91,0,1,1-.91,13.25" strokeLinecap="round" />
     </svg>
   ),
   skip10: (props: SVGProps<SVGSVGElement>) => (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" stroke-width="3" stroke="currentColor" fill="none">
-      <path d="M23.93,41.41V23a.09.09,0,0,0-.16-.07s-2.58,3.69-4.17,4.78" stroke-linecap="round" />
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" strokeWidth="3" stroke="currentColor" fill="none">
+      <path d="M23.93,41.41V23a.09.09,0,0,0-.16-.07s-2.58,3.69-4.17,4.78" strokeLinecap="round" />
       <rect x="29.19" y="22.52" width="11.41" height="18.89" rx="5.7" />
-      <polyline points="54.43 15.41 51.83 24.05 43.19 21.44" stroke-linecap="round" />
-      <path d="M51.86,23.94a21.91,21.91,0,1,0,.91,13.25" stroke-linecap="round" />
+      <polyline points="54.43 15.41 51.83 24.05 43.19 21.44" strokeLinecap="round" />
+      <path d="M51.86,23.94a21.91,21.91,0,1,0,.91,13.25" strokeLinecap="round" />
     </svg>
   ),
   resetIcon: (props: SVGProps<SVGSVGElement>) => (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" stroke-width="3" stroke="currentColor" fill="none">
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" strokeWidth="3" stroke="currentColor" fill="none">
       <path d="M34.46,53.91A21.91,21.91,0,1,0,12.55,31.78" />
       <polyline points="4.65 22.33 12.52 32.62 22.81 24.75" />
     </svg>
   ),
   searchIcon: (props: SVGProps<SVGSVGElement>) => (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    >
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="11" cy="11" r="8" />
       <line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>

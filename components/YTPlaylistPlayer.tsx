@@ -2,11 +2,10 @@
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { YouTubeEvent, YouTubeProps } from "react-youtube";
+import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 import { Items, PlVideos, PlaylistInfo } from "@/types";
 import { Icons } from "@/assets/Icons";
 
-import YouTube from "react-youtube";
 import fetchVideosIds from "@/utils/fetchVideosIds";
 import getPlaylistSize from "@/utils/getPlaylistSize";
 import getVideosSlice from "@/utils/getVideosSlice";

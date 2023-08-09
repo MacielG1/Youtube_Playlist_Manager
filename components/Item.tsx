@@ -95,7 +95,7 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
         <div className="relative overflow-hidden rounded-lg group">
           <button
             onClick={openModal}
-            className="opacity-0 group-hover:opacity-100 z-10 peer absolute bg-neutral-800  text-neutral-500 hover:text-red-500 top-0 right-0 p-1 hover:bg-neutral-900 group-hover:transition-opacity group-hover:duration-500 rounded-bl-md"
+            className="opacity-0 group-hover:opacity-100 z-10 peer absolute bg-neutral-800  text-neutral-400 hover:text-red-500 top-0 right-0 p-1 hover:bg-neutral-900 group-hover:transition-opacity group-hover:duration-500 rounded-bl-md"
             aria-label="Delete Button"
           >
             <Icons.deleteIcon className="w-4 h-4" />

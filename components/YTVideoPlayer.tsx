@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Items } from "@/types";
 import { Icons } from "@/assets/Icons";
-import YouTube, { YouTubeEvent } from "react-youtube";
+import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 
 import seekTime from "@/utils/seekTime";
 import BackButton from "./BackButton";
@@ -13,7 +13,7 @@ import DeleteModalContent from "./DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
 
 type Params = {
-  videoId: string;
+  v: string;
   title: string;
 };
 
@@ -27,7 +27,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   const videoPlayerRef = useRef<YouTube | null>(null);
   const playingVideoRef = useRef<boolean | null>(false);
 
-  const videoId = params.videoId;
+  const videoId = params.v;
   const item = `v=${videoId}`;
 
   useEffect(() => {
@@ -69,9 +69,9 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     console.log(e);
   }
 
-  function onStateChange(e: YouTubeEvent) {}
+  // function onStateChange(e: YouTubeEvent) {}
 
-  function onEnd(e: YouTubeEvent) {}
+  // function onEnd(e: YouTubeEvent) {}
 
   function onDelete() {
     localStorage.removeItem(`v=${videoId}`);
@@ -103,7 +103,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     initialTime = 0;
   }
 
-  const vidOptions = {
+  const vidOptions: YouTubeProps["opts"] = {
     height: "100%",
     width: "100%",
     playerVars: {
@@ -137,9 +137,9 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
             onReady={onReady}
             onPlay={onPlay}
             onPause={onPause}
-            onEnd={onEnd}
+            // onEnd={onEnd}
             onError={onError}
-            onStateChange={onStateChange}
+            // onStateChange={onStateChange}
             className="absolute top-0 left-0 right-0 w-full h-full border-none"
           />
         </div>
