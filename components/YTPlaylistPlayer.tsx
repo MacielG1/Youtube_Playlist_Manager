@@ -13,7 +13,7 @@ import seekTime from "@/utils/seekTime";
 import BackButton from "./BackButton";
 import savePlaylistsProgress from "@/utils/savePlaylistProgress";
 import loadPlaylist from "@/utils/loadPlaylist";
-import DeleteModalContent from "./DeleteModalContent";
+import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
 
 type Params = {

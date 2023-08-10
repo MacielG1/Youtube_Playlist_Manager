@@ -9,7 +9,7 @@ import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 import seekTime from "@/utils/seekTime";
 import BackButton from "./BackButton";
 import saveVideoProgress from "@/utils/saveVideoProgress";
-import DeleteModalContent from "./DeleteModalContent";
+import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
 
 type Params = {

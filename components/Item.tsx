@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useRouter } from "next/navigation";
-import DeleteModalContent from "./DeleteModalContent";
+import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
 import { Playlist, Thumbnails } from "@/types";
 import { Icons } from "@/assets/Icons";

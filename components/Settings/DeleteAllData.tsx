@@ -41,8 +41,8 @@ export default function DeleteAllData({ parentModalSetter }: Props) {
 
   const content = (
     <div className="flex flex-col gap-4 items-center justify-center  px-2 pt-2 pb-6 max-w-[16rem] xs:max-w-sm sm:max-w-md">
-      <h2 className="text-lg sm:text-2xl text-red-500 font-semibold tracking-wide">Delete All Data</h2>
-      <p className="text-lg">This will delete all of your saved data</p>
+      <h2 className="text-lg sm:text-2xl text-red-500 font-semibold tracking-wide">Delete All Saved Data</h2>
+      <p className="text-lg">This will remove all of your Playlists and Videos stored</p>
       <div className="flex gap-3 pt-3 text-lg">
         <button
           onClick={onCancelDelete}
