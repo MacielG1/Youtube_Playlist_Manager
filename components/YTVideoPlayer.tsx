@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Items } from "@/types";
@@ -95,7 +95,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     router.replace("/");
   }
 
-  let initialTime;
+  let initialTime: number;
 
   if (typeof window !== "undefined") {
     initialTime = JSON.parse(localStorage.getItem(item) || "[]")?.initialTime || 0;
@@ -103,17 +103,20 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     initialTime = 0;
   }
 
-  const vidOptions: YouTubeProps["opts"] = {
-    height: "100%",
-    width: "100%",
-    playerVars: {
-      autoplay: 1,
-      start: Math.floor(initialTime),
-      origin: window.location.origin,
-    },
-  };
+  const vidOptions: YouTubeProps["opts"] = useMemo(() => {
+    return {
+      height: "100%",
+      width: "100%",
+      playerVars: {
+        autoplay: 1,
+        start: Math.floor(initialTime),
+        origin: window.location.origin,
+      },
+    };
+  }, []);
 
   function openModal() {
+    videoPlayerRef?.current?.internalPlayer.pauseVideo();
     setIsModalOpen(!isModalOpen);
   }
 
