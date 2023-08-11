@@ -54,7 +54,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
   useEffect(() => {
     async function run() {
-      if (plVideos) {
+      if (plVideos?.videosIds?.length) {
+        console.log("Playlist Already in Storage");
         // if the playlist is already in local storage
         let hasOnlyDate = plVideos.updatedTime && allIds.length == 0;
 
@@ -63,6 +64,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         // let recentThan1MIn = Date.now() - plVideos.updatedTime < 60 * 1000; // 1 min
 
         if (hasOnlyDate && !recentThan3days) {
+          console.log("hasOnlyDate, but older than 3 days");
           // if hasOnlyData the playlist was already added to storage but is smaller than 200 videos
 
           const playlistLength = await getPlaylistSize(playlistId);
@@ -75,9 +77,12 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ updatedTime: Date.now() }));
           }
         } else if (allIds.length && !recentThan1day) {
+          // if the playlist is in Storage and longer than 1 day: fetch the new videos
+
           await fetchVideosIds(playlistId, allIds, allVideosIdsRef);
           playlistLengthRef.current = allVideosIdsRef.current.length;
         } else if (allIds.length && recentThan1day) {
+          // if the playlist is in Storage and recent than 1 day: take the length from the storage
           allVideosIdsRef.current = allIds;
           playlistLengthRef.current = allIds.length;
         } else if (!allIds.length) {
@@ -87,6 +92,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         }
       } else {
         // if it's a new playlist
+
         const playlistLength = await getPlaylistSize(playlistId);
         playlistLengthRef.current = playlistLength;
 
@@ -160,10 +166,12 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }
 
   async function onEnd(e: YouTubeEvent) {
+    console.log("callled");
     const currentIndex = e.target.getPlaylistIndex();
 
     if (currentIndex < e.target.getPlaylist().length - 1) {
       // e.target.nextVideo();
+
       e.target.playVideoAt(currentIndex + 1);
       e.target.seekTo(0);
     }
