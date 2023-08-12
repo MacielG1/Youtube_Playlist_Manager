@@ -7,8 +7,9 @@ import { CSS } from "@dnd-kit/utilities";
 import { useRouter } from "next/navigation";
 import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
-import { Playlist, Thumbnails } from "@/types";
+import { Items, Playlist, Thumbnails } from "@/types";
 import { Icons } from "@/assets/Icons";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Params = {
   title: string;
@@ -28,6 +29,8 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
   };
 
   const router = useRouter();
+  const queryClient = useQueryClient();
+
   const { mutate, isLoading } = useMutation({
     mutationFn: async () => onDelete,
   });
@@ -42,13 +45,21 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
       const newPlaylists = allPlaylists.filter((pl: string) => pl !== id);
 
       localStorage.setItem("playlists", JSON.stringify(newPlaylists));
-      mutate();
+
+      queryClient.setQueryData<Items>(["playlists"], (prev) => {
+        if (prev === undefined) return prev;
+
+        const newPlaylistsData = prev.items.filter((item: any) => item.id !== id);
+        const newPlaylists = { ...prev, items: newPlaylistsData };
+        return newPlaylists;
+      });
 
       setOnDelete((prev) => {
         const newPlsData = prev.filter((item) => item.id !== id);
         return newPlsData;
       });
       setIsModalOpen(false);
+      mutate();
     } else if (type === "Video") {
       localStorage.removeItem(`v=${id}`);
 
@@ -57,13 +68,21 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
       const newVideos = allVideos.filter((v: string) => v !== id);
 
       localStorage.setItem("videos", JSON.stringify(newVideos));
-      mutate();
+
+      queryClient.setQueryData<Items>(["videos"], (prev) => {
+        if (prev === undefined) return prev;
+
+        const newVideosData = prev.items.filter((item) => item.id !== id);
+        const newVideos = { ...prev, items: newVideosData };
+        return newVideos;
+      });
 
       setOnDelete((prev) => {
         const newVideosData = prev.filter((item) => item.id !== id);
         return newVideosData;
       });
       setIsModalOpen(false);
+      mutate();
     }
   }
 
@@ -72,9 +91,15 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
     setIsModalOpen(!isModalOpen);
   }
 
-  const thumbnailURL = thumbnail?.maxres?.url || thumbnail?.standard?.url || thumbnail?.high?.url || thumbnail?.medium?.url || thumbnail?.default?.url || "";
-  // // check if thumbnail includes blackbars
-  const noBlackBars = /(maxres|medium)/.test(thumbnailURL);
+  let thumbnailURL;
+  let noBlackBars;
+  if (window.innerWidth <= 720) {
+    thumbnailURL = thumbnail?.medium?.url || thumbnail?.default?.url || "";
+    noBlackBars = true;
+  } else {
+    thumbnailURL = thumbnail?.maxres?.url || thumbnail?.standard?.url || thumbnail?.high?.url || thumbnail?.medium?.url || thumbnail?.default?.url || "";
+    noBlackBars = /(maxres|medium)/.test(thumbnailURL); // if it's maxres or medium it doesn't have blackbars
+  }
 
   function gotoLink() {
     if (type == "Playlist") {
@@ -107,6 +132,7 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
             height={300}
             className={`rounded-xl peer-hover:scale-105 hover:scale-105 transition duration-300 ${noBlackBars ? "-my-[1px]" : "-my-[32px]"} `}
             priority
+            unoptimized
           />
         </div>
 

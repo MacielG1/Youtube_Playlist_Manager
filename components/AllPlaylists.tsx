@@ -1,5 +1,5 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Playlist } from "@/types";
 import { useRouter } from "next/navigation";
@@ -15,6 +15,7 @@ export default function AllPlaylists() {
   const [videoItems, setVideoItems] = useState<Playlist[]>([]);
 
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const {
     dataUpdatedAt: plDataUpdatedAt,
@@ -64,12 +65,14 @@ export default function AllPlaylists() {
   useEffect(() => {
     if (playlistItems.length > 0) {
       localStorage.setItem("playlists", JSON.stringify(playlistItems.map((item) => item.id)));
+      queryClient.setQueryData(["playlists"], { items: playlistItems });
     }
   }, [playlistItems]);
 
   useEffect(() => {
     if (videoItems.length > 0) {
       localStorage.setItem("videos", JSON.stringify(videoItems.map((item) => item.id)));
+      queryClient.setQueryData(["videos"], { items: videoItems });
     }
   }, [videoItems]);
 

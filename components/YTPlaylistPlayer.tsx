@@ -65,7 +65,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
         if (hasOnlyDate && !recentThan3days) {
           console.log("hasOnlyDate, but older than 3 days");
-          // if hasOnlyData the playlist was already added to storage but is smaller than 200 videos
+          // if hasOnlyData is true the playlist was already added to storage but is smaller than 200 videos
 
           const playlistLength = await getPlaylistSize(playlistId);
           playlistLengthRef.current = playlistLength;
