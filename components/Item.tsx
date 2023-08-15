@@ -1,6 +1,6 @@
 "use client";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -10,6 +10,7 @@ import ModalDelete from "./modals/ModalDelete";
 import { Items, Playlist, Thumbnails } from "@/types";
 import { Icons } from "@/assets/Icons";
 import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 
 type Params = {
   title: string;
@@ -21,8 +22,10 @@ type Params = {
 
 export default function Item({ title, thumbnail, id, type, setOnDelete }: Params) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDraggingItem, setIsDragging] = useState(false);
+  const [isSortingItem, setIsSorting] = useState(false);
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id, disabled: isModalOpen });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isSorting } = useSortable({ id, disabled: isModalOpen });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -34,6 +37,14 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
   const { mutate, isLoading } = useMutation({
     mutationFn: async () => onDelete,
   });
+
+  useEffect(() => {
+    setIsDragging(isDragging);
+  }, [isDragging]);
+
+  useEffect(() => {
+    setIsSorting(isSorting);
+  }, [isSorting]);
 
   function onDelete(id: string) {
     if (type === "Playlist") {
@@ -112,7 +123,7 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
   return (
     <div className="mt-2 outline-none" ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <div
-        className={`flex flex-col  items-center justify-center space-y-2 w-60 xs:w-52 md:w-56 lg:w-64 xl:w-[17.8rem] 3xl:w-80  ${
+        className={`flex flex-col items-center justify-center space-y-2 w-60 xs:w-52 md:w-56 lg:w-64 xl:w-[17.8rem] 3xl:w-80  ${
           isDragging ? "cursor-grabbing" : "cursor-pointer"
         } `}
         onClick={gotoLink}
@@ -125,15 +136,17 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
           >
             <Icons.deleteIcon className="w-4 h-4" />
           </button>
-          <Image
-            src={thumbnailURL}
-            alt={title}
-            width={300}
-            height={300}
-            className={`rounded-xl peer-hover:scale-105 hover:scale-105 transition duration-300 ${noBlackBars ? "-my-[1px]" : "-my-[32px]"} `}
-            priority
-            unoptimized
-          />
+          <Link href={!isDraggingItem && !isSortingItem ? (type === "Playlist" ? `/playlist/p?list=${id}&title=${title}` : `/video/v?v=${id}&title=${title}`) : "#"}>
+            <Image
+              src={thumbnailURL}
+              alt={title}
+              width={300}
+              height={300}
+              className={`rounded-xl peer-hover:scale-105 hover:scale-105 transition duration-300 ${noBlackBars ? "-my-[1px]" : "-my-[32px]"} `}
+              priority
+              unoptimized
+            />
+          </Link>
         </div>
 
         <h2 className="text-black dark:text-white break-words text-center text-sm font-normal h-10 overflow-hidden whitespace-normal max-w-[15rem] md:max-w-[19rem]">
