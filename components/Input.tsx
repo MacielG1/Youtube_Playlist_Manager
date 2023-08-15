@@ -28,7 +28,9 @@ export default function Input() {
     setAddedURL(e.target.value);
   }
 
-  async function handleButtonClick() {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+
     if (!addedURL) {
       toast.error("Please Enter a URL!", toastError);
       return;
@@ -113,7 +115,7 @@ export default function Input() {
 
   return (
     <nav className="sticky top-0 z-20 mb-3 sm:mb-2 mt-1 sm:mt-4 px-2 ">
-      <div className="flex justify-center gap-2 max-h-12 ">
+      <form className="flex justify-center gap-2 max-h-12 " onSubmit={handleSubmit}>
         <input
           type="text"
           value={addedURL}
@@ -127,12 +129,12 @@ export default function Input() {
             "
         />
         <button
-          onClick={handleButtonClick}
+          type="submit"
           className={`flex items-center justify-center rounded-lg  border border-blue-800 bg-blue-700  hover:bg-blue-800 text-gray-100 px-4 py-2 hover:border-blue-950 hover:text-gray-200 transition duration-300`}
         >
           <Icons.searchIcon className=" w-4 h-4 sm:w-7 sm:h-7" />
         </button>
-      </div>
+      </form>
     </nav>
   );
 }
