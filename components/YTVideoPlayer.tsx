@@ -47,16 +47,20 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   function onReady(e: YouTubeEvent) {
     setIsLoaded(true);
 
+    const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
+    videoPlayerRef.current?.internalPlayer.setPlaybackRate(plRate);
+
     const intervalId = setInterval(() => {
       if (playingVideoRef.current) {
         saveVideoProgress(e.target, videoId);
       }
-    }, 15000);
+    }, 15000); // 15 seconds
 
     return () => clearInterval(intervalId);
   }
 
   function onPlay(e: YouTubeEvent) {
+    console.log(e);
     playingVideoRef.current = true;
     saveVideoProgress(e.target, videoId);
   }
@@ -67,6 +71,12 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   }
   function onError(e: YouTubeEvent) {
     console.log(e);
+  }
+  function onSpeedChange(e: YouTubeEvent) {
+    let currentData = JSON.parse(localStorage.getItem(item) || "[]");
+    currentData.playbackSpeed = e.data;
+
+    localStorage.setItem(item, JSON.stringify(currentData));
   }
 
   // function onStateChange(e: YouTubeEvent) {}
@@ -142,6 +152,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
             onPause={onPause}
             // onEnd={onEnd}
             onError={onError}
+            onPlaybackRateChange={onSpeedChange}
             // onStateChange={onStateChange}
             className="absolute top-0 left-0 right-0 w-full h-full border-none"
           />

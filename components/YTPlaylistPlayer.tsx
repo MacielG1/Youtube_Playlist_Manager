@@ -123,6 +123,9 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   function onReady(e: YouTubeEvent) {
     setIsLoaded(true);
 
+    const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
+    PlaylistPlayerRef.current?.internalPlayer.setPlaybackRate(plRate);
+
     const intervalId = setInterval(() => {
       if (playingVideoRef.current) {
         savePlaylistsProgress(e.target, playlistId, pageRef.current);
@@ -141,14 +144,14 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     savePlaylistsProgress(e.target, playlistId, pageRef.current);
   }
   async function onError(e: YouTubeEvent) {
-    // pageRef.current = 1;
+    pageRef.current = 1;
     let data = {
       playlistId,
       currentItem: 0,
       initialTime: 1,
       currentPage: 1,
+      playbackSpeed: 1,
     };
-
     setTimeout(async () => {
       let state = e.target.getPlayerState();
       if (state == -1) {
@@ -166,7 +169,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }
 
   async function onEnd(e: YouTubeEvent) {
-    console.log("callled");
     const currentIndex = e.target.getPlaylistIndex();
 
     if (currentIndex < e.target.getPlaylist().length - 1) {
@@ -182,6 +184,14 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       await loadPlaylist(e.target, allVideosIdsRef.current, nextPage);
     }
   }
+
+  function onSpeedChange(e: YouTubeEvent) {
+    const currentData = JSON.parse(localStorage.getItem(item) || "[]");
+    currentData.playbackSpeed = e.data;
+
+    localStorage.setItem(item, JSON.stringify(currentData));
+  }
+
   async function previousVideo() {
     const player = PlaylistPlayerRef.current?.getInternalPlayer();
     const index = await player.getPlaylistIndex();
@@ -308,6 +318,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             onEnd={onEnd}
             onError={onError}
             onStateChange={onStateChange}
+            onPlaybackRateChange={onSpeedChange}
             className="absolute top-0 left-0 right-0 w-full h-full border-none"
           />
         </div>
