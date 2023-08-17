@@ -5,6 +5,7 @@ import QueryProvider from "@/providers/QueryProvider";
 import ToastProvider from "@/providers/Toaster";
 import ThemeProvider from "@/providers/ThemeProvider";
 import SettingsMenu from "@/components/Settings/SettingsMenu";
+import { Analytics } from "@vercel/analytics/react";
 
 const font = Open_Sans({ subsets: ["latin"] });
 
@@ -19,6 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${font.className} bg-background `}>
         <QueryProvider>
           <ThemeProvider attribute="class" defaultTheme="system">
+            <Analytics />
             <SettingsMenu />
             <ToastProvider />
             {children}

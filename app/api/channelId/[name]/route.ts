@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-
 const API_KEY = process.env.YOUTUBE_API;
 
 export const runtime = "edge";
@@ -8,7 +7,7 @@ type Params = {
   name: string;
 };
 
-export async function GET(req: Request, { params }: { params: Params }) {
+export async function GET(req: Request, response: Response, params: Params) {
   const name = params.name;
 
   if (!name) return;
@@ -37,6 +36,6 @@ export async function GET(req: Request, { params }: { params: Params }) {
     }
   } catch (e) {
     console.log(e);
-    return new NextResponse("Error", { status: 404 });
+    return new NextResponse("Error in Channel Id", { status: 404 });
   }
 }
