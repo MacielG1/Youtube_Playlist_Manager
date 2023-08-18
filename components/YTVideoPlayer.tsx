@@ -131,55 +131,57 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   }
 
   return (
-    <div className="flex flex-col justify-center items-center pt-8 xl:pt-10 2xl-pt-12 ">
+    <>
       <BackButton />
+      <div className="flex flex-col justify-center h-screen items-center  ">
+        {!isLoaded && (
+          <div role="status" className="flex justify-center items-center h-[25vh] md:h-[70vh]">
+            <Icons.spinIcon className="h-7 w-7 mt-5 text-blue-500 animate-spin " />
+            <span className="sr-only">Loading...</span>
+          </div>
+        )}
 
-      {!isLoaded && (
-        <div role="status" className="flex justify-center items-center h-[25vh] md:h-[70vh]">
-          <Icons.spinIcon className="h-7 w-7 mt-5 text-blue-500 animate-spin " />
-          <span className="sr-only">Loading...</span>
+        <div className="w-full min-w-[400px] max-w-[95vw] md:max-w-[750px]  lg:max-w-[800px] xl:max-w-[1000px] 2xl:max-w-[1300px] -mt-20 sm:mt-0 pt-2 xl:pt-0 flex justify-center items-center">
+          <div className={`${isLoaded ? "visible" : "hidden"} relative w-full overflow-hidden pb-[56.25%] `}>
+            <YouTube
+              videoId={videoId}
+              ref={videoPlayerRef}
+              opts={vidOptions}
+              onReady={onReady}
+              onPlay={onPlay}
+              onPause={onPause}
+              // onEnd={onEnd}
+              onError={onError}
+              onPlaybackRateChange={onSpeedChange}
+              // onStateChange={onStateChange}
+              className="absolute top-0 left-0 right-0 w-full h-full border-none"
+            />
+          </div>
         </div>
-      )}
 
-      <div className="w-full min-w-[400px] max-w-[95vw] md:max-w-[880px]  2xl:max-w-[1300px]   mt-4 2xl:mt-5  ">
-        <div className={`${isLoaded ? "visible" : "hidden"} flex justify-center items center relative w-full overflow-hidden pb-[56.25%] `}>
-          <YouTube
-            videoId={videoId}
-            ref={videoPlayerRef}
-            opts={vidOptions}
-            onReady={onReady}
-            onPlay={onPlay}
-            onPause={onPause}
-            // onEnd={onEnd}
-            onError={onError}
-            onPlaybackRateChange={onSpeedChange}
-            // onStateChange={onStateChange}
-            className="absolute top-0 left-0 right-0 w-full h-full border-none"
-          />
-        </div>
+        {isLoaded && (
+          <div className="flex gap-3 justify-center items-center my-2">
+            <button
+              className=" cursor-pointer  text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500"
+              onClick={() => seekTime(playingVideoRef, videoPlayerRef, -10)}
+            >
+              <Icons.rewind10 className="h-8 w-8" />
+            </button>
+            <button
+              className=" cursor-pointer  text-neutral-400 transition  hover:text-neutral-500 duration-300 outline-none focus:text-neutral-500"
+              onClick={() => seekTime(playingVideoRef, videoPlayerRef, 10)}
+            >
+              <Icons.skip10 className="h-8 w-8" />
+            </button>
+            <button className="cursor-pointer text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500" onClick={openModal}>
+              <Icons.closeIcon className="w-6 h-6" />
+            </button>
+          </div>
+        )}
+        {isModalOpen && (
+          <ModalDelete onClose={openModal} content={<DeleteModalContent type="Video" id={videoId} title={params.title} openModal={openModal} onDelete={onDelete} />} />
+        )}
       </div>
-      {isLoaded && (
-        <div className="flex gap-3 justify-center items-center my-2">
-          <button
-            className=" cursor-pointer  text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500"
-            onClick={() => seekTime(playingVideoRef, videoPlayerRef, -10)}
-          >
-            <Icons.rewind10 className="h-8 w-8" />
-          </button>
-          <button
-            className=" cursor-pointer  text-neutral-400 transition  hover:text-neutral-500 duration-300 outline-none focus:text-neutral-500"
-            onClick={() => seekTime(playingVideoRef, videoPlayerRef, 10)}
-          >
-            <Icons.skip10 className="h-8 w-8" />
-          </button>
-          <button className="cursor-pointer text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500" onClick={openModal}>
-            <Icons.closeIcon className="w-6 h-6" />
-          </button>
-        </div>
-      )}
-      {isModalOpen && (
-        <ModalDelete onClose={openModal} content={<DeleteModalContent type="Video" id={videoId} title={params.title} openModal={openModal} onDelete={onDelete} />} />
-      )}
-    </div>
+    </>
   );
 }
