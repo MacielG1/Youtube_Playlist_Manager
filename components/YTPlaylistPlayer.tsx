@@ -308,7 +308,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             <span className="sr-only">Loading...</span>
           </div>
         )}
-        <div className="w-full min-w-[400px] max-w-[95vw] md:max-w-[750px]  lg:max-w-[800px] xl:max-w-[1000px] 2xl:max-w-[1300px] -mt-20 sm:mt-0 pt-2 xl:pt-0 flex justify-center items-center">
+        <div className="w-full min-w-[400px] max-w-[89vw] md:max-w-[89vw] lg:min-w-[90vw] lg:max-w-[800px] xl:min-w-[800px] xl:max-w-[68vw] 2xl:max-w-[1300px] -mt-20 sm:mt-0 pt-2 xl:pt-0 p-[0.15rem] flex justify-center items-center">
           <div className={`${isLoaded ? "visible" : "hidden"} relative w-full overflow-hidden pb-[56.25%] `}>
             <YouTube
               ref={PlaylistPlayerRef}
