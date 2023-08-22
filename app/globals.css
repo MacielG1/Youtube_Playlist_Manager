@@ -24,6 +24,14 @@
     }
 }
 
+
+
+@media (max-height : 950px) {
+    .videoPlayer {
+        max-width: 1250px;
+    }
+}
+
 @media (max-height : 800px) {
     .videoPlayer {
         max-width: 850px;

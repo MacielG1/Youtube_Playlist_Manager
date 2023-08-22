@@ -134,14 +134,13 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     <>
       <BackButton />
       <div className="flex flex-col justify-center h-screen items-center  ">
-        {!isLoaded && (
-          <div role="status" className="flex justify-center items-center h-[25vh] md:h-[70vh]">
-            <Icons.spinIcon className="h-7 w-7 mt-5 text-blue-500 animate-spin " />
-            <span className="sr-only">Loading...</span>
-          </div>
-        )}
-
-        <div className="w-full min-w-[400px]  2xl:max-w-[1300px] -mt-20 sm:mt-0 pt-2 xl:pt-0 p-[0.15rem] flex justify-center items-center videoPlayer">
+        <div className="w-full min-w-[400px] 2xl:max-w-[64vw] -mt-20 sm:mt-0 pt-2 xl:pt-0 p-[0.15rem] flex justify-center items-center videoPlayer">
+          {!isLoaded && (
+            <div role="status" className="flex justify-center items-center -mt-20">
+              <Icons.spinIcon className="h-7 w-7 mt-5 text-blue-500 animate-spin " />
+              <span className="sr-only">Loading...</span>
+            </div>
+          )}
           <div className={`${isLoaded ? "visible" : "hidden"} relative w-full overflow-hidden pb-[56.25%] `}>
             <YouTube
               videoId={videoId}
@@ -160,20 +159,23 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         </div>
 
         {isLoaded && (
-          <div className="flex gap-3 justify-center items-center my-2">
+          <div className="flex xs:gap-3 justify-center items-center my-2">
             <button
-              className=" cursor-pointer  text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500"
+              className=" cursor-pointer  text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition duration-300 outline-none focus:text-neutral-500"
               onClick={() => seekTime(playingVideoRef, videoPlayerRef, -10)}
             >
               <Icons.rewind10 className="h-8 w-8" />
             </button>
             <button
-              className=" cursor-pointer  text-neutral-400 transition  hover:text-neutral-500 duration-300 outline-none focus:text-neutral-500"
+              className=" cursor-pointer  text-neutral-600 dark:text-neutral-400   hover:text-neutral-500 dark:hover:text-neutral-300 transition duration-300 outline-none focus:text-neutral-500"
               onClick={() => seekTime(playingVideoRef, videoPlayerRef, 10)}
             >
               <Icons.skip10 className="h-8 w-8" />
             </button>
-            <button className="cursor-pointer text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500" onClick={openModal}>
+            <button
+              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition duration-300 outline-none focus:text-neutral-500"
+              onClick={openModal}
+            >
               <Icons.closeIcon className="w-6 h-6" />
             </button>
           </div>

@@ -9,7 +9,7 @@ export default async function fetchVideosIds(playlistId: string, existingVideoId
     });
 
     if (!res.ok) {
-      console.log("Error", res.statusText);
+      return console.log("Error", res.statusText);
     }
     const data = await res.json();
 

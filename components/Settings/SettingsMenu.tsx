@@ -12,7 +12,7 @@ export default function SettingsMenu() {
   let [isOpen, setIsOpen] = useState(false);
 
   let content = (
-    <div className="flex flex-col justify-center items-center">
+    <div className="flex flex-col justify-center items-center pb-3">
       <ThemeToggler />
       <ImportExportTimers setModalOpen={setIsOpen} />
       <DeleteAllData parentModalSetter={setIsOpen} />

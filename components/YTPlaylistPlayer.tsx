@@ -51,7 +51,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }
 
   let allIds = plVideos?.videosIds || [];
-
+  console.log("allIds", allIds);
   useEffect(() => {
     async function run() {
       if (plVideos?.videosIds?.length) {
@@ -61,7 +61,12 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
         let recentThan1day = Date.now() - (plVideos.updatedTime || 0) < 24 * 60 * 60 * 1000; // 1 day
         let recentThan3days = Date.now() - (plVideos.updatedTime || 0) < 3 * 24 * 60 * 60 * 1000; // 3 days
-        // let recentThan1MIn = Date.now() - plVideos.updatedTime < 60 * 1000; // 1 min
+
+        // let recentThan1day = Date.now() - (plVideos.updatedTime || 0) < 60000; // 1 min to test
+        // let recentThan3days = Date.now() - (plVideos.updatedTime || 0) < 60000; // 1 min to test
+
+        console.log("recentThan1day", recentThan1day);
+        console.log("date", Date.now(), "saved", plVideos.updatedTime || 0, "1min", 6000);
 
         if (hasOnlyDate && !recentThan3days) {
           console.log("hasOnlyDate, but older than 3 days");
@@ -77,17 +82,22 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ updatedTime: Date.now() }));
           }
         } else if (allIds.length && !recentThan1day) {
+          console.log("OLDER THAN 1 DAY");
           // if the playlist is in Storage and longer than 1 day: fetch the new videos
+          playlistLengthRef.current = allIds.length;
 
-          await fetchVideosIds(playlistId, allIds, allVideosIdsRef);
-          playlistLengthRef.current = allVideosIdsRef.current.length;
+          const data = await fetchVideosIds(playlistId, allIds, allVideosIdsRef);
+          playlistLengthRef.current = data.length || allIds;
+          setCurrentVideoIndex((prev) => prev); // Forces re-render so the ref above updates
         } else if (allIds.length && recentThan1day) {
           // if the playlist is in Storage and recent than 1 day: take the length from the storage
           allVideosIdsRef.current = allIds;
+
           playlistLengthRef.current = allIds.length;
         } else if (!allIds.length) {
           // if the playlist is small take the length from the player
           const pl = await PlaylistPlayerRef.current?.internalPlayer.getPlaylist();
+
           playlistLengthRef.current = pl.length;
         }
       } else {
@@ -166,6 +176,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   async function onStateChange(e: YouTubeEvent) {
     const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
     setCurrentVideoIndex(index);
+
+    console.log(playlistLengthRef.current);
   }
 
   async function onEnd(e: YouTubeEvent) {
@@ -302,13 +314,13 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     <>
       <BackButton />
       <div className="flex flex-col justify-center h-screen items-center  ">
-        {!isLoaded && (
-          <div role="status" className="flex justify-center items-center h-[25vh] md:h-[70vh]">
-            <Icons.spinIcon className="h-7 w-7 mt-5 text-blue-500 animate-spin " />
-            <span className="sr-only">Loading...</span>
-          </div>
-        )}
-        <div className="w-full min-w-[400px]  2xl:max-w-[1300px] -mt-20 sm:mt-0 pt-2 xl:pt-0 p-[0.15rem] flex justify-center items-center videoPlayer">
+        <div className="w-full min-w-[400px]  2xl:max-w-[80vw] -mt-20 sm:mt-0 pt-2 xl:pt-0 p-[0.15rem] flex justify-center items-center videoPlayer">
+          {!isLoaded && (
+            <div role="status" className="flex justify-center items-center -mt-20">
+              <Icons.spinIcon className="h-7 w-7 mt-5 text-blue-500 animate-spin " />
+              <span className="sr-only">Loading...</span>
+            </div>
+          )}
           <div className={`${isLoaded ? "visible" : "hidden"} relative w-full overflow-hidden pb-[56.25%] `}>
             <YouTube
               ref={PlaylistPlayerRef}
@@ -326,24 +338,33 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         </div>
 
         {isLoaded && (
-          <div className="flex gap-3 justify-center items-center my-2">
-            <button className=" cursor-pointer text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none  " onClick={resetPlaylist}>
+          <div className="flex xs:gap-3 justify-center items-center my-2 ">
+            <button
+              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition duration-300 outline-none focus:text-neutral-500"
+              onClick={resetPlaylist}
+            >
               <Icons.resetIcon className="h-8 w-8" />
             </button>
             <button
-              className=" text-neutral-400  cursor-pointer  duration-300 hover:text-neutral-500 transition  outline-none focus:text-neutral-500"
+              className=" cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition duration-300 outline-none focus:text-neutral-500"
               onClick={() => seekTime(playingVideoRef, PlaylistPlayerRef, -10)}
             >
               <Icons.rewind10 className="h-8 w-8" />
             </button>
-            <button className=" cursor-pointer text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none " onClick={previousVideo}>
+            <button
+              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition duration-300 outline-none focus:text-neutral-500"
+              onClick={previousVideo}
+            >
               <Icons.pointerLeft className="w-8 h-8" />
             </button>
-            <button className=" cursor-pointer  text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500" onClick={nextVideo}>
+            <button
+              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition duration-300 outline-none focus:text-neutral-500"
+              onClick={nextVideo}
+            >
               <Icons.pointerRight className="w-8 h-8" />
             </button>
             <button
-              className=" cursor-pointer  text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500"
+              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition duration-300 outline-none focus:text-neutral-500"
               onClick={() => seekTime(playingVideoRef, PlaylistPlayerRef, 10)}
             >
               <Icons.skip10 className="h-8 w-8" />
@@ -352,7 +373,10 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             <span className="pl-3 min-w-[5rem] text-xl text-[#7b7e83]">
               {currentVideoIndex} / {playlistLengthRef.current}
             </span>
-            <button className=" cursor-pointer  text-neutral-400 hover:text-neutral-500 transition duration-300 outline-none focus:text-neutral-500" onClick={openModal}>
+            <button
+              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition duration-300 outline-none focus:text-neutral-500"
+              onClick={openModal}
+            >
               <Icons.closeIcon className="w-6 h-6" />
             </button>
           </div>
