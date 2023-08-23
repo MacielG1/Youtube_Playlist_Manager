@@ -130,6 +130,12 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     setIsModalOpen(!isModalOpen);
   }
 
+  // called when cancel or backdrop is clicked
+  function onCancel() {
+    videoPlayerRef.current?.internalPlayer.playVideo();
+    setIsModalOpen(false);
+  }
+
   return (
     <>
       <BackButton />
@@ -181,7 +187,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
           </div>
         )}
         {isModalOpen && (
-          <ModalDelete onClose={openModal} content={<DeleteModalContent type="Video" id={videoId} title={params.title} openModal={openModal} onDelete={onDelete} />} />
+          <ModalDelete onClose={onCancel} content={<DeleteModalContent type="Video" id={videoId} title={params.title} openModal={onCancel} onDelete={onDelete} />} />
         )}
       </div>
     </>

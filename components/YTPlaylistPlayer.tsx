@@ -310,6 +310,12 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     setIsModalOpen(!isModalOpen);
   }
 
+  // called when cancel or backdrop is clicked
+  function onCancel() {
+    PlaylistPlayerRef.current?.internalPlayer.playVideo();
+    setIsModalOpen(false);
+  }
+
   return (
     <>
       <BackButton />
@@ -383,8 +389,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         )}
         {isModalOpen && (
           <ModalDelete
-            onClose={openModal}
-            content={<DeleteModalContent type="Playlist" id={playlistId} title={params.title} openModal={openModal} onDelete={onDelete} />}
+            onClose={onCancel}
+            content={<DeleteModalContent type="Playlist" id={playlistId} title={params.title} openModal={onCancel} onDelete={onDelete} />}
           />
         )}
       </div>
