@@ -40,19 +40,19 @@ export default function DeleteAllData({ parentModalSetter }: Props) {
   }
 
   const content = (
-    <div className="flex flex-col gap-4 items-center justify-center  px-2 pt-2 pb-6 max-w-[16rem] xs:max-w-sm sm:max-w-md">
-      <h2 className="text-lg sm:text-2xl text-red-500 font-semibold tracking-wide">Delete All Saved Data</h2>
-      <p className="text-lg">This will remove all of your Playlists and Videos stored</p>
+    <div className="flex flex-col gap-4 items-center justify-center px-2 pt-2 pb-6 max-w-[20rem] xs:max-w-sm sm:max-w-md">
+      <h2 className="text-lg sm:text-2xl text-red-500 font-semibold tracking-wide text-center">Delete All Saved Data</h2>
+      <p className="text-lg text-center px-4">This will remove all of your Playlists and Videos that are saved</p>
       <div className="flex gap-3 pt-3 text-lg">
         <button
           onClick={onCancelDelete}
-          className="bg-gray-600/90 font-semibold border-neutral-800 text-neutral-300 hover:text-neutral-200  cursor-pointer  px-3 py-1 rounded-md hover:bg-gray-700 transition duration-200"
+          className="bg-zinc-700 font-semibold border-neutral-900 border-2 text-neutral-300 hover:text-neutral-200  cursor-pointer  px-3 py-1 rounded-md hover:bg-zinc-600 transition duration-200"
         >
           Cancel
         </button>
         <button
           onClick={deleteAllData}
-          className="bg-red-500  font-semibold border-neutral-800 text-black cursor-pointer px-3 py-1 rounded-md hover:bg-[#d32828] transition duration-200"
+          className="bg-red-600 font-semibold border-neutral-900 border-2 text-black   cursor-pointer px-3 py-1 rounded-md hover:bg-red-500 transition duration-200"
         >
           Delete
         </button>
@@ -63,7 +63,7 @@ export default function DeleteAllData({ parentModalSetter }: Props) {
   return (
     <>
       <button
-        className="  hover:cursor-pointer  mt-1 px-2 py-2 h-10 bg-neutral-800 text-white hover:bg-neutral-900 hover:border border border-neutral-950 duration-300 rounded-md text-base font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:border focus-visible:border-neutral-400 "
+        className="  hover:cursor-pointer  mt-1 px-7 py-2 h-10 bg-neutral-800 text-white hover:bg-neutral-900 hover:border border border-neutral-950 duration-300 rounded-md text-base font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:border focus-visible:border-neutral-400 "
         onClick={ToggleModal}
       >
         Delete Data

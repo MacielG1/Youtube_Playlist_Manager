@@ -142,7 +142,7 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
 
   return (
     <div className="flex justify-center gap-2 py-2 mx-auto">
-      <div className="grid w-20 max-w-sm items-center justify-center ">
+      <div className="grid  max-w-sm items-center justify-center ">
         <label
           htmlFor="fileInput"
           className={`text-base hover:cursor-cell relative inline-flex items-center px-2 py-2 

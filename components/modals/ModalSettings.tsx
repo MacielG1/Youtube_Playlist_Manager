@@ -13,7 +13,7 @@ export default function ModalSettings({ onClose, content }: ModalSettingsProps) 
       <>
         {/* Modal */}
         <div
-          className="fixed top-14 right-10  w-fit flex flex-col p-4 gap-2 mt-1 bg-neutral-300 dark:bg-neutral-600  rounded-lg shadow-md z-30 
+          className="fixed top-14 right-10  w-fit flex flex-col p-4 gap-2 mt-1 bg-neutral-300 dark:bg-zinc-700  rounded-lg shadow-md z-30 
       max-[350px]:right-1 max-[350px]:p-1 max-[350px]:text-base max-[350px]:w-[95%] "
         >
           {content}
