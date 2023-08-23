@@ -134,7 +134,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     <>
       <BackButton />
       <div className="flex flex-col justify-center h-screen items-center  ">
-        <div className="w-full min-w-[400px] 2xl:max-w-[64vw] -mt-20 sm:mt-0 pt-2 xl:pt-0 p-[0.15rem] flex justify-center items-center videoPlayer">
+        <div className="w-full min-w-[400px] 2xl:max-w-[75vw] -mt-20 sm:mt-0 pt-2 xl:pt-0 p-[0.15rem] flex justify-center items-center videoPlayer">
           {!isLoaded && (
             <div role="status" className="flex justify-center items-center -mt-20">
               <Icons.spinIcon className="h-7 w-7 mt-5 text-blue-500 animate-spin " />
