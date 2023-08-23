@@ -62,8 +62,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         let recentThan1day = Date.now() - (plVideos.updatedTime || 0) < 24 * 60 * 60 * 1000; // 1 day
         let recentThan3days = Date.now() - (plVideos.updatedTime || 0) < 3 * 24 * 60 * 60 * 1000; // 3 days
 
-        // let recentThan1day = Date.now() - (plVideos.updatedTime || 0) < 60000; // 1 min to test
-        // let recentThan3days = Date.now() - (plVideos.updatedTime || 0) < 60000; // 1 min to test
+        // let recentThan1day = Date.now() - (plVideos.updatedTime || 0) < 10000; // 10 sec to test
+        // let recentThan3days = Date.now() - (plVideos.updatedTime || 0) < 10000; // 10 sec to test
 
         console.log("recentThan1day", recentThan1day);
         console.log("date", Date.now(), "saved", plVideos.updatedTime || 0, "1min", 6000);
@@ -87,7 +87,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
           playlistLengthRef.current = allIds.length;
 
           const data = await fetchVideosIds(playlistId, allIds, allVideosIdsRef);
-          playlistLengthRef.current = data.length || allIds;
+          playlistLengthRef.current = data?.length || allIds;
           setCurrentVideoIndex((prev) => prev); // Forces re-render so the ref above updates
         } else if (allIds.length && recentThan1day) {
           // if the playlist is in Storage and recent than 1 day: take the length from the storage

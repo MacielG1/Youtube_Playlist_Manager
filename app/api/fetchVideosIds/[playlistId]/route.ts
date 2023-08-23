@@ -72,7 +72,8 @@ type Params = {
 };
 
 export async function POST(req: Request, { params }: { params: Params }) {
-  let { existingVideoIds } = await req.json();
+  // let { existingVideoIds } = await req.json();
+  // const newExistingVideoIds = existingVideoIds.toReversed();
 
   const playlistsToFetch = params.playlistId;
 
@@ -80,28 +81,24 @@ export async function POST(req: Request, { params }: { params: Params }) {
 
   let nextPageToken = "";
 
-  const newExistingVideoIds = existingVideoIds.toReversed();
-
   const allIds = [];
   try {
     do {
       const res = await fetch(
-        `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistsToFetch}&maxResults=50&pageToken=${nextPageToken}&key=${API_KEY}`
+        `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId=${playlistsToFetch}&maxResults=50&pageToken=${nextPageToken}&key=${API_KEY}`
       );
       if (!res.ok) {
-        console.log("Error in /api/fetch_write_videos/[playlistId]", res.status, res.statusText);
+        console.log("Error in /api/fetchVideosIds/[playlistId]", res.status, res.statusText);
         throw new Error("ERROR");
       }
       let data = await res.json();
 
       for (let item of data.items) {
-        allIds.push(item.snippet.resourceId.videoId);
+        allIds.push(item.contentDetails.videoId);
       }
 
       nextPageToken = data.nextPageToken;
     } while (nextPageToken);
-
-    console.log("New videos", allIds);
 
     return NextResponse.json(allIds);
   } catch (e: any) {
