@@ -11,7 +11,6 @@ const config: Config = {
       screens: {
         xs: "500px",
         lg: "1124px",
-        "3xl": "1650px",
       },
       colors: {
         // Using modern `rgb`

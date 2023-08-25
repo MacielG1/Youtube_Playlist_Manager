@@ -25,25 +25,21 @@
 }
 
 
-
 @media (max-height : 950px) {
     .videoPlayer {
         max-width: 1250px;
     }
 }
-
 @media (max-height : 800px) {
     .videoPlayer {
         max-width: 850px;
     }
 }
-
 @media (max-height : 600px) {
     .videoPlayer {
         max-width: 650px;
     }
 }
-
 @media (max-height : 400px) {
     .videoPlayer {
         max-width: 450px;

@@ -20,9 +20,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${font.className} bg-background `}>
         <QueryProvider>
           <ThemeProvider attribute="class" defaultTheme="system">
-            <Analytics />
             <SettingsMenu />
             <ToastProvider />
+            <Analytics />
             {children}
           </ThemeProvider>
         </QueryProvider>

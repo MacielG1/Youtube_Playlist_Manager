@@ -346,41 +346,41 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         {isLoaded && (
           <div className="flex xs:gap-3 justify-center items-center my-2 ">
             <button
-              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition duration-300 outline-none focus:text-neutral-500"
+              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
               onClick={resetPlaylist}
             >
               <Icons.resetIcon className="h-8 w-8" />
             </button>
             <button
-              className=" cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition duration-300 outline-none focus:text-neutral-500"
+              className=" cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
               onClick={() => seekTime(playingVideoRef, PlaylistPlayerRef, -10)}
             >
               <Icons.rewind10 className="h-8 w-8" />
             </button>
             <button
-              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition duration-300 outline-none focus:text-neutral-500"
+              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
               onClick={previousVideo}
             >
               <Icons.pointerLeft className="w-8 h-8" />
             </button>
             <button
-              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition duration-300 outline-none focus:text-neutral-500"
+              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
               onClick={nextVideo}
             >
               <Icons.pointerRight className="w-8 h-8" />
             </button>
             <button
-              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition duration-300 outline-none focus:text-neutral-500"
+              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
               onClick={() => seekTime(playingVideoRef, PlaylistPlayerRef, 10)}
             >
               <Icons.skip10 className="h-8 w-8" />
             </button>
 
-            <span className="pl-3 min-w-[5rem] text-xl text-[#7b7e83]">
+            <span className=" min-w-[4rem] text-xl text-neutral-600 dark:text-[#818386]">
               {currentVideoIndex} / {playlistLengthRef.current}
             </span>
             <button
-              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition duration-300 outline-none focus:text-neutral-500"
+              className="pl-1 cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-red-500 dark:hover:text-red-500 transition duration-300 outline-none focus:text-neutral-500"
               onClick={openModal}
             >
               <Icons.closeIcon className="w-6 h-6" />
