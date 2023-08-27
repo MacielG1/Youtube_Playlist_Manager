@@ -31,9 +31,11 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const queryClient = useQueryClient();
 
   const pageRef = useRef(1);
-  const playlistLengthRef = useRef(0);
+  const plLengthRef = useRef(0);
+  const isPlaying = useRef(false);
+
   const PlaylistPlayerRef = useRef<YouTube | null>(null);
-  const playingVideoRef = useRef<boolean | null>(false);
+  const isPlayingVideoRef = useRef<boolean | null>(false);
   const allVideosIdsRef = useRef<string[]>([]);
 
   const playlistId = params.list;
@@ -51,11 +53,10 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }
 
   let allIds = plVideos?.videosIds || [];
-  console.log("allIds", allIds);
+
   useEffect(() => {
     async function run() {
       if (plVideos?.videosIds?.length) {
-        console.log("Playlist Already in Storage");
         // if the playlist is already in local storage
         let hasOnlyDate = plVideos.updatedTime && allIds.length == 0;
 
@@ -65,15 +66,11 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         // let recentThan1day = Date.now() - (plVideos.updatedTime || 0) < 10000; // 10 sec to test
         // let recentThan3days = Date.now() - (plVideos.updatedTime || 0) < 10000; // 10 sec to test
 
-        console.log("recentThan1day", recentThan1day);
-        console.log("date", Date.now(), "saved", plVideos.updatedTime || 0, "1min", 6000);
-
         if (hasOnlyDate && !recentThan3days) {
-          console.log("hasOnlyDate, but older than 3 days");
           // if hasOnlyData is true the playlist was already added to storage but is smaller than 200 videos
 
           const playlistLength = await getPlaylistSize(playlistId);
-          playlistLengthRef.current = playlistLength;
+          plLengthRef.current = playlistLength;
 
           if (playlistLength > 200) {
             // if it became bigger than 200 videos, fetch the new ids
@@ -82,29 +79,28 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ updatedTime: Date.now() }));
           }
         } else if (allIds.length && !recentThan1day) {
-          console.log("OLDER THAN 1 DAY");
           // if the playlist is in Storage and longer than 1 day: fetch the new videos
-          playlistLengthRef.current = allIds.length;
+          plLengthRef.current = allIds.length;
 
           const data = await fetchVideosIds(playlistId, allIds, allVideosIdsRef);
-          playlistLengthRef.current = data?.length || allIds;
+          plLengthRef.current = data?.length || allIds;
           setCurrentVideoIndex((prev) => prev); // Forces re-render so the ref above updates
         } else if (allIds.length && recentThan1day) {
           // if the playlist is in Storage and recent than 1 day: take the length from the storage
           allVideosIdsRef.current = allIds;
 
-          playlistLengthRef.current = allIds.length;
+          plLengthRef.current = allIds.length;
         } else if (!allIds.length) {
           // if the playlist is small take the length from the player
           const pl = await PlaylistPlayerRef.current?.internalPlayer.getPlaylist();
 
-          playlistLengthRef.current = pl.length;
+          plLengthRef.current = pl.length;
         }
       } else {
         // if it's a new playlist
 
         const playlistLength = await getPlaylistSize(playlistId);
-        playlistLengthRef.current = playlistLength;
+        plLengthRef.current = playlistLength;
 
         if (playlistLength > 200) {
           await fetchVideosIds(playlistId, allIds, allVideosIdsRef);
@@ -120,7 +116,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     const player = PlaylistPlayerRef.current?.internalPlayer; // returns the iframe video  player
 
     const timer = setInterval(() => {
-      if (playingVideoRef.current) {
+      if (isPlayingVideoRef.current) {
         savePlaylistsProgress(player, playlistId, pageRef.current);
       }
     }, 30000);
@@ -137,7 +133,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     PlaylistPlayerRef.current?.internalPlayer.setPlaybackRate(plRate);
 
     const intervalId = setInterval(() => {
-      if (playingVideoRef.current) {
+      if (isPlayingVideoRef.current) {
         savePlaylistsProgress(e.target, playlistId, pageRef.current);
       }
     }, 15000);
@@ -146,7 +142,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }
 
   function onPlay(e: YouTubeEvent) {
-    playingVideoRef.current = true;
+    isPlayingVideoRef.current = true;
     savePlaylistsProgress(e.target, playlistId, pageRef.current);
   }
 
@@ -177,7 +173,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
     setCurrentVideoIndex(index);
 
-    console.log(playlistLengthRef.current);
+    console.log(plLengthRef.current);
   }
 
   async function onEnd(e: YouTubeEvent) {
@@ -189,7 +185,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       e.target.playVideoAt(currentIndex + 1);
       e.target.seekTo(0);
     }
-    if ((currentIndex + 1) % 200 === 0 && playlistLengthRef.current > 200) {
+    if ((currentIndex + 1) % 200 === 0 && plLengthRef.current > 200) {
       // if the index is 199, 399, 599, etc. and videosIds  has more than 200 , 400, 600, etc. videos
       const nextPage = pageRef.current + 1;
       pageRef.current = nextPage;
@@ -208,7 +204,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     const player = PlaylistPlayerRef.current?.getInternalPlayer();
     const index = await player.getPlaylistIndex();
 
-    if (playlistLengthRef.current > 200) {
+    if (plLengthRef.current > 200) {
       if (index === 0 && pageRef.current > 1) {
         pageRef.current -= 1;
         await loadPlaylist(player, allVideosIdsRef.current, pageRef.current, 199);
@@ -227,7 +223,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     const player = PlaylistPlayerRef.current?.getInternalPlayer();
     const index = await player.getPlaylistIndex();
 
-    if (playlistLengthRef.current > 200) {
+    if (plLengthRef.current > 200) {
       if ((index + 1) % 200 === 0) {
         pageRef.current += 1;
 
@@ -301,7 +297,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       return oldData;
     });
 
-    playingVideoRef.current = null;
+    isPlayingVideoRef.current = null;
     router.replace("/");
   }
 
@@ -313,6 +309,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   // called when cancel or backdrop is clicked
   function onCancel() {
     PlaylistPlayerRef.current?.internalPlayer.playVideo();
+
     setIsModalOpen(false);
   }
 
@@ -353,7 +350,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             </button>
             <button
               className=" cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
-              onClick={() => seekTime(playingVideoRef, PlaylistPlayerRef, -10)}
+              onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, -10)}
             >
               <Icons.rewind10 className="h-8 w-8" />
             </button>
@@ -371,13 +368,13 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             </button>
             <button
               className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
-              onClick={() => seekTime(playingVideoRef, PlaylistPlayerRef, 10)}
+              onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, 10)}
             >
               <Icons.skip10 className="h-8 w-8" />
             </button>
 
             <span className=" min-w-[4rem] text-xl text-neutral-600 dark:text-[#818386]">
-              {currentVideoIndex} / {playlistLengthRef.current}
+              {currentVideoIndex} / {plLengthRef.current}
             </span>
             <button
               className="pl-1 cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-red-500 dark:hover:text-red-500 transition duration-300 outline-none focus:text-neutral-500"

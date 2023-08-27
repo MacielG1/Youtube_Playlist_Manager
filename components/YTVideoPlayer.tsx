@@ -25,7 +25,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   const router = useRouter();
 
   const videoPlayerRef = useRef<YouTube | null>(null);
-  const playingVideoRef = useRef<boolean | null>(false);
+  const isPlayingVideoRef = useRef<boolean | null>(false);
 
   const videoId = params.v;
   const item = `v=${videoId}`;
@@ -34,7 +34,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     const player = videoPlayerRef.current?.getInternalPlayer(); // returns the iframe video  player
 
     const timer = setInterval(() => {
-      if (playingVideoRef.current) {
+      if (isPlayingVideoRef.current) {
         saveVideoProgress(player, videoId);
       }
     }, 30000);
@@ -51,7 +51,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     videoPlayerRef.current?.internalPlayer.setPlaybackRate(plRate);
 
     const intervalId = setInterval(() => {
-      if (playingVideoRef.current) {
+      if (isPlayingVideoRef.current) {
         saveVideoProgress(e.target, videoId);
       }
     }, 15000); // 15 seconds
@@ -61,12 +61,12 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   function onPlay(e: YouTubeEvent) {
     console.log(e);
-    playingVideoRef.current = true;
+    isPlayingVideoRef.current = true;
     saveVideoProgress(e.target, videoId);
   }
 
   function onPause(e: YouTubeEvent) {
-    playingVideoRef.current = false;
+    isPlayingVideoRef.current = false;
     saveVideoProgress(e.target, videoId);
   }
   function onError(e: YouTubeEvent) {
@@ -101,7 +101,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
       }
     });
 
-    playingVideoRef.current = null;
+    isPlayingVideoRef.current = null;
     router.replace("/");
   }
 
@@ -168,13 +168,13 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
           <div className="flex xs:gap-3 justify-center items-center my-2">
             <button
               className=" cursor-pointer  text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
-              onClick={() => seekTime(playingVideoRef, videoPlayerRef, -10)}
+              onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}
             >
               <Icons.rewind10 className="h-8 w-8" />
             </button>
             <button
               className=" cursor-pointer  text-neutral-600 dark:text-neutral-400   hover:text-neutral-500 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
-              onClick={() => seekTime(playingVideoRef, videoPlayerRef, 10)}
+              onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, 10)}
             >
               <Icons.skip10 className="h-8 w-8" />
             </button>
