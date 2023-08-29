@@ -291,7 +291,7 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
     <div className="mt-2 outline-none" ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <div className={`flex flex-col items-center justify-center space-y-2 `} onClick={gotoLink}>
         <div className=" relative w-60 xs:w-52 md:w-56 lg:w-64 xl:w-[17.8rem] 3xl:w-80">
-          <div className={` overflow-hidden group  rounded-xl  w-full h-full  ${isDragging ? "cursor-grabbing" : "cursor-pointer"}`}>
+          <div className={`overflow-hidden group  rounded-xl  w-full h-full  ${isDragging ? "cursor-grabbing" : "cursor-pointer"}`}>
             <button
               onClick={openModal}
               className="opacity-0  group-hover:opacity-100 z-10 peer absolute bg-neutral-800 text-neutral-40 hover:text-red-500 top-0 right-0 p-1 hover:bg-neutral-900 group-hover:transition-opacity group-hover:duration-500 rounded-bl-md rounded-tr-[0.50rem]    "

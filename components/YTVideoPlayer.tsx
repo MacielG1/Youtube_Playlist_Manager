@@ -140,7 +140,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     <>
       <BackButton />
       <div className="flex flex-col justify-center h-screen items-center  ">
-        <div className="w-full min-w-[400px] 2xl:max-w-[75vw] -mt-20 sm:mt-0 pt-2 xl:pt-0 p-[0.15rem] flex justify-center items-center videoPlayer">
+        {isLoaded && <span className="text-center py-2 text-neutral-200 tracking-wide -mt-20 sm:mt-0">{params.title}</span>}
+        <div className="w-full min-w-[400px] 2xl:max-w-[75vw] -0 pt-2 xl:pt-0 p-[0.15rem] flex justify-center items-center videoPlayer">
           {!isLoaded && (
             <div role="status" className="flex justify-center items-center -mt-20">
               <Icons.spinIcon className="h-7 w-7 mt-5 text-blue-500 animate-spin " />
@@ -165,7 +166,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         </div>
 
         {isLoaded && (
-          <div className="flex xs:gap-3 justify-center items-center my-2">
+          <div className="flex gap-1 xs:gap-3 justify-center items-center my-2">
             <button
               className=" cursor-pointer  text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
               onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}

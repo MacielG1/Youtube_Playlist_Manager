@@ -9,7 +9,7 @@ export default function ModalSettings({ onClose, content }: ModalSettingsProps) 
   let modal = (
     <>
       {/* Backdrop */}
-      <button type="button" className="cursor-default fixed top-0 left-0 w-full h-[100vh] z-20 bg-black bg-opacity-60" onClick={onClose} />
+      <button type="button" className=" cursor-default fixed top-0 left-0 w-full h-[100vh] z-20 bg-black bg-opacity-60" onClick={onClose} />
       <>
         {/* Modal */}
         <div className="absolute inset-0 flex justify-center items-center ">
