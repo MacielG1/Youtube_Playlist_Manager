@@ -167,13 +167,13 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         {isLoaded && (
           <div className="flex xs:gap-3 justify-center items-center my-2">
             <button
-              className=" cursor-pointer  text-neutral-600 dark:text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
+              className=" cursor-pointer  text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
               onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}
             >
               <Icons.rewind10 className="h-8 w-8" />
             </button>
             <button
-              className=" cursor-pointer  text-neutral-600 dark:text-neutral-400   hover:text-neutral-500 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
+              className=" cursor-pointer  text-neutral-600 dark:text-neutral-400   hover:text-neutral-950 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
               onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, 10)}
             >
               <Icons.skip10 className="h-8 w-8" />

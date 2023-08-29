@@ -63,7 +63,7 @@ export default function DeleteAllData({ parentModalSetter }: Props) {
   return (
     <>
       <button
-        className="  hover:cursor-pointer  mt-1 px-7 py-2 h-10 bg-neutral-800 text-white hover:bg-neutral-900 hover:border border border-neutral-950 duration-300 rounded-md text-base font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:border focus-visible:border-neutral-400 "
+        className="hover:cursor-pointer  mt-1 px-7 py-2 h-10 bg-neutral-800 text-white hover:bg-neutral-900 hover:border border border-neutral-950 duration-300 rounded-md text-base font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:border focus-visible:border-neutral-400 "
         onClick={ToggleModal}
       >
         Delete Data

@@ -146,7 +146,7 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
         <label
           htmlFor="fileInput"
           className={`text-base hover:cursor-cell relative inline-flex items-center px-2 py-2 
-           text-white bg-neutral-800 hover:bg-neutral-900 hover:border border border-neutral-950 
+           text-white bg-neutral-800 hover:bg-neutral-950 hover:border border border-neutral-950 
            duration-300 rounded-md  font-medium ring-offset-background transition-colors focus-visible:outline-none 
            focus-visible:border focus-visible:border-neutral-400 ${isExportable ? "max-w-[5.2rem]" : " pl-6 w-[6.5rem] max-w-[7rem]"}`}
         >
@@ -158,7 +158,7 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
       {isExportable && (
         <button
           onClick={exportTimers}
-          className=" max-w-[5.2rem] hover:cursor-pointer px-2 py-2 h-10 bg-neutral-800 text-white hover:bg-neutral-900 hover:border border border-neutral-950 duration-300 rounded-md text-base font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:border focus-visible:border-neutral-400 "
+          className=" max-w-[5.2rem] hover:cursor-pointer px-2 py-2 h-10 bg-neutral-800 text-white hover:bg-neutral-950 hover:border border border-neutral-950 duration-300 rounded-md text-base font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:border focus-visible:border-neutral-400 "
         >
           Export
         </button>

@@ -90,7 +90,6 @@ export default function AllPlaylists() {
       {!vidData?.items?.length && !plData?.items?.length && isPlFetched && isVidFetched && (
         <div className="flex items-center flex-col gap-3 pt-10">
           <h3 className=" text-neutral-500 dark:text-neutral-400 text-lg font-semibold tracking-wide">No Items Added</h3>
-
           <Icons.emptyBox className="w-12 h-12 text-neutral-400 dark:text-neutral-500" />
           <Link
             href="/about"

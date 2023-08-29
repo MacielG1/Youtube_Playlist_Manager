@@ -132,7 +132,7 @@ export default function Input() {
           type="submit"
           className={`flex items-center justify-center rounded-lg  border border-blue-800 bg-blue-700  hover:bg-blue-800 text-gray-100 px-4 py-2 hover:border-blue-950 hover:text-gray-200 transition duration-300`}
         >
-          <Icons.searchIcon className=" w-4 h-4 sm:w-7 sm:h-7" />
+          <Icons.searchIcon className="w-4 h-4 sm:w-7 sm:h-7" />
         </button>
       </form>
     </nav>
