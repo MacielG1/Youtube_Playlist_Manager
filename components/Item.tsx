@@ -284,8 +284,8 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
   //     router.push(`/video/v?v=${id}&title=${title}`);
   //   }
   // }
-
-  let url = !isDraggingItem && !isSortingItem ? (type === "Playlist" ? `/playlist/p?list=${id}&title=${title}` : `/video/v?v=${id}&title=${title}`) : "#";
+  let t = encodeURIComponent(title);
+  let url = !isDraggingItem && !isSortingItem ? (type === "Playlist" ? `/playlist/p?list=${id}&title=${t}` : `/video/v?v=${id}&title=${t}`) : "#";
 
   return (
     <div className="mt-2 outline-none" ref={setNodeRef} style={style} {...attributes} {...listeners}>
