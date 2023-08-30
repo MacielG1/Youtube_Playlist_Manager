@@ -30,6 +30,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
+  const isPaused = useRef(false); // used to resume video if it was playing when delete modal was opened
   const pageRef = useRef(1);
   const plLengthRef = useRef(0);
 
@@ -300,14 +301,19 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     router.replace("/");
   }
 
-  function openModal() {
+  async function openModal() {
     PlaylistPlayerRef.current?.internalPlayer.pauseVideo();
+    isPaused.current = (await PlaylistPlayerRef?.current?.internalPlayer.getPlayerState()) === 2;
+
     setIsModalOpen(!isModalOpen);
   }
 
   // called when cancel or backdrop is clicked
   function onCancel() {
-    PlaylistPlayerRef.current?.internalPlayer.playVideo();
+    if (!isPaused.current) {
+      PlaylistPlayerRef.current?.internalPlayer.playVideo();
+      isPaused.current = false;
+    }
 
     setIsModalOpen(false);
   }

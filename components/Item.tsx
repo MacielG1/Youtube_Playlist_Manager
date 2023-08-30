@@ -122,8 +122,6 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
   let t = encodeURIComponent(title);
   let url = !isDraggingItem && !isSortingItem ? (type === "Playlist" ? `/playlist/p?list=${id}&title=${t}` : `/video/v?v=${id}&title=${t}`) : "#";
 
-  // ${isDragging || isSorting ? "cursor-grabbing" : "cursor-progress"}
-
   return (
     <div className="mt-2 outline-none" ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <div className="flex flex-col items-center justify-center space-y-2">

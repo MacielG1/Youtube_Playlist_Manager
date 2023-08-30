@@ -24,6 +24,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   const queryClient = useQueryClient();
   const router = useRouter();
 
+  const isPaused = useRef(false); // used to resume video if it was playing when delete modal was opened
+
   const videoPlayerRef = useRef<YouTube | null>(null);
   const isPlayingVideoRef = useRef<boolean | null>(false);
 
@@ -60,7 +62,6 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   }
 
   function onPlay(e: YouTubeEvent) {
-    console.log(e);
     isPlayingVideoRef.current = true;
     saveVideoProgress(e.target, videoId);
   }
@@ -85,7 +86,6 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   function onDelete() {
     localStorage.removeItem(`v=${videoId}`);
-
     // remove playlist from playlists array
     const allPlaylists = JSON.parse(localStorage.getItem("videos") || "[]");
     const newPlaylists = allPlaylists.filter((v: string) => v !== videoId);
@@ -100,6 +100,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         };
       }
     });
+
+    console.log(queryClient.getQueryData<Items>(["videos"]));
 
     isPlayingVideoRef.current = null;
     router.replace("/");
@@ -125,14 +127,18 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     };
   }, []);
 
-  function openModal() {
+  async function openModal() {
     videoPlayerRef?.current?.internalPlayer.pauseVideo();
+    isPaused.current = (await videoPlayerRef?.current?.internalPlayer.getPlayerState()) === 2;
     setIsModalOpen(!isModalOpen);
   }
 
   // called when cancel or backdrop is clicked
   function onCancel() {
-    videoPlayerRef.current?.internalPlayer.playVideo();
+    if (!isPaused.current) {
+      videoPlayerRef.current?.internalPlayer.playVideo();
+      isPaused.current = false;
+    }
     setIsModalOpen(false);
   }
 

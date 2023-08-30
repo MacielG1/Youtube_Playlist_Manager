@@ -1,6 +1,8 @@
 export default async function getVideosData() {
   const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
 
+  console.log("allVideos", allVideos);
+
   if (!allVideos.length) return {};
 
   const videosIds: string[] = allVideos.join(",");
