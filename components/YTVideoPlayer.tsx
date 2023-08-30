@@ -98,6 +98,10 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
           ...oldData,
           items: oldData?.items.filter((v) => v.id !== videoId),
         };
+      } else {
+        return {
+          items: [],
+        };
       }
     });
 

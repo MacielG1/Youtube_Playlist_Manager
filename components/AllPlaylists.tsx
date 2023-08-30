@@ -26,8 +26,7 @@ export default function AllPlaylists() {
   } = useQuery({
     queryKey: ["playlists"],
     queryFn: getPlaylistsData,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    // refetchOnWindowFocus: false,
   });
 
   const {
@@ -38,8 +37,7 @@ export default function AllPlaylists() {
   } = useQuery({
     queryKey: ["videos"],
     queryFn: getVideosData,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    // refetchOnWindowFocus: false,
   });
 
   // useEffect related to the react-query data
