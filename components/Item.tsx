@@ -277,19 +277,19 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
     noBlackBars = /(maxres|medium)/.test(thumbnailURL); // if it's maxres or medium it doesn't have blackbars
   }
 
-  function gotoLink() {
-    if (type == "Playlist") {
-      router.push(`/playlist/p?list=${id}&title=${title}`);
-    } else {
-      router.push(`/video/v?v=${id}&title=${title}`);
-    }
-  }
+  // function gotoLink() {
+  //   if (type == "Playlist") {
+  //     router.push(`/playlist/p?list=${id}&title=${title}`);
+  //   } else {
+  //     router.push(`/video/v?v=${id}&title=${title}`);
+  //   }
+  // }
 
   let url = !isDraggingItem && !isSortingItem ? (type === "Playlist" ? `/playlist/p?list=${id}&title=${title}` : `/video/v?v=${id}&title=${title}`) : "#";
 
   return (
     <div className="mt-2 outline-none" ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <div className={`flex flex-col items-center justify-center space-y-2 `} onClick={gotoLink}>
+      <Link href={url} className="flex flex-col items-center justify-center space-y-2">
         <div className=" relative w-60 xs:w-52 md:w-56 lg:w-64 xl:w-[17.8rem] 3xl:w-80">
           <div className={`overflow-hidden group  rounded-xl  w-full h-full  ${isDragging ? "cursor-grabbing" : "cursor-pointer"}`}>
             <button
@@ -299,19 +299,8 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
             >
               <Icons.deleteIcon className="w-4 h-4" />
             </button>
-
             <div className="peer-hover:scale-105 hover:scale-105 transition duration-300 ">
-              <Link href={url}>
-                <Image
-                  src={thumbnailURL}
-                  alt={title}
-                  width={300}
-                  height={300}
-                  className={`rounded-xl ${noBlackBars ? "-my-[1px]" : "-my-[32px]"} `}
-                  priority
-                  unoptimized
-                />
-              </Link>
+              <Image src={thumbnailURL} alt={title} width={300} height={300} className={`rounded-xl ${noBlackBars ? "-my-[1px]" : "-my-[32px]"} `} priority unoptimized />
             </div>
           </div>
 
@@ -319,8 +308,7 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
             {title}
           </h2>
         </div>
-      </div>
-
+      </Link>
       {isModalOpen && (
         <ModalDelete
           onClose={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
