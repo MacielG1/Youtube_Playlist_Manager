@@ -32,7 +32,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
   const pageRef = useRef(1);
   const plLengthRef = useRef(0);
-  const isPlaying = useRef(false);
 
   const PlaylistPlayerRef = useRef<YouTube | null>(null);
   const isPlayingVideoRef = useRef<boolean | null>(false);
