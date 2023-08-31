@@ -13,8 +13,6 @@ export default function AllPlaylists() {
   const [playlistItems, setPlaylistItems] = useState<Playlist[]>([]);
   const [videoItems, setVideoItems] = useState<Playlist[]>([]);
 
-  const queryClient = useQueryClient();
-
   const {
     dataUpdatedAt: plDataUpdatedAt,
     isError: isPlError,

@@ -64,13 +64,6 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
         const newPlaylists = { ...prev, items: newPlaylistsData };
         return newPlaylists;
       });
-
-      setOnDelete((prev) => {
-        const newPlsData = prev.filter((item) => item.id !== id);
-        return newPlsData;
-      });
-      setIsModalOpen(false);
-      mutate();
     } else if (type === "Video") {
       localStorage.removeItem(`v=${id}`);
 
@@ -87,14 +80,9 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
         const newVideos = { ...prev, items: newVideosData };
         return newVideos;
       });
-
-      setOnDelete((prev) => {
-        const newVideosData = prev.filter((item) => item.id !== id);
-        return newVideosData;
-      });
-      setIsModalOpen(false);
-      mutate();
     }
+    setIsModalOpen(false);
+    mutate();
   }
 
   function openModal(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
