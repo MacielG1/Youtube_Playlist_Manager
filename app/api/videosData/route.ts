@@ -18,6 +18,8 @@ export async function POST(req: Request) {
 
     const data = await res.json();
 
+    console.log("Videos:", data.items.length);
+
     if (!data) {
       console.log("Error", res.statusText);
       return {};

@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState, useMemo, use } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { Items } from "@/types";
@@ -33,7 +33,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   const item = `v=${videoId}`;
 
   useEffect(() => {
-    const player = videoPlayerRef.current?.getInternalPlayer(); // returns the iframe video  player
+    const player = videoPlayerRef?.current?.getInternalPlayer(); // returns the iframe video  player
 
     const timer = setInterval(() => {
       if (isPlayingVideoRef.current) {
@@ -50,7 +50,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     setIsLoaded(true);
 
     const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
-    videoPlayerRef.current?.internalPlayer.setPlaybackRate(plRate);
+    videoPlayerRef?.current?.internalPlayer.setPlaybackRate(plRate);
 
     const intervalId = setInterval(() => {
       if (isPlayingVideoRef.current) {
@@ -98,14 +98,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
           ...oldData,
           items: oldData?.items.filter((v) => v.id !== videoId),
         };
-      } else {
-        return {
-          items: [],
-        };
       }
     });
-
-    console.log(queryClient.getQueryData<Items>(["videos"]));
 
     isPlayingVideoRef.current = null;
     router.replace("/");
@@ -140,7 +134,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   // called when cancel or backdrop is clicked
   function onCancel() {
     if (!isPaused.current) {
-      videoPlayerRef.current?.internalPlayer.playVideo();
+      videoPlayerRef?.current?.internalPlayer.playVideo();
       isPaused.current = false;
     }
     setIsModalOpen(false);
