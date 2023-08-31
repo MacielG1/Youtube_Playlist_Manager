@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useEffect, useState, useMemo, use } from "react";
 import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Items } from "@/types";
 import { Icons } from "@/assets/Icons";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
@@ -86,10 +86,9 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   function onDelete() {
     localStorage.removeItem(`v=${videoId}`);
-    // remove playlist from playlists array
+
     const allPlaylists = JSON.parse(localStorage.getItem("videos") || "[]");
     const newPlaylists = allPlaylists.filter((v: string) => v !== videoId);
-
     localStorage.setItem("videos", JSON.stringify(newPlaylists));
 
     queryClient.setQueryData<Items>(["videos"], (oldData) => {

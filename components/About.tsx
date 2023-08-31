@@ -28,10 +28,10 @@ export default function About() {
                   Adding videos is also possible and can be useful in certain situations, like a long live stream.
                 </p>
               </div>
-              <div className="flex justify-center items-center py-4 max-w-lg">
+              <div className="flex justify-center items-center sm:ml-10 py-4 max-w-lg">
                 <Link
                   href="/"
-                  className="bg-indigo-800 hover:bg-indigo-900 py-2 px-4 text-neutral-300 hover:text-neutral-200 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="bg-indigo-800 hover:bg-indigo-900 py-2 px-5 text-neutral-300 hover:text-neutral-200 inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   Return
                 </Link>
@@ -41,7 +41,7 @@ export default function About() {
         </div>
 
         <div className="absolute inset-x-0 -top-16 -z-10 flex transform-gpu opacity-20 justify-center overflow-hidden blur-3xl" aria-hidden="true">
-          <div className="aspect-[1318/752] w-[82.375rem] flex-none bg-gradient-to-r from-[#80caff] to-[#4f46e5] opacity-20" />
+          <div className=" aspect-[1318/752] w-[82.375rem] flex-none bg-gradient-to-r from-[#80caff] to-[#4f46e5] opacity-20" />
         </div>
       </div>
     </>

@@ -7,9 +7,6 @@ export default function BackButton() {
       <Link href="/" className=" text-neutral-400 hover:text-neutral-500">
         <Icons.arrowLeft className="w-8 h-8 text-blue-600" />
       </Link>
-      {/* <a href="/" className=" text-neutral-400 hover:text-neutral-500">
-        <Icons.arrowLeft className="w-8 h-8 text-blue-600" />
-      </a> */}
     </div>
   );
 }
