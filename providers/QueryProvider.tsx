@@ -21,6 +21,7 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
 
   const persister = createSyncStoragePersister({
     storage: typeof window !== "undefined" ? window.localStorage : undefined,
+    throttleTime: 100,
   });
 
   return (

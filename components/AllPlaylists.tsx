@@ -40,7 +40,6 @@ export default function AllPlaylists() {
     refetchOnMount: false,
   });
 
-  // useEffect related to the react-query data
   useEffect(() => {
     setPlaylistItems(plData?.items || []);
   }, [plData, plDataUpdatedAt]);
@@ -48,21 +47,6 @@ export default function AllPlaylists() {
   useEffect(() => {
     setVideoItems(vidData?.items || []);
   }, [vidData, vidDataUpdatedAt]);
-
-  // useEffect related to the Drag and Drop functionality
-  useEffect(() => {
-    if (playlistItems.length > 0) {
-      localStorage.setItem("playlists", JSON.stringify(playlistItems.map((item) => item.id)));
-      queryClient.setQueryData(["playlists"], { items: playlistItems });
-    }
-  }, [playlistItems]);
-
-  useEffect(() => {
-    if (videoItems.length > 0) {
-      localStorage.setItem("videos", JSON.stringify(videoItems.map((item) => item.id)));
-      queryClient.setQueryData(["videos"], { items: videoItems });
-    }
-  }, [videoItems]);
 
   if ((isPlFetching || isVidFetching) && !isPlFetched) {
     return (

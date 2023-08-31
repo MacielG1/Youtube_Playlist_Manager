@@ -1,8 +1,9 @@
 import { DndContext, DragEndEvent, MouseSensor, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 
-import { Playlist } from "@/types";
+import { Items, Playlist, PlaylistItem, VideoItem } from "@/types";
 import Item from "./Item";
+import { useQueryClient } from "@tanstack/react-query";
 
 type Props = {
   setItems: React.Dispatch<React.SetStateAction<Playlist[]>>;
@@ -27,15 +28,25 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
 
   const sensors = useSensors(pointerSensor, touchSensor);
 
+  const queryClient = useQueryClient();
+  let type = title === "Playlist" ? "playlists" : "videos";
+
   function handleDragEnd(e: DragEndEvent, setter: React.Dispatch<React.SetStateAction<Playlist[]>>) {
     const { active, over } = e;
 
     if (active.id !== over?.id) {
-      setter((items) => {
-        let activeIndex = items.findIndex((item) => item.id === active.id);
-        let overIndex = items.findIndex((item) => item.id === over?.id);
+      queryClient.setQueryData<Items>([type], (prev) => {
+        if (!prev) return { items: [] };
 
-        return arrayMove(items, activeIndex, overIndex);
+        let activeIndex = prev?.items.findIndex((item) => item.id === active.id);
+        let overIndex = prev?.items.findIndex((item) => item.id === over?.id);
+
+        let items = arrayMove(prev?.items, activeIndex, overIndex);
+
+        localStorage.setItem(type, JSON.stringify(items.map((item) => item.id)));
+
+        setter(items);
+        return { items };
       });
     }
   }

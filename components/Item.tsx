@@ -149,7 +149,7 @@ export default function Item({ title, thumbnail, id, type, setOnDelete }: Params
             </div>
           </div>
 
-          <h2 className="pt-1 text-black dark:text-white  break-words text-center text-sm font-normal h-10 overflow-hidden whitespace-normal max-w-[15rem] md:max-w-[19rem]">
+          <h2 className="pt-1 text-black dark:text-white break-words text-center text-sm font-normal h-11 overflow-hidden whitespace-normal max-w-[15rem] md:max-w-[19rem]">
             <span onClick={gotoLink} className="cursor-pointer">
               {title}
             </span>
