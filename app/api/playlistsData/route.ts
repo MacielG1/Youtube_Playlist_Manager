@@ -9,8 +9,6 @@ export async function POST(req: Request) {
 
   if (!playlistsIds) return;
 
-  console.log("playlistsIds", { playlistsIds });
-
   try {
     const res = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistsIds}&key=${API_KEY}&maxResults=50`);
 

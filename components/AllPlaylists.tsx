@@ -2,7 +2,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { Playlist } from "@/types";
-import { useRouter } from "next/navigation";
 import { Icons } from "@/assets/Icons";
 
 import getPlaylistsData from "@/utils/getPlaylistsData";
@@ -14,7 +13,6 @@ export default function AllPlaylists() {
   const [playlistItems, setPlaylistItems] = useState<Playlist[]>([]);
   const [videoItems, setVideoItems] = useState<Playlist[]>([]);
 
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const {
@@ -26,7 +24,7 @@ export default function AllPlaylists() {
   } = useQuery({
     queryKey: ["playlists"],
     queryFn: getPlaylistsData,
-    // refetchOnWindowFocus: false,
+    refetchOnWindowFocus: false,
   });
 
   const {
@@ -37,26 +35,16 @@ export default function AllPlaylists() {
   } = useQuery({
     queryKey: ["videos"],
     queryFn: getVideosData,
-    // refetchOnWindowFocus: false,
+    refetchOnWindowFocus: false,
   });
 
   // useEffect related to the react-query data
   useEffect(() => {
     setPlaylistItems(plData?.items || []);
-    if (plData?.items?.length) {
-      for (let i of plData?.items) {
-        router.prefetch(`/playlist/pl?list=${i.id}`);
-      }
-    }
   }, [plData, plDataUpdatedAt]);
 
   useEffect(() => {
     setVideoItems(vidData?.items || []);
-    if (vidData?.items?.length) {
-      for (let i of vidData?.items) {
-        router.prefetch(`/video/v?v=${i.id}`);
-      }
-    }
   }, [vidData, vidDataUpdatedAt]);
 
   // useEffect related to the Drag and Drop functionality
