@@ -1,7 +1,7 @@
-import { Playlist, PlaylistItem, SavedItem, VideoItem } from "@/types";
-import { useQueryClient } from "@tanstack/react-query";
-import { useState, useEffect } from "react";
+import { PlaylistItem, SavedItem, VideoItem } from "@/types";
 import { ToastOptions, toast } from "react-hot-toast";
+import useIsExportable from "@/hooks/useIsExportable";
+import { useQueryClient } from "@tanstack/react-query";
 
 const toastSuccess: ToastOptions = {
   position: "top-center",
@@ -18,22 +18,8 @@ const toastSuccess: ToastOptions = {
 };
 
 export default function ImportExportTimers({ setModalOpen }: { setModalOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
-  const [isExportable, setIsExportable] = useState(false);
-
+  const isExportable = useIsExportable();
   const queryClient = useQueryClient();
-
-  useEffect(() => {
-    const savedPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-    const savedVideos = JSON.parse(localStorage.getItem("videos") || "[]");
-
-    if (savedPlaylists.length > 0 || savedVideos.length > 0) {
-      setIsExportable(true);
-    }
-
-    return () => {
-      setIsExportable(false);
-    };
-  }, []);
 
   // funciton that export the timers to a json file and create a download link with React
   function exportTimers() {
@@ -66,7 +52,8 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
     link.download = "YT-Export.json";
     toast.success("Exporting", toastSuccess);
 
-    link.click(); // Simulate a click on the anchor to start the download
+    link.click(); // Simulate a click
+    setModalOpen(false);
   }
 
   function importTimers(evt: React.ChangeEvent<HTMLInputElement>) {
@@ -117,26 +104,25 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
 
       const uniqueNewVideos = jsonData.savedVideos.filter((video: string) => !existingVideoIds[video]);
       const mergedVideos = [...currentSavedVideos, ...uniqueNewVideos];
-      const mergedAllPlaylistData = [...currentAllPlaylistData, ...jsonData.allPlaylistData];
-      const mergedAllVideoData = [...currentAllVideoData, ...jsonData.allVideoData];
 
       localStorage.setItem("playlists", JSON.stringify(mergedPlaylists));
       localStorage.setItem("videos", JSON.stringify(mergedVideos));
 
-      mergedAllPlaylistData.forEach((playlist) => {
-        const key = Object.keys(playlist)[0];
+      // Merging Playlist and Video Data
+      const mergedAllPlaylistData = [...currentAllPlaylistData, ...jsonData.allPlaylistData];
+      const mergedAllVideoData = [...currentAllVideoData, ...jsonData.allVideoData];
 
-        localStorage.setItem(key, JSON.stringify(playlist[key]));
+      mergedAllPlaylistData.forEach((playlist) => {
+        localStorage.setItem(playlist.key, JSON.stringify(playlist.data));
       });
 
       mergedAllVideoData.forEach((video) => {
-        const key = Object.keys(video)[0];
-
-        localStorage.setItem(key, JSON.stringify(video[key]));
+        localStorage.setItem(video.key, JSON.stringify(video.data));
       });
 
       queryClient.refetchQueries(["playlists"]);
       queryClient.refetchQueries(["videos"]);
+      setModalOpen(false);
     };
     fileReader.readAsText(file);
   }

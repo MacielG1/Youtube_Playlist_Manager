@@ -26,6 +26,7 @@
       "@assets/*": ["./assets/*"],
       "@providers/*": ["./providers/*"],
       "@context/*": ["./context/*"],
+      "@hooks/*": ["./hooks/*"],
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "components/BackButton.jsx"],
