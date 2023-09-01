@@ -4,20 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Icons } from "@/assets/Icons";
 import createChannelPlaylist from "@/utils/createChannelPlaylist";
 import toast from "react-hot-toast";
-
-const toastError = {
-  duration: 2500,
-  style: {
-    border: "1px solid #9c0000",
-    padding: "12px",
-    color: "#a7a7a8",
-    backgroundColor: "#000",
-  },
-  iconTheme: {
-    primary: "#9c0000",
-    secondary: "#eee",
-  },
-};
+import { toastError } from "@/utils/toastStyles";
 
 export default function Input() {
   const [addedURL, setAddedURL] = useState("");
@@ -43,7 +30,6 @@ export default function Input() {
       if (!channelId) {
         setAddedURL("");
         toast.error("Invalid Input!", toastError);
-
         return null;
       }
       const playlistKey = "pl=" + channelId;

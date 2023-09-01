@@ -1,21 +1,8 @@
 import { PlaylistItem, SavedItem, VideoItem } from "@/types";
-import { ToastOptions, toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import useIsExportable from "@/hooks/useIsExportable";
 import { useQueryClient } from "@tanstack/react-query";
-
-const toastSuccess: ToastOptions = {
-  position: "top-center",
-  style: {
-    border: "1px solid #14ff76",
-    padding: "12px",
-    color: "#b5b5b5",
-    backgroundColor: "#000",
-  },
-  iconTheme: {
-    primary: "#14ff76",
-    secondary: "#000",
-  },
-};
+import { toastSuccess } from "@/utils/toastStyles";
 
 export default function ImportExportTimers({ setModalOpen }: { setModalOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
   const isExportable = useIsExportable();

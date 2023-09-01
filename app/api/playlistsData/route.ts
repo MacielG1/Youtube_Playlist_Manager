@@ -26,6 +26,6 @@ export async function POST(req: Request) {
     return NextResponse.json(data);
   } catch (e) {
     console.log("Error in /api/playlistsData", e);
-    return new NextResponse("Error", { status: 404 });
+    return new NextResponse("Error", { status: 400 });
   }
 }

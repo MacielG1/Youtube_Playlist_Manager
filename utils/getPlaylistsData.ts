@@ -13,6 +13,7 @@ export default async function getPlaylistsData() {
       method: "POST",
       body: JSON.stringify({ playlistsIds }),
     });
+
     let data = await res.json();
     if (!data) {
       console.log("Error", res.statusText);
