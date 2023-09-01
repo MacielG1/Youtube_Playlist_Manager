@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import ModalDelete from "../modals/ModalDelete";
+import { useRouter } from "next/navigation";
 
 type Props = {
   parentModalSetter: React.Dispatch<React.SetStateAction<boolean>>;
@@ -9,6 +10,7 @@ type Props = {
 export default function DeleteAllData({ parentModalSetter }: Props) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   function deleteAllData() {
     localStorage.removeItem("playlists");
@@ -24,10 +26,12 @@ export default function DeleteAllData({ parentModalSetter }: Props) {
       }
     });
 
-    queryClient.invalidateQueries(["playlists", "videos"]);
+    // delete all queries
+    queryClient.clear();
 
     setIsModalOpen(false);
     parentModalSetter(false);
+    router.refresh();
   }
 
   function ToggleModal() {

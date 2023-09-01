@@ -87,6 +87,7 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
         console.log("Invalid file format");
       }
 
+      // Getting the Current Saved Playlists and Videos
       const currentSavedPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
       const currentSavedVideos = JSON.parse(localStorage.getItem("videos") || "[]");
 
@@ -106,16 +107,16 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
 
       // Merging Playlists without duplicates
       const existingPlaylistIds: { [id: string]: boolean } = {};
-      currentSavedPlaylists.forEach((playlist: Playlist) => (existingPlaylistIds[playlist.id] = true));
-      const uniqueNewPlaylists = jsonData.savedPlaylists.filter((playlist: Playlist) => !existingPlaylistIds[playlist.id]);
+      currentSavedPlaylists.forEach((playlist: string) => (existingPlaylistIds[playlist] = true));
+      const uniqueNewPlaylists = jsonData.savedPlaylists.filter((playlist: string) => !existingPlaylistIds[playlist]);
       const mergedPlaylists = [...currentSavedPlaylists, ...uniqueNewPlaylists];
 
       // Merging Videos without duplicates
       const existingVideoIds: { [id: string]: boolean } = {};
-      currentSavedVideos.forEach((video: Playlist) => (existingVideoIds[video.id] = true));
-      const uniqueNewVideos = jsonData.savedVideos.filter((video: Playlist) => !existingVideoIds[video.id]);
-      const mergedVideos = [...currentSavedVideos, ...uniqueNewVideos];
+      currentSavedVideos.forEach((video: string) => (existingVideoIds[video] = true));
 
+      const uniqueNewVideos = jsonData.savedVideos.filter((video: string) => !existingVideoIds[video]);
+      const mergedVideos = [...currentSavedVideos, ...uniqueNewVideos];
       const mergedAllPlaylistData = [...currentAllPlaylistData, ...jsonData.allPlaylistData];
       const mergedAllVideoData = [...currentAllVideoData, ...jsonData.allVideoData];
 
