@@ -1,7 +1,7 @@
-import { DndContext, DragEndEvent, MouseSensor, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 
-import { Items, Playlist, PlaylistItem, VideoItem } from "@/types";
+import { Items, Playlist } from "@/types";
 import Item from "./Item";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -40,7 +40,6 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
 
         let activeIndex = prev?.items.findIndex((item) => item.id === active.id);
         let overIndex = prev?.items.findIndex((item) => item.id === over?.id);
-
         let items = arrayMove(prev?.items, activeIndex, overIndex);
 
         localStorage.setItem(type, JSON.stringify(items.map((item) => item.id)));
@@ -64,7 +63,7 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
             )}
             <div className="pl-3 sm:pl-7 pt-1 2xl:pt-3 grid grid-cols-1 gap-y-2  xs:grid-cols-2  md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 mx-4 lg:mx-6 2xl:mx-8 place-items-center">
               {items?.map((playlist) => (
-                <Item key={playlist.id} id={playlist.id} title={playlist.snippet.title} thumbnail={playlist.snippet.thumbnails} type={title} setOnDelete={setItems} />
+                <Item key={playlist.id} id={playlist.id} title={playlist.snippet.title} thumbnail={playlist.snippet.thumbnails} type={title} />
               ))}
             </div>
           </>

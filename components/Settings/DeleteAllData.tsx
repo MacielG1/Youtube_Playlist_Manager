@@ -33,7 +33,7 @@ export default function DeleteAllData({ parentModalSetter }: Props) {
 
     setIsModalOpen(false);
     parentModalSetter(false);
-    // router.refresh();
+    router.refresh();
     router.push("/");
   }
 

@@ -17,10 +17,9 @@ type Params = {
   thumbnail: Thumbnails | undefined;
   id: string;
   type: string;
-  setOnDelete: React.Dispatch<React.SetStateAction<Playlist[]>>;
 };
 
-export default function Item({ title, thumbnail, id, type, setOnDelete }: Params) {
+export default function Item({ title, thumbnail, id, type }: Params) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDraggingItem, setIsDragging] = useState(false);
   const [isSortingItem, setIsSorting] = useState(false);
