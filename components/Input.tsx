@@ -2,9 +2,12 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Icons } from "@/assets/Icons";
-import createChannelPlaylist from "@/utils/createChannelPlaylist";
-import toast from "react-hot-toast";
+import { Items } from "@/types";
 import { toastError } from "@/utils/toastStyles";
+import getChannelId from "@/utils/createChannelPlaylist";
+import toast from "react-hot-toast";
+import getPlaylistData from "@/utils/getPlaylistData";
+import getVideoData from "@/utils/getVideoData";
 
 export default function Input() {
   const [addedURL, setAddedURL] = useState("");
@@ -25,16 +28,15 @@ export default function Input() {
     const isChannel = !/(list=|v=)/.test(addedURL);
 
     if (isChannel) {
-      const channelId = await createChannelPlaylist(addedURL);
+      const channelId = await getChannelId(addedURL);
+      setAddedURL("");
 
       if (!channelId) {
-        setAddedURL("");
         toast.error("Invalid Input!", toastError);
         return null;
       }
       const playlistKey = "pl=" + channelId;
       if (localStorage.getItem(playlistKey)) {
-        setAddedURL("");
         toast.error("Playlist Already Added!", toastError);
         return null;
       }
@@ -44,7 +46,22 @@ export default function Input() {
       const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
       localStorage.setItem("playlists", JSON.stringify([...allPlaylists, channelId]));
 
-      queryClient.invalidateQueries({ queryKey: ["playlists"] });
+      const data = await getPlaylistData(channelId);
+
+      // Updating the query data with the new playlist
+      if (data?.items?.length) {
+        queryClient.setQueryData<Items>(["playlists"], (prev) => {
+          if (!prev || !prev?.items?.length) return data;
+
+          return {
+            ...data,
+            items: [...prev.items, ...data.items],
+          };
+        });
+      } else {
+        toast.error("Playlist is Invalid or Private!", toastError);
+        localStorage.removeItem(playlistKey);
+      }
       setAddedURL("");
       return null;
     }
@@ -55,7 +72,7 @@ export default function Input() {
       playlistID = params.get("list");
       videoId = params.get("v");
     } catch (error) {
-      return;
+      return console.log(error);
     }
 
     // Saving specific video data
@@ -71,7 +88,25 @@ export default function Input() {
       const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
       localStorage.setItem("videos", JSON.stringify([...allVideos, videoId]));
 
-      queryClient.invalidateQueries({ queryKey: ["videos"] });
+      const data = await getVideoData(videoId);
+
+      console.log(data);
+
+      // Updating the query data with the new playlist
+      if (data?.items?.length) {
+        queryClient.setQueryData<Items>(["videos"], (prev) => {
+          if (!prev || !prev?.items?.length) return data;
+
+          return {
+            ...data,
+            items: [...prev.items, ...data.items],
+          };
+        });
+      } else {
+        toast.error("Video is Invalid or Private!", toastError);
+        localStorage.removeItem(videoKey);
+      }
+      setAddedURL("");
     } else if (playlistID) {
       // if it's a playlist
       let playlistKey = "pl=" + playlistID;
@@ -86,14 +121,28 @@ export default function Input() {
       const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
       localStorage.setItem("playlists", JSON.stringify([...allPlaylists, playlistID]));
 
-      // mutate();
-      queryClient.invalidateQueries({ queryKey: ["playlists"] });
+      const data = await getPlaylistData(playlistID);
+
+      // Updating the query data with the new playlist
+      if (data?.items?.length) {
+        queryClient.setQueryData<Items>(["playlists"], (prev) => {
+          if (!prev || !prev?.items?.length) return data;
+
+          return {
+            ...data,
+            items: [...prev.items, ...data.items],
+          };
+        });
+      } else {
+        toast.error("Playlist is Invalid or Private!", toastError);
+        localStorage.removeItem(playlistKey);
+      }
     }
+
     setAddedURL("");
     if (!isChannel && !videoId && !playlistID) {
       setAddedURL("");
-      toast.error("Please Enter a Valid URL!", toastError);
-
+      toast.error("Please Enter a Valid URL or Channel!", toastError);
       return;
     }
   }

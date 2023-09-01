@@ -8,7 +8,6 @@ type Params = {
 };
 
 export async function GET(req: Request, { params }: { params: Params }) {
-  console.log("params", params.name);
   const name = params.name;
 
   if (!name) return;

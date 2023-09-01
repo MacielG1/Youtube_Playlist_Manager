@@ -1,4 +1,4 @@
-export default async function createChannelPlaylist(name: string) {
+export default async function getChannelId(name: string) {
   try {
     const res = await fetch(`/api/channelId/${encodeURIComponent(name)}`, {
       headers: {

@@ -7,7 +7,7 @@ export const runtime = "edge";
 export async function POST(req: Request) {
   const { playlistsIds } = await req.json();
 
-  if (!playlistsIds) return;
+  if (!playlistsIds) return {};
 
   try {
     const res = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistsIds}&key=${API_KEY}&maxResults=50`);

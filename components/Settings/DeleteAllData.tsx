@@ -34,7 +34,7 @@ export default function DeleteAllData({ parentModalSetter }: Props) {
     setIsModalOpen(false);
     parentModalSetter(false);
     router.refresh();
-    router.push("/");
+    router.push("/", { scroll: false });
   }
 
   function ToggleModal() {

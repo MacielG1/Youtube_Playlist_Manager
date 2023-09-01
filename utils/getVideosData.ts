@@ -1,4 +1,4 @@
-export default async function getVideosData() {
+export default async function getVideoData() {
   const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
 
   if (!allVideos.length) return {};
@@ -18,6 +18,7 @@ export default async function getVideosData() {
       console.log("Error", res.statusText);
       return {};
     }
+    console.log("data", data);
     return data;
   } catch (err) {
     console.log("Error in getVideosData", err);

@@ -1,18 +1,16 @@
-export default async function getPlaylistsData() {
-  const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-
-  if (!allPlaylists.length) return {};
-
-  const playlistsIds: string[] = allPlaylists.join(",");
-
+export default async function getPlaylistData(newPlaylistId: string) {
   try {
     const res = await fetch(`/api/playlistsData`, {
       headers: {
         "Content-Type": "application/json",
       },
       method: "POST",
-      body: JSON.stringify({ playlistsIds }),
+      body: JSON.stringify({ playlistsIds: newPlaylistId }),
     });
+
+    if (!res.ok) {
+      console.log("Error", res.statusText);
+    }
 
     let data = await res.json();
 
@@ -20,9 +18,6 @@ export default async function getPlaylistsData() {
       console.log("Error", res.statusText);
       return {};
     }
-
-    console.log("data", data);
-
     return data;
   } catch (error) {
     console.log("Error in getPlaylistsData", error);

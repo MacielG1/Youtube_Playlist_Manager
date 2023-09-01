@@ -116,7 +116,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
           <div className="overflow-hidden group rounded-xl  w-full h-full ">
             <button
               onClick={openModal}
-              className="opacity-0 group-hover:opacity-100 z-10 peer absolute bg-neutral-800 text-neutral-40 hover:text-red-500 top-0 right-0 p-1 hover:bg-neutral-900 group-hover:transition-opacity group-hover:duration-500 rounded-bl-md rounded-tr-[0.50rem]    "
+              className="opacity-0 group-hover:opacity-100 z-10 peer absolute bg-neutral-800 text-neutral-400 hover:text-red-500 top-0 right-0 p-1 hover:bg-neutral-900 group-hover:transition-opacity group-hover:duration-500 rounded-bl-md rounded-tr-[0.50rem]    "
               aria-label="Delete Button"
             >
               <Icons.deleteIcon className="w-4 h-4" />
