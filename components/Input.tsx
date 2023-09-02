@@ -6,8 +6,8 @@ import { Items } from "@/types";
 import { toastError } from "@/utils/toastStyles";
 import getChannelId from "@/utils/createChannelPlaylist";
 import toast from "react-hot-toast";
-import getPlaylistData from "@/utils/getPlaylistData";
-import getVideoData from "@/utils/getVideoData";
+import getVideosData from "@/utils/getVideosData";
+import getPlaylistsData from "@/utils/getPlaylistsData";
 
 export default function Input() {
   const [addedURL, setAddedURL] = useState("");
@@ -46,7 +46,7 @@ export default function Input() {
       const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
       localStorage.setItem("playlists", JSON.stringify([...allPlaylists, channelId]));
 
-      const data = await getPlaylistData(channelId);
+      const data = await getPlaylistsData(channelId);
 
       // Updating the query data with the new playlist
       if (data?.items?.length) {
@@ -88,9 +88,7 @@ export default function Input() {
       const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
       localStorage.setItem("videos", JSON.stringify([...allVideos, videoId]));
 
-      const data = await getVideoData(videoId);
-
-      console.log(data);
+      const data = await getVideosData(videoId);
 
       // Updating the query data with the new playlist
       if (data?.items?.length) {
@@ -121,7 +119,7 @@ export default function Input() {
       const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
       localStorage.setItem("playlists", JSON.stringify([...allPlaylists, playlistID]));
 
-      const data = await getPlaylistData(playlistID);
+      const data = await getPlaylistsData(playlistID);
 
       // Updating the query data with the new playlist
       if (data?.items?.length) {

@@ -21,7 +21,9 @@ export default function AllPlaylists() {
     isFetched: isPlFetched,
   } = useQuery({
     queryKey: ["playlists"],
-    queryFn: getPlaylistsData,
+    queryFn: async () => {
+      return await getPlaylistsData();
+    },
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });
@@ -33,7 +35,9 @@ export default function AllPlaylists() {
     isFetched: isVidFetched,
   } = useQuery({
     queryKey: ["videos"],
-    queryFn: getVideosData,
+    queryFn: async () => {
+      return await getVideosData();
+    },
     refetchOnWindowFocus: false,
     refetchOnMount: false,
   });

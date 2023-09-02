@@ -1,9 +1,14 @@
-export default async function getVideoData() {
-  const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
+export default async function getVideoData(newVideoId?: string) {
+  let videosIds = "";
 
-  if (!allVideos.length) return {};
+  if (newVideoId) {
+    videosIds = newVideoId;
+  } else {
+    const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
+    if (!allVideos.length) return {};
 
-  const videosIds: string[] = allVideos.join(",");
+    videosIds = allVideos.join(",");
+  }
 
   try {
     const res = await fetch("/api/videosData", {
@@ -18,7 +23,6 @@ export default async function getVideoData() {
       console.log("Error", res.statusText);
       return {};
     }
-    console.log("data", data);
     return data;
   } catch (err) {
     console.log("Error in getVideosData", err);

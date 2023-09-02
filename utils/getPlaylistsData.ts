@@ -1,10 +1,14 @@
-export default async function getPlaylistsData() {
-  const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
+export default async function getPlaylistsData(newPlaylistId?: string) {
+  let playlistsIds = "";
 
-  if (!allPlaylists.length) return {};
+  if (newPlaylistId) {
+    playlistsIds = newPlaylistId;
+  } else {
+    const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
 
-  const playlistsIds: string[] = allPlaylists.join(",");
-
+    if (!allPlaylists.length) return {};
+    playlistsIds = allPlaylists.join(",");
+  }
   try {
     const res = await fetch(`/api/playlistsData`, {
       headers: {
@@ -20,8 +24,6 @@ export default async function getPlaylistsData() {
       console.log("Error", res.statusText);
       return {};
     }
-
-    console.log("data", data);
 
     return data;
   } catch (error) {
