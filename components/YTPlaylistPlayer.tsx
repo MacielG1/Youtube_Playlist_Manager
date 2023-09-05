@@ -379,7 +379,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               <Icons.skip10 className="h-8 w-8" />
             </button>
 
-            <span className=" min-w-[4rem] text-xl text-neutral-600 dark:text-[#818386]">
+            <span className="min-w-[4rem] text-xl text-neutral-600 dark:text-[#818386]">
               {currentVideoIndex} / {plLengthRef.current}
             </span>
             <button

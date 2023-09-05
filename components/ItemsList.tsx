@@ -57,7 +57,7 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
           <>
             {/* if the other type of item doesnt have any items, dont show the title at all */}
             {otherTypeVideos?.length > 0 && (
-              <h2 className="sm:pl-24 xs:pl-16 xl:pl-24 text-center xs:text-left mt-4 2xl:mt-5 text-neutral-700 dark:text-zinc-300/90 font-semibold tracking-wide">
+              <h2 className="sm:pl-24 xs:pl-16 xl:pl-28 text-center xs:text-left mt-4 2xl:mt-5 text-neutral-700 dark:text-zinc-300/90 font-semibold tracking-wide">
                 {title}s
               </h2>
             )}

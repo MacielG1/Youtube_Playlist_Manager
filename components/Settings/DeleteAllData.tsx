@@ -53,13 +53,13 @@ export default function DeleteAllData({ parentModalSetter }: Props) {
       <div className="flex gap-3 pt-3 text-lg">
         <button
           onClick={onCancelDelete}
-          className="bg-zinc-700 font-semibold border-neutral-900 border-2 text-neutral-300 hover:text-neutral-200  cursor-pointer  px-3 py-1 rounded-md hover:bg-zinc-600 transition duration-200"
+          className="bg-zinc-700 font-semibold border-neutral-900 border-2 text-neutral-300 hover:text-neutral-200 cursor-pointer px-3 py-1 rounded-md hover:bg-zinc-600 transition duration-200"
         >
           Cancel
         </button>
         <button
           onClick={deleteAllData}
-          className="bg-red-600 font-semibold border-neutral-900 border-2 text-black   cursor-pointer px-3 py-1 rounded-md hover:bg-red-500 transition duration-200"
+          className="bg-red-600 font-semibold border-neutral-900 border-2 text-black cursor-pointer px-3 py-1 rounded-md hover:bg-red-500 transition duration-200"
         >
           Delete
         </button>
