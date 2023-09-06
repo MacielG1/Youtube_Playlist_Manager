@@ -12,7 +12,7 @@ export default function SettingsMenu() {
   let [isOpen, setIsOpen] = useState(false);
 
   let content = (
-    <div className="flex flex-col justify-center items-center pb-3">
+    <div className="flex flex-col items-center justify-center pb-3">
       <ThemeToggler />
       <ImportExportTimers setModalOpen={setIsOpen} />
       <DeleteAllData parentModalSetter={setIsOpen} />
@@ -24,7 +24,7 @@ export default function SettingsMenu() {
   }
 
   return (
-    <div className="flex xs:fixed z-50 justify-end items-end p-2 py-3 sm:px-5 xl:px-8 top-0 right-0">
+    <div className="right-0 top-0 z-50 flex items-end justify-end p-2 py-3 xs:fixed sm:px-5 xl:px-8">
       <button onClick={ToggleModal}>
         <Icons.settingIcon className="h-8 w-8 cursor-pointer" />
       </button>

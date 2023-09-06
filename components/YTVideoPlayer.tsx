@@ -49,7 +49,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   function onReady(e: YouTubeEvent) {
     setIsLoaded(true);
 
-    const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
+    const plRate =
+      JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
     videoPlayerRef?.current?.internalPlayer.setPlaybackRate(plRate);
 
     const intervalId = setInterval(() => {
@@ -80,7 +81,10 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     localStorage.setItem(item, JSON.stringify(currentData));
   }
 
-  // function onStateChange(e: YouTubeEvent) {}
+  // function onStateChange(e: YouTubeEvent) {
+  //   console.log("called");
+  //   console.log(e);
+  // }
 
   // function onEnd(e: YouTubeEvent) {}
 
@@ -107,7 +111,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   let initialTime: number;
 
   if (typeof window !== "undefined") {
-    initialTime = JSON.parse(localStorage.getItem(item) || "[]")?.initialTime || 0;
+    initialTime =
+      JSON.parse(localStorage.getItem(item) || "[]")?.initialTime || 0;
   } else {
     initialTime = 0;
   }
@@ -126,7 +131,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   async function openModal() {
     videoPlayerRef?.current?.internalPlayer.pauseVideo();
-    isPaused.current = (await videoPlayerRef?.current?.internalPlayer.getPlayerState()) === 2;
+    isPaused.current =
+      (await videoPlayerRef?.current?.internalPlayer.getPlayerState()) === 2;
     setIsModalOpen(!isModalOpen);
   }
 
@@ -142,16 +148,27 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   return (
     <>
       <BackButton />
-      <div className="flex flex-col justify-center h-screen items-center  ">
-        {isLoaded && <span className="text-center py-2 text-neutral-200 tracking-wide -mt-20 sm:mt-0">{params.title}</span>}
-        <div className="w-full min-w-[400px] 2xl:max-w-[75vw] -0 pt-2 xl:pt-0 p-[0.15rem] flex justify-center items-center videoPlayer">
+      <div className="flex h-screen flex-col items-center justify-center ">
+        {isLoaded && (
+          <span className="-mt-20 py-2 text-center tracking-wide text-neutral-200 sm:mt-0">
+            {params.title}
+          </span>
+        )}
+        <div className="-0 videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[75vw]">
           {!isLoaded && (
-            <div role="status" className="flex justify-center items-center -mt-20">
-              <Icons.spinIcon className="h-7 w-7 mt-5 text-blue-500 animate-spin " />
+            <div
+              role="status"
+              className="-mt-20 flex items-center justify-center"
+            >
+              <Icons.spinIcon className="mt-5 h-7 w-7 animate-spin text-blue-500 " />
               <span className="sr-only">Loading...</span>
             </div>
           )}
-          <div className={`${isLoaded ? "visible" : "hidden"} relative w-full overflow-hidden pb-[56.25%] `}>
+          <div
+            className={`${
+              isLoaded ? "visible" : "hidden"
+            } relative w-full overflow-hidden pb-[56.25%] `}
+          >
             <YouTube
               videoId={videoId}
               ref={videoPlayerRef}
@@ -163,35 +180,46 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               onError={onError}
               onPlaybackRateChange={onSpeedChange}
               // onStateChange={onStateChange}
-              className="absolute top-0 left-0 right-0 w-full h-full border-none"
+              className="absolute left-0 right-0 top-0 h-full w-full border-none"
             />
           </div>
         </div>
 
         {isLoaded && (
-          <div className="flex gap-1 xs:gap-3 justify-center items-center my-2">
+          <div className="my-2 flex items-center justify-center gap-1 xs:gap-3">
             <button
-              className=" cursor-pointer  text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
+              className=" cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
               onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}
             >
               <Icons.rewind10 className="h-8 w-8" />
             </button>
             <button
-              className="cursor-pointer text-neutral-600 dark:text-neutral-400   hover:text-neutral-950 dark:hover:text-neutral-200 transition duration-300 outline-none focus:text-neutral-500"
+              className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
               onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, 10)}
             >
               <Icons.skip10 className="h-8 w-8" />
             </button>
             <button
-              className="cursor-pointer text-neutral-600 dark:text-neutral-400 hover:text-red-500 dark:hover:text-red-500 transition duration-300 outline-none focus:text-neutral-500"
+              className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
               onClick={openModal}
             >
-              <Icons.closeIcon className="w-6 h-6" />
+              <Icons.closeIcon className="h-6 w-6" />
             </button>
           </div>
         )}
         {isModalOpen && (
-          <ModalDelete onClose={onCancel} content={<DeleteModalContent type="Video" id={videoId} title={params.title} openModal={onCancel} onDelete={onDelete} />} />
+          <ModalDelete
+            onClose={onCancel}
+            content={
+              <DeleteModalContent
+                type="Video"
+                id={videoId}
+                title={params.title}
+                openModal={onCancel}
+                onDelete={onDelete}
+              />
+            }
+          />
         )}
       </div>
     </>

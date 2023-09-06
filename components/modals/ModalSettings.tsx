@@ -5,21 +5,31 @@ type ModalSettingsProps = {
   content: React.ReactNode;
 };
 
-export default function ModalSettings({ onClose, content }: ModalSettingsProps) {
+export default function ModalSettings({
+  onClose,
+  content,
+}: ModalSettingsProps) {
   let modal = (
     <>
       {/* Backdrop */}
-      <button type="button" className="cursor-default fixed top-0 left-0 w-full h-[100vh] z-20 bg-black bg-opacity-60" onClick={onClose} />
+      <button
+        type="button"
+        className="fixed left-0 top-0 z-20 h-[100vh] w-full cursor-default bg-black bg-opacity-60"
+        onClick={onClose}
+      />
       <>
         {/* Modal */}
         <div
-          className="absolute top-14 right-10 w-fit flex flex-col p-4 gap-2 mt-1 bg-neutral-300 dark:bg-zinc-700  rounded-lg shadow-md z-30
-       max-[350px]:right-1 max-[350px]:p-1 max-[350px]:text-base max-[350px]:w-[95%]"
+          className="absolute right-10 top-14 z-30 mt-1 flex w-fit flex-col gap-2 rounded-lg bg-neutral-300 p-4 shadow-md dark:bg-zinc-700
+       max-[350px]:right-1 max-[350px]:w-[95%] max-[350px]:p-1 max-[350px]:text-base"
         >
           {content}
         </div>
       </>
     </>
   );
-  return createPortal(modal, document.getElementById("modal-root") as HTMLElement);
+  return createPortal(
+    modal,
+    document.getElementById("modal-root") as HTMLElement,
+  );
 }

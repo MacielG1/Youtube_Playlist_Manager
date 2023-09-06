@@ -41,10 +41,18 @@ export default function Input() {
         return null;
       }
 
-      localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0 }));
+      localStorage.setItem(
+        playlistKey,
+        JSON.stringify({ currentItem: 0, initialTime: 0 }),
+      );
       // Saving playlist to all playlists Array
-      const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-      localStorage.setItem("playlists", JSON.stringify([...allPlaylists, channelId]));
+      const allPlaylists = JSON.parse(
+        localStorage.getItem("playlists") || "[]",
+      );
+      localStorage.setItem(
+        "playlists",
+        JSON.stringify([...allPlaylists, channelId]),
+      );
 
       const data = await getPlaylistsData(channelId);
 
@@ -113,11 +121,19 @@ export default function Input() {
         setAddedURL("");
         return;
       }
-      localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0 }));
+      localStorage.setItem(
+        playlistKey,
+        JSON.stringify({ currentItem: 0, initialTime: 0 }),
+      );
 
       // Saving playlist to all playlists Array
-      const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-      localStorage.setItem("playlists", JSON.stringify([...allPlaylists, playlistID]));
+      const allPlaylists = JSON.parse(
+        localStorage.getItem("playlists") || "[]",
+      );
+      localStorage.setItem(
+        "playlists",
+        JSON.stringify([...allPlaylists, playlistID]),
+      );
 
       const data = await getPlaylistsData(playlistID);
 
@@ -146,25 +162,28 @@ export default function Input() {
   }
 
   return (
-    <nav className="sticky bg-inherit top-0 z-20 w-full pb-3 sm:pb-2 pt-1 sm:pt-4 px-2 ">
-      <form className="flex justify-center gap-2 max-h-12 " onSubmit={handleSubmit}>
+    <nav className="sticky top-0 z-20 w-full bg-inherit px-2 pb-3 pt-1 sm:pb-2 sm:pt-4 ">
+      <form
+        className="flex max-h-12 justify-center gap-2 "
+        onSubmit={handleSubmit}
+      >
         <input
           type="text"
           value={addedURL}
           onChange={handleInputChange}
           placeholder="Enter a Video or Playlist URL or a Channel Name"
-          className=" w-[65vw] md:w-[30rem] min-w[1rem] text-lg px-3 border-2 rounded-md placeholder:text-base focus-visible:outline-none focus-visible:border-[3px]
-             text-neutral-900 bg-neutral-300 border-neutral-600   
-            focus-visible:bg-neutral-200 placeholder-neutral-700 focus-visible:border-neutral-900 focus:placeholder-neutral-500 focus:border-gray-600  
-            dark:text-neutral-300 dark:bg-neutral-900 dark:border-neutral-600 dark:hover:bg-black hover:bg-neutral-200 transition-colors duration-300
-            dark:focus-visible:bg-neutral-950 dark:placeholder-neutral-400 dark:focus-visible:border-neutral-700 dark:focus:placeholder-neutral-500 dark:focus:border-gray-500 
+          className="min-w[1rem] w-[65vw] rounded-md border-2 border-neutral-600 bg-neutral-300 px-3 text-lg text-neutral-900 placeholder-neutral-700
+             transition-colors duration-300 placeholder:text-base 
+            hover:bg-neutral-200 focus:border-gray-600 focus:placeholder-neutral-500 focus-visible:border-[3px] focus-visible:border-neutral-900 
+            focus-visible:bg-neutral-200 focus-visible:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300 dark:placeholder-neutral-400 dark:hover:bg-black
+            dark:focus:border-gray-500 dark:focus:placeholder-neutral-500 dark:focus-visible:border-neutral-700 dark:focus-visible:bg-neutral-950 md:w-[30rem] 
             "
         />
         <button
           type="submit"
-          className={`flex items-center justify-center rounded-lg  border border-blue-800 bg-blue-700  hover:bg-blue-800 text-gray-100 px-4 py-2 hover:border-blue-950 hover:text-gray-200 transition duration-300`}
+          className={`flex items-center justify-center rounded-lg border border-blue-800 bg-blue-700 px-4 py-2 text-gray-100 transition duration-300 hover:border-blue-950 hover:bg-blue-800 hover:text-gray-200`}
         >
-          <Icons.searchIcon className="w-4 h-4 sm:w-7 sm:h-7" />
+          <Icons.searchIcon className="h-4 w-4 sm:h-7 sm:w-7" />
         </button>
       </form>
     </nav>

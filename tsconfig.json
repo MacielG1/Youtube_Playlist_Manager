@@ -29,6 +29,6 @@
       "@hooks/*": ["./hooks/*"],
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "components/BackButton.jsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "components/BackButton.jsx", "prettier.config.js"],
   "exclude": ["node_modules"]
 }

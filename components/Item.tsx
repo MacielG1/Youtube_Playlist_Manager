@@ -24,7 +24,15 @@ export default function Item({ title, thumbnail, id, type }: Params) {
   const [isDraggingItem, setIsDragging] = useState(false);
   const [isSortingItem, setIsSorting] = useState(false);
 
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isSorting } = useSortable({ id, disabled: isModalOpen });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+    isSorting,
+  } = useSortable({ id, disabled: isModalOpen });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -51,7 +59,9 @@ export default function Item({ title, thumbnail, id, type }: Params) {
       localStorage.removeItem(`plVideos=${id}`);
 
       // remove playlist from playlists array
-      const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
+      const allPlaylists = JSON.parse(
+        localStorage.getItem("playlists") || "[]",
+      );
       const newPlaylists = allPlaylists.filter((pl: string) => pl !== id);
 
       localStorage.setItem("playlists", JSON.stringify(newPlaylists));
@@ -59,7 +69,9 @@ export default function Item({ title, thumbnail, id, type }: Params) {
       queryClient.setQueryData<Items>(["playlists"], (prev) => {
         if (prev === undefined) return prev;
 
-        const newPlaylistsData = prev.items.filter((item: any) => item.id !== id);
+        const newPlaylistsData = prev.items.filter(
+          (item: any) => item.id !== id,
+        );
         const newPlaylists = { ...prev, items: newPlaylistsData };
         return newPlaylists;
       });
@@ -95,7 +107,13 @@ export default function Item({ title, thumbnail, id, type }: Params) {
     thumbnailURL = thumbnail?.medium?.url || thumbnail?.default?.url || "";
     noBlackBars = true;
   } else {
-    thumbnailURL = thumbnail?.maxres?.url || thumbnail?.standard?.url || thumbnail?.high?.url || thumbnail?.medium?.url || thumbnail?.default?.url || "";
+    thumbnailURL =
+      thumbnail?.maxres?.url ||
+      thumbnail?.standard?.url ||
+      thumbnail?.high?.url ||
+      thumbnail?.medium?.url ||
+      thumbnail?.default?.url ||
+      "";
     noBlackBars = /(maxres|medium)/.test(thumbnailURL); // if it's maxres or medium it doesn't have blackbars
   }
 
@@ -107,28 +125,41 @@ export default function Item({ title, thumbnail, id, type }: Params) {
     }
   }
   let t = encodeURIComponent(title);
-  let url = !isDraggingItem && !isSortingItem ? (type === "Playlist" ? `/playlist/p?list=${id}&title=${t}` : `/video/v?v=${id}&title=${t}`) : "#";
+  let url =
+    !isDraggingItem && !isSortingItem
+      ? type === "Playlist"
+        ? `/playlist/p?list=${id}&title=${t}`
+        : `/video/v?v=${id}&title=${t}`
+      : "#";
 
   return (
-    <div className="mt-2 outline-none" ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div
+      className="mt-2 outline-none"
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+    >
       <div className="flex flex-col items-center justify-center space-y-2">
-        <div className="relative w-60 xs:w-52 md:w-56 lg:w-64 xl:w-[17.8rem] 3xl:w-80 ">
-          <div className="overflow-hidden group rounded-xl  w-full h-full ">
+        <div className="3xl:w-80 relative w-60 xs:w-52 md:w-56 lg:w-64 xl:w-[17.8rem] ">
+          <div className="group h-full w-full overflow-hidden rounded-xl ">
             <button
               onClick={openModal}
-              className="opacity-0 group-hover:opacity-100 z-10 peer absolute bg-neutral-800 text-neutral-400 hover:text-red-500 top-0 right-0 p-1 hover:bg-neutral-900 group-hover:transition-opacity group-hover:duration-500 rounded-bl-md rounded-tr-[0.50rem]    "
+              className="peer absolute right-0 top-0 z-10 rounded-bl-md rounded-tr-[0.50rem] bg-neutral-800 p-1 text-neutral-400 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-500    "
               aria-label="Delete Button"
             >
-              <Icons.deleteIcon className="w-4 h-4" />
+              <Icons.deleteIcon className="h-4 w-4" />
             </button>
-            <div className="peer-hover:scale-105 hover:scale-105 transition duration-300 ">
+            <div className="transition duration-300 hover:scale-105 peer-hover:scale-105 ">
               <Link href={url}>
                 <Image
                   src={thumbnailURL}
                   alt={title}
                   width={300}
                   height={300}
-                  className={`rounded-xl ${noBlackBars ? "-my-[1px]" : "-my-[32px]"} ${isDragging ? "cursor-grabbing" : "cursor-pointer"} `}
+                  className={`rounded-xl ${
+                    noBlackBars ? "-my-[1px]" : "-my-[32px]"
+                  } ${isDragging ? "cursor-grabbing" : "cursor-pointer"} `}
                   priority
                   unoptimized
                 />
@@ -136,7 +167,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
             </div>
           </div>
 
-          <h2 className="pt-1 text-black dark:text-white break-words text-center text-sm font-normal h-11 overflow-hidden whitespace-normal max-w-[15rem] md:max-w-[19rem]">
+          <h2 className="h-11 max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-sm font-normal text-black dark:text-white md:max-w-[19rem]">
             <span onClick={gotoLink} className="cursor-pointer">
               {title}
             </span>
@@ -149,7 +180,16 @@ export default function Item({ title, thumbnail, id, type }: Params) {
             e.stopPropagation();
             setIsModalOpen(false);
           }}
-          content={<DeleteModalContent type={type} id={id} title={title} isLoading={isLoading} openModal={openModal} onDelete={onDelete} />}
+          content={
+            <DeleteModalContent
+              type={type}
+              id={id}
+              title={title}
+              isLoading={isLoading}
+              openModal={openModal}
+              onDelete={onDelete}
+            />
+          }
         />
       )}
     </div>

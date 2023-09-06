@@ -53,7 +53,7 @@ export default function AllPlaylists() {
   if ((isPlFetching || isVidFetching) && !isPlFetched) {
     return (
       <div className="mx-auto flex justify-center pt-2">
-        <Icons.spinIcon className="h-7 w-7 mt-5 text-blue-500 animate-spin" />
+        <Icons.spinIcon className="mt-5 h-7 w-7 animate-spin text-blue-500" />
       </div>
     );
   }
@@ -61,24 +61,39 @@ export default function AllPlaylists() {
 
   return (
     <>
-      {!vidData?.items?.length && !plData?.items?.length && isPlFetched && isVidFetched && (
-        <div className="flex items-center flex-col gap-3 pt-10">
-          <h3 className=" text-neutral-500 dark:text-neutral-400 text-lg font-semibold tracking-wide">No Items Added</h3>
-          <Icons.emptyBox className="w-12 h-12 text-neutral-400 dark:text-neutral-500" />
-          <Link
-            href="/about"
-            className="bg-neutral-200 hover:bg-neutral-300  text-neutral-900 border border-neutral-800 hover:border-neutral-700
-            dark:bg-neutral-800 dark:hover:bg-neutral-700  dark:text-neutral-300 dark:hover:text-neutral-300/80 
-            py-2 px-4 my-5  inline-flex items-center justify-center rounded-md text-sm font-semibold ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            Learn how it works
-          </Link>
-        </div>
-      )}
+      {!vidData?.items?.length &&
+        !plData?.items?.length &&
+        isPlFetched &&
+        isVidFetched && (
+          <div className="flex flex-col items-center gap-3 pt-10">
+            <h3 className=" text-lg font-semibold tracking-wide text-neutral-500 dark:text-neutral-400">
+              No Items Added
+            </h3>
+            <Icons.emptyBox className="h-12 w-12 text-neutral-400 dark:text-neutral-500" />
+            <Link
+              href="/about"
+              className="focus-visible:ring-ring my-5 inline-flex items-center justify-center rounded-md
+            border border-neutral-800 bg-neutral-200 px-4 
+            py-2 text-sm font-semibold text-neutral-900 ring-offset-background transition-colors hover:border-neutral-700 hover:bg-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-300/80"
+            >
+              Learn how it works
+            </Link>
+          </div>
+        )}
 
       <>
-        <ItemsList title="Playlist" setItems={setPlaylistItems} items={playlistItems} otherTypeVideos={videoItems} />
-        <ItemsList title="Video" setItems={setVideoItems} items={videoItems} otherTypeVideos={playlistItems} />
+        <ItemsList
+          title="Playlist"
+          setItems={setPlaylistItems}
+          items={playlistItems}
+          otherTypeVideos={videoItems}
+        />
+        <ItemsList
+          title="Video"
+          setItems={setVideoItems}
+          items={videoItems}
+          otherTypeVideos={playlistItems}
+        />
       </>
     </>
   );
