@@ -150,7 +150,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
       <BackButton />
       <div className="flex h-screen flex-col items-center justify-center ">
         {isLoaded && (
-          <span className="-mt-20 py-2 text-center tracking-wide text-neutral-200 sm:mt-0">
+          <span className="-mt-20 py-2 text-center tracking-wide text-neutral-800 dark:text-neutral-200 sm:mt-0">
             {params.title}
           </span>
         )}
