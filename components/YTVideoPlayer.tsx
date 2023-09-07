@@ -7,7 +7,7 @@ import { Icons } from "@/assets/Icons";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 
 import seekTime from "@/utils/seekTime";
-import BackButton from "./BackButton";
+import LogoButton from "./LogoButton";
 import saveVideoProgress from "@/utils/saveVideoProgress";
 import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
@@ -49,8 +49,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   function onReady(e: YouTubeEvent) {
     setIsLoaded(true);
 
-    const plRate =
-      JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
+    const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
     videoPlayerRef?.current?.internalPlayer.setPlaybackRate(plRate);
 
     const intervalId = setInterval(() => {
@@ -111,8 +110,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   let initialTime: number;
 
   if (typeof window !== "undefined") {
-    initialTime =
-      JSON.parse(localStorage.getItem(item) || "[]")?.initialTime || 0;
+    initialTime = JSON.parse(localStorage.getItem(item) || "[]")?.initialTime || 0;
   } else {
     initialTime = 0;
   }
@@ -131,8 +129,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   async function openModal() {
     videoPlayerRef?.current?.internalPlayer.pauseVideo();
-    isPaused.current =
-      (await videoPlayerRef?.current?.internalPlayer.getPlayerState()) === 2;
+    isPaused.current = (await videoPlayerRef?.current?.internalPlayer.getPlayerState()) === 2;
     setIsModalOpen(!isModalOpen);
   }
 
@@ -147,28 +144,17 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   return (
     <>
-      <BackButton />
+      <LogoButton />
       <div className="flex h-screen flex-col items-center justify-center ">
-        {isLoaded && (
-          <span className="-mt-20 py-2 text-center tracking-wide text-neutral-800 dark:text-neutral-200 sm:mt-0">
-            {params.title}
-          </span>
-        )}
+        {isLoaded && <span className="-mt-20 py-2 text-center tracking-wide text-neutral-800 dark:text-neutral-200 sm:mt-0">{params.title}</span>}
         <div className="-0 videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[75vw]">
           {!isLoaded && (
-            <div
-              role="status"
-              className="-mt-20 flex items-center justify-center"
-            >
+            <div role="status" className="-mt-20 flex items-center justify-center">
               <Icons.spinIcon className="mt-5 h-7 w-7 animate-spin text-blue-500 " />
               <span className="sr-only">Loading...</span>
             </div>
           )}
-          <div
-            className={`${
-              isLoaded ? "visible" : "hidden"
-            } relative w-full overflow-hidden pb-[56.25%] `}
-          >
+          <div className={`${isLoaded ? "visible" : "hidden"} relative w-full overflow-hidden pb-[56.25%] `}>
             <YouTube
               videoId={videoId}
               ref={videoPlayerRef}
@@ -208,18 +194,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
           </div>
         )}
         {isModalOpen && (
-          <ModalDelete
-            onClose={onCancel}
-            content={
-              <DeleteModalContent
-                type="Video"
-                id={videoId}
-                title={params.title}
-                openModal={onCancel}
-                onDelete={onDelete}
-              />
-            }
-          />
+          <ModalDelete onClose={onCancel} content={<DeleteModalContent type="Video" id={videoId} title={params.title} openModal={onCancel} onDelete={onDelete} />} />
         )}
       </div>
     </>

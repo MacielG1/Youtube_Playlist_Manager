@@ -10,7 +10,7 @@ import fetchVideosIds from "@/utils/fetchVideosIds";
 import getPlaylistSize from "@/utils/getPlaylistSize";
 import getVideosSlice from "@/utils/getVideosSlice";
 import seekTime from "@/utils/seekTime";
-import BackButton from "./BackButton";
+import LogoButton from "./LogoButton";
 import savePlaylistsProgress from "@/utils/savePlaylistProgress";
 import loadPlaylist from "@/utils/loadPlaylist";
 import DeleteModalContent from "./modals/DeleteModalContent";
@@ -318,7 +318,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
   return (
     <>
-      <BackButton />
+      <LogoButton />
       <div className="flex h-screen max-h-full flex-col items-center justify-center">
         {isLoaded && <span className="-mt-20 py-2 text-center tracking-wide text-neutral-800 dark:text-neutral-200 sm:mt-0">{params.title}</span>}
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[75vw]">

@@ -6,6 +6,7 @@ import ToastProvider from "@/providers/Toaster";
 import ThemeProvider from "@/providers/ThemeProvider";
 import SettingsMenu from "@/components/Settings/SettingsMenu";
 import { Analytics } from "@vercel/analytics/react";
+import LogoButton from "@/components/LogoButton";
 
 const font = Open_Sans({ subsets: ["latin"] });
 

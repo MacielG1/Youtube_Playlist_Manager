@@ -1,10 +1,10 @@
 import About from "@/components/About";
-import BackButton from "@/components/BackButton";
+import LogoButton from "@/components/LogoButton";
 
 export default function page() {
   return (
     <>
-      <BackButton />
+      <LogoButton />
       <About />
     </>
   );
