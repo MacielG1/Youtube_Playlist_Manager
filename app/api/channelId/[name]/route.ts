@@ -21,7 +21,6 @@ export async function GET(req: Request, { params }: { params: Params }) {
     }
 
     const data = await res.json();
-
     if (!data) {
       console.log("No Data", res.statusText);
       return new NextResponse("No Data Found", { status: 404 });

@@ -19,6 +19,7 @@ export default async function getVideoData(newVideoId?: string) {
       body: JSON.stringify({ videosIds }),
     });
     const data = await res.json();
+
     if (!data) {
       console.log("Error", res.statusText);
       return {};

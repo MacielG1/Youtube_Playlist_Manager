@@ -45,8 +45,10 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     videosIds: [],
   };
 
+  let isChannel = false;
   if (typeof window !== "undefined") {
     const savedData = localStorage.getItem(`plVideos=${playlistId}`);
+    isChannel = JSON.parse(localStorage.getItem(item) || "[]")?.isChannel || false;
     if (savedData) {
       plVideos = JSON.parse(savedData);
     }
@@ -63,8 +65,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         let recentThan1day = Date.now() - (plVideos.updatedTime || 0) < 24 * 60 * 60 * 1000; // 1 day
         let recentThan3days = Date.now() - (plVideos.updatedTime || 0) < 3 * 24 * 60 * 60 * 1000; // 3 days
 
-        // let recentThan1day = Date.now() - (plVideos.updatedTime || 0) < 10000; // 10 sec to test
-        // let recentThan3days = Date.now() - (plVideos.updatedTime || 0) < 10000; // 10 sec to test
+        // let recentThan1day = Date.now() - (plVideos.updatedTime || 0) < 40000; // 10 sec to test
+        // let recentThan3days = Date.now() - (plVideos.updatedTime || 0) < 40000; // 10 sec to test
 
         if (hasOnlyDate && !recentThan3days) {
           // if hasOnlyData is true the playlist was already added to storage but is smaller than 200 videos
@@ -84,6 +86,18 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
           const data = await fetchVideosIds(playlistId, allIds, allVideosIdsRef);
           plLengthRef.current = data?.length || allIds;
+
+          const newVideosAmount = data?.length - allIds.length || 0;
+
+          console.log("newVideosAmount", newVideosAmount);
+
+          // if (newVideosAmount > 0) {
+          //   let currData = JSON.parse(localStorage.getItem(item) || "[]");
+          //   currData.currentItem += newVideosAmount;
+
+          //   localStorage.setItem(item, JSON.stringify(currData));
+          // }
+
           setCurrentVideoIndex((prev) => prev); // Forces re-render so the ref above updates
         } else if (allIds.length && recentThan1day) {
           // if the playlist is in Storage and recent than 1 day: take the length from the storage

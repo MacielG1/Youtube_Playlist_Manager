@@ -19,7 +19,7 @@ export default async function getPlaylistsData(newPlaylistId?: string) {
     });
 
     let data = await res.json();
-
+    console.log("data", data);
     if (!data) {
       console.log("Error", res.statusText);
       return {};

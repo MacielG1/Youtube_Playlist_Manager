@@ -44,7 +44,7 @@ export default function Input() {
           return null;
         }
 
-        localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0 }));
+        localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0, isChannel: true }));
         // Saving playlist to all playlists Array
         const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
         localStorage.setItem("playlists", JSON.stringify([...allPlaylists, channelId]));
@@ -58,7 +58,7 @@ export default function Input() {
 
             return {
               ...data,
-              items: [...prev.items, ...data.items],
+              items: [...prev.items, data.items[0]],
             };
           });
         } else {
