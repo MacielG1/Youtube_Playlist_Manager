@@ -150,7 +150,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         <div className="-0 videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[75vw]">
           {!isLoaded && (
             <div role="status" className="-mt-20 flex items-center justify-center">
-              <Icons.spinIcon className="mt-5 h-7 w-7 animate-spin text-blue-500 " />
+              <Icons.spinIcon className="mt-5 h-7 w-7 animate-spin text-blue-500" />
               <span className="sr-only">Loading...</span>
             </div>
           )}
