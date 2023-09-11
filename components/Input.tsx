@@ -171,10 +171,10 @@ export default function Input() {
         <button
           type="submit"
           disabled={isLoading}
-          className={`flex items-center justify-center rounded-lg border border-blue-800 bg-blue-700 px-4 py-2 text-gray-100 transition duration-300 hover:border-blue-950
-           hover:bg-blue-800 hover:text-gray-200  disabled:border-neutral-600 disabled:bg-neutral-700
-             dark:border-blue-800 dark:bg-blue-900 dark:hover:border-blue-950 dark:hover:bg-blue-800 dark:hover:text-gray-200
-             dark:disabled:border-neutral-600 dark:disabled:bg-neutral-900 `}
+          className={`group flex items-center justify-center rounded-lg border border-blue-800 bg-blue-700 px-4 py-2 text-gray-100 transition duration-300
+           hover:border-blue-950 hover:bg-blue-800  hover:text-gray-200 disabled:border-neutral-600
+             disabled:bg-neutral-700 dark:border-blue-800 dark:bg-blue-800 dark:hover:border-blue-900 dark:hover:bg-blue-900
+             dark:hover:text-gray-200 dark:disabled:border-neutral-600 dark:disabled:bg-neutral-900`}
         >
           <Icons.searchIcon className="h-4 w-4 sm:h-7 sm:w-7" />
         </button>
