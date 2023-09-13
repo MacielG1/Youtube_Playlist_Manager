@@ -1,4 +1,4 @@
-export interface Playlist {
+export type Playlist = {
   id: string;
   snippet: {
     publishedAt: string;
@@ -7,24 +7,24 @@ export interface Playlist {
     description: string;
     thumbnails?: Thumbnails;
   };
-}
+};
 
-export interface Items {
+export type Items = {
   items: Playlist[];
-}
+};
 
-export interface Thumbnail {
+export type Thumbnail = {
   url: string;
   width: number;
   height: number;
-}
-export interface Thumbnails {
+};
+export type Thumbnails = {
   default?: Thumbnail;
   medium?: Thumbnail;
   high?: Thumbnail;
   standard?: Thumbnail;
   maxres?: Thumbnail;
-}
+};
 
 export type PlaylistItem = {
   currentItem: number;
@@ -44,11 +44,4 @@ export type SavedItem = {
 export type PlVideos = {
   videosIds?: string[];
   updatedTime?: number;
-};
-
-export type PlaylistInfo = {
-  currentItem: number;
-  initialTime: number;
-  currentPage: number;
-  isChannel: boolean;
 };

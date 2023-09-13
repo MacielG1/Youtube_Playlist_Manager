@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Icons } from "@/assets/Icons";
-import { Items } from "@/types";
+import type { Items } from "@/types";
 import { toastError } from "@/utils/toastStyles";
 import getChannelId from "@/utils/createChannelPlaylist";
 import toast from "react-hot-toast";

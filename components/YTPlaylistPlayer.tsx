@@ -3,7 +3,7 @@ import { useRef, useEffect, useState, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
-import { Items, PlVideos, PlaylistInfo } from "@/types";
+import type { Items, PlVideos } from "@/types";
 import { Icons } from "@/assets/Icons";
 
 import fetchVideosIds from "@/utils/fetchVideosIds";
@@ -15,6 +15,7 @@ import savePlaylistsProgress from "@/utils/savePlaylistProgress";
 import loadPlaylist from "@/utils/loadPlaylist";
 import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
+import onDeleteItems from "@/utils/onDeleteItem";
 
 type Params = {
   list: string;
@@ -24,7 +25,6 @@ type Params = {
 export default function YoutubePlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
   const [currentVideoIndex, setCurrentVideoIndex] = useState(1);
 
   const isPaused = useRef(false); // used to resume video if it was playing when delete modal was opened
@@ -41,23 +41,20 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const playlistId = params.list;
   const item = `pl=${playlistId}`;
 
-  let plVideos: PlVideos = {
-    videosIds: [],
-  };
-
+  let plVideos: PlVideos = { videosIds: [] };
   let isBrowser = typeof window !== "undefined";
   let isChannel = false;
 
   if (isBrowser) {
-    const savedData = localStorage.getItem(`plVideos=${playlistId}`);
     isChannel = JSON.parse(localStorage.getItem(item) || "[]")?.isChannel || false;
+    const savedData = localStorage.getItem(`plVideos=${playlistId}`);
+
     if (savedData) {
       plVideos = JSON.parse(savedData);
     }
   }
 
   let allIds = plVideos?.videosIds || [];
-
   let playlistIsInStorage = plVideos?.videosIds?.length;
   let smallerThan200 = plVideos.updatedTime && allIds.length == 0;
 
@@ -71,6 +68,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     async function run() {
       if (playlistIsInStorage) {
         if (smallerThan200 && olderThan3days) {
+          // if the playlist is small and older re-check the size
           const playlistLength = await getPlaylistSize(playlistId);
           plLengthRef.current = playlistLength;
 
@@ -80,7 +78,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ updatedTime: Date.now() }));
           }
         } else if (allIds.length && olderThan1day) {
-          // if the playlist is bigger than 200 and older than 1 day fetch the new videos
+          // if the playlist is bigger than 200 and older re-fetch new videos
           plLengthRef.current = allIds.length;
 
           const data = await fetchVideosIds(playlistId, allIds, allVideosIdsRef);
@@ -88,17 +86,16 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
           setCurrentVideoIndex((prev) => prev); // Forces re-render so the ref above updates the UI
         } else if (allIds.length && !olderThan1day) {
-          // if the playlist is in Storage and recent than 1 day, just set the length
+          // if the playlist is saved and recent than 1 day, just set the length
           allVideosIdsRef.current = allIds;
           plLengthRef.current = allIds.length;
         } else if (!allIds.length) {
-          // if the playlist is small than 200 and not old, just take the length
+          // if the playlist is small and not old, just set the length
           const pl = await PlaylistPlayerRef.current?.internalPlayer.getPlaylist();
           plLengthRef.current = pl.length;
         }
       } else {
-        // if it's a new playlist
-
+        // New playlist
         const playlistLength = await getPlaylistSize(playlistId);
         plLengthRef.current = playlistLength;
 
@@ -113,7 +110,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }, []);
 
   useEffect(() => {
-    const player = PlaylistPlayerRef.current?.internalPlayer; // returns the iframe video  player
+    const player = PlaylistPlayerRef.current?.internalPlayer; // returns the iframe video player
 
     const timer = setInterval(() => {
       if (isPlayingVideoRef.current) {
@@ -244,12 +241,10 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     setCurrentVideoIndex(1);
   }
 
-  let playlistInfo: PlaylistInfo;
+  let playlistInfo = { currentItem: 0, initialTime: 0, currentPage: 0, isChannel: false };
 
-  if (typeof window !== "undefined") {
+  if (isBrowser) {
     playlistInfo = JSON.parse(localStorage.getItem(item) || JSON.stringify({ currentItem: 0, initialTime: 0, currentPage: 1, isChannel: false }));
-  } else {
-    playlistInfo = { currentItem: 0, initialTime: 0, currentPage: 0, isChannel: false };
   }
 
   const { currentItem, initialTime, currentPage } = playlistInfo;
@@ -276,14 +271,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }
 
   function onDelete() {
-    localStorage.removeItem(`pl=${playlistId}`);
-    localStorage.removeItem(`plVideos=${playlistId}`);
-
-    // remove playlist from playlists array
-    const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-    const newPlaylists = allPlaylists.filter((pl: string) => pl !== playlistId);
-
-    localStorage.setItem("playlists", JSON.stringify(newPlaylists));
+    onDeleteItems(playlistId, "playlists");
 
     queryClient.setQueryData<Items>(["playlists"], (oldData) => {
       if (oldData) {

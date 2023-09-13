@@ -7,7 +7,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useRouter } from "next/navigation";
 import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
-import { Items, Playlist, Thumbnails } from "@/types";
+import type { Items, Thumbnails } from "@/types";
 import { Icons } from "@/assets/Icons";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -24,15 +24,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
   const [isDraggingItem, setIsDragging] = useState(false);
   const [isSortingItem, setIsSorting] = useState(false);
 
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-    isSorting,
-  } = useSortable({ id, disabled: isModalOpen });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging, isSorting } = useSortable({ id, disabled: isModalOpen });
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
@@ -59,9 +51,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
       localStorage.removeItem(`plVideos=${id}`);
 
       // remove playlist from playlists array
-      const allPlaylists = JSON.parse(
-        localStorage.getItem("playlists") || "[]",
-      );
+      const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
       const newPlaylists = allPlaylists.filter((pl: string) => pl !== id);
 
       localStorage.setItem("playlists", JSON.stringify(newPlaylists));
@@ -69,9 +59,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
       queryClient.setQueryData<Items>(["playlists"], (prev) => {
         if (prev === undefined) return prev;
 
-        const newPlaylistsData = prev.items.filter(
-          (item: any) => item.id !== id,
-        );
+        const newPlaylistsData = prev.items.filter((item: any) => item.id !== id);
         const newPlaylists = { ...prev, items: newPlaylistsData };
         return newPlaylists;
       });
@@ -107,13 +95,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
     thumbnailURL = thumbnail?.medium?.url || thumbnail?.default?.url || "";
     noBlackBars = true;
   } else {
-    thumbnailURL =
-      thumbnail?.maxres?.url ||
-      thumbnail?.standard?.url ||
-      thumbnail?.high?.url ||
-      thumbnail?.medium?.url ||
-      thumbnail?.default?.url ||
-      "";
+    thumbnailURL = thumbnail?.maxres?.url || thumbnail?.standard?.url || thumbnail?.high?.url || thumbnail?.medium?.url || thumbnail?.default?.url || "";
     noBlackBars = /(maxres|medium)/.test(thumbnailURL); // if it's maxres or medium it doesn't have blackbars
   }
 
@@ -125,21 +107,10 @@ export default function Item({ title, thumbnail, id, type }: Params) {
     }
   }
   let t = encodeURIComponent(title);
-  let url =
-    !isDraggingItem && !isSortingItem
-      ? type === "Playlist"
-        ? `/playlist/p?list=${id}&title=${t}`
-        : `/video/v?v=${id}&title=${t}`
-      : "#";
+  let url = !isDraggingItem && !isSortingItem ? (type === "Playlist" ? `/playlist/p?list=${id}&title=${t}` : `/video/v?v=${id}&title=${t}`) : "#";
 
   return (
-    <div
-      className="mt-2 outline-none"
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-    >
+    <div className="mt-2 outline-none" ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <div className="flex flex-col items-center justify-center space-y-2">
         <div className="3xl:w-80 relative w-60 xs:w-52 md:w-56 lg:w-64 xl:w-[17.8rem] ">
           <div className="group h-full w-full overflow-hidden rounded-xl ">
@@ -157,9 +128,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
                   alt={title}
                   width={300}
                   height={300}
-                  className={`rounded-xl ${
-                    noBlackBars ? "-my-[1px]" : "-my-[32px]"
-                  } ${isDragging ? "cursor-grabbing" : "cursor-pointer"} `}
+                  className={`rounded-xl ${noBlackBars ? "-my-[1px]" : "-my-[32px]"} ${isDragging ? "cursor-grabbing" : "cursor-pointer"} `}
                   priority
                   unoptimized
                 />
@@ -180,16 +149,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
             e.stopPropagation();
             setIsModalOpen(false);
           }}
-          content={
-            <DeleteModalContent
-              type={type}
-              id={id}
-              title={title}
-              isLoading={isLoading}
-              openModal={openModal}
-              onDelete={onDelete}
-            />
-          }
+          content={<DeleteModalContent type={type} id={id} title={title} isLoading={isLoading} openModal={openModal} onDelete={onDelete} />}
         />
       )}
     </div>

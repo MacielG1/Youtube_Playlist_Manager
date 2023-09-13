@@ -1,8 +1,8 @@
 "use client";
-import { useRef, useEffect, useState, useMemo, use } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Items } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
+import type { Items } from "@/types";
 import { Icons } from "@/assets/Icons";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 
@@ -11,6 +11,7 @@ import LogoButton from "./LogoButton";
 import saveVideoProgress from "@/utils/saveVideoProgress";
 import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
+import onDeleteItems from "@/utils/onDeleteItem";
 
 type Params = {
   v: string;
@@ -31,6 +32,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   const videoId = params.v;
   const item = `v=${videoId}`;
+  let isBrowser = typeof window !== "undefined";
 
   useEffect(() => {
     const player = videoPlayerRef?.current?.getInternalPlayer(); // returns the iframe video  player
@@ -81,18 +83,12 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   }
 
   // function onStateChange(e: YouTubeEvent) {
-  //   console.log("called");
-  //   console.log(e);
   // }
 
   // function onEnd(e: YouTubeEvent) {}
 
   function onDelete() {
-    localStorage.removeItem(`v=${videoId}`);
-
-    const allPlaylists = JSON.parse(localStorage.getItem("videos") || "[]");
-    const newPlaylists = allPlaylists.filter((v: string) => v !== videoId);
-    localStorage.setItem("videos", JSON.stringify(newPlaylists));
+    onDeleteItems(videoId, "videos");
 
     queryClient.setQueryData<Items>(["videos"], (oldData) => {
       if (oldData) {
@@ -107,12 +103,10 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     router.replace("/");
   }
 
-  let initialTime: number;
+  let initialTime = 0;
 
-  if (typeof window !== "undefined") {
+  if (isBrowser) {
     initialTime = JSON.parse(localStorage.getItem(item) || "[]")?.initialTime || 0;
-  } else {
-    initialTime = 0;
   }
 
   const vidOptions: YouTubeProps["opts"] = useMemo(() => {
@@ -122,7 +116,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
       playerVars: {
         autoplay: 1,
         start: Math.floor(initialTime),
-        origin: window.location.origin,
+        origin: window.location.origin || "http://localhost:3000",
       },
     };
   }, []);

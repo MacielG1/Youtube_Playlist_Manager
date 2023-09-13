@@ -1,7 +1,6 @@
 import { DndContext, DragEndEvent, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
-
-import { Items, Playlist } from "@/types";
+import type { Items, Playlist } from "@/types";
 import Item from "./Item";
 import { useQueryClient } from "@tanstack/react-query";
 
