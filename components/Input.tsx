@@ -162,7 +162,7 @@ export default function Input() {
   }
 
   return (
-    <nav className="sticky top-0 z-20 w-full bg-inherit px-2 pb-3 pt-1 sm:pb-2 sm:pt-4 ">
+    <nav className="sticky top-0 z-20 w-full bg-inherit px-2 pb-3 xs:pt-3 sm:pt-4 ">
       <form className="flex max-h-12 justify-center gap-2 " onSubmit={handleSubmit}>
         <input
           type="text"

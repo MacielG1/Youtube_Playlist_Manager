@@ -143,8 +143,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     <>
       <LogoButton />
       <div className="flex h-screen flex-col items-center justify-center ">
-        {isLoaded && <span className="-mt-20 py-2 text-center tracking-wide text-neutral-800 dark:text-neutral-200 sm:mt-0">{videoTitle}</span>}
-        <div className="-0 videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[75vw]">
+        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[75vw]">
           {!isLoaded && (
             <div role="status" className="-mt-20 flex items-center justify-center">
               <Icons.spinIcon className="mt-5 h-7 w-7 animate-spin text-blue-500" />
@@ -167,29 +166,32 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
             />
           </div>
         </div>
-
         {isLoaded && (
-          <div className="my-2 flex items-center justify-center gap-1 xs:gap-3">
-            <button
-              className=" cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-              onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}
-            >
-              <Icons.rewind10 className="h-8 w-8" />
-            </button>
-            <button
-              className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-              onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, 10)}
-            >
-              <Icons.skip10 className="h-8 w-8" />
-            </button>
-            <button
-              className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
-              onClick={openModal}
-            >
-              <Icons.closeIcon className="h-6 w-6" />
-            </button>
+          <div className="flex max-w-[80vw] flex-col-reverse">
+            <span className="text-balance break-words py-1 text-center  tracking-wide text-neutral-800 dark:text-neutral-200 sm:mt-0">{videoTitle}</span>
+            <div className="flex items-center justify-center gap-1 py-1 xs:gap-3">
+              <button
+                className=" cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}
+              >
+                <Icons.rewind10 className="h-8 w-8" />
+              </button>
+              <button
+                className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, 10)}
+              >
+                <Icons.skip10 className="h-8 w-8" />
+              </button>
+              <button
+                className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
+                onClick={openModal}
+              >
+                <Icons.closeIcon className="h-6 w-6" />
+              </button>
+            </div>
           </div>
         )}
+
         {isModalOpen && (
           <ModalDelete onClose={onCancel} content={<DeleteModalContent type="Video" id={videoId} title={params.title} openModal={onCancel} onDelete={onDelete} />} />
         )}
