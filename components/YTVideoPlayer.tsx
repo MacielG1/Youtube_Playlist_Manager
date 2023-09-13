@@ -12,6 +12,7 @@ import saveVideoProgress from "@/utils/saveVideoProgress";
 import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
 import onDeleteItems from "@/utils/onDeleteItem";
+import reduceStringSize from "@/utils/reduceStringLength";
 
 type Params = {
   v: string;
@@ -136,11 +137,13 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     setIsModalOpen(false);
   }
 
+  let videoTitle = reduceStringSize(params.title, 50);
+
   return (
     <>
       <LogoButton />
       <div className="flex h-screen flex-col items-center justify-center ">
-        {isLoaded && <span className="-mt-20 py-2 text-center tracking-wide text-neutral-800 dark:text-neutral-200 sm:mt-0">{params.title}</span>}
+        {isLoaded && <span className="-mt-20 py-2 text-center tracking-wide text-neutral-800 dark:text-neutral-200 sm:mt-0">{videoTitle}</span>}
         <div className="-0 videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[75vw]">
           {!isLoaded && (
             <div role="status" className="-mt-20 flex items-center justify-center">
