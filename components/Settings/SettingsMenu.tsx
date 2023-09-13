@@ -7,15 +7,17 @@ import ModalSettings from "../modals/ModalSettings";
 import ImportExportTimers from "./ImportExportTimers";
 import ThemeToggler from "./ThemeToggler";
 import DeleteAllData from "./DeleteAllData";
+import HowItWorks from "./HowItWorks";
 
 export default function SettingsMenu() {
   let [isOpen, setIsOpen] = useState(false);
 
   let content = (
-    <div className="flex flex-col items-center justify-center pb-3">
+    <div className="flex flex-col items-center justify-center gap-y-2 pb-3">
       <ThemeToggler />
       <ImportExportTimers setModalOpen={setIsOpen} />
-      <DeleteAllData parentModalSetter={setIsOpen} />
+      <HowItWorks setModalOpen={setIsOpen} />
+      <DeleteAllData setModalOpen={setIsOpen} />
     </div>
   );
 

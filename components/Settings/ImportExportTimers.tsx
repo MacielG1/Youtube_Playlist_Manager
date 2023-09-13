@@ -117,22 +117,25 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
         localStorage.setItem(video.key, JSON.stringify(video.data));
       });
 
-      queryClient.refetchQueries(["playlists"]);
-      queryClient.refetchQueries(["videos"]);
+      queryClient.refetchQueries({ queryKey: ["playlists"] });
+      queryClient.refetchQueries({ queryKey: ["videos"] });
       setModalOpen(false);
     };
     fileReader.readAsText(file);
   }
 
   return (
-    <div className="mx-auto flex justify-center gap-2 py-2">
+    <div className="mx-auto flex justify-center gap-2">
       <div className="grid max-w-sm items-center justify-center ">
         <label
           htmlFor="fileInput"
-          className={`relative inline-flex items-center rounded-md border border-neutral-950 bg-neutral-800 
-           px-2 py-2 text-base font-medium text-white ring-offset-background 
-           transition-colors duration-300 hover:cursor-cell hover:border hover:bg-neutral-950 focus-visible:border 
-           focus-visible:border-neutral-400 focus-visible:outline-none ${isExportable ? "max-w-[5.2rem]" : "w-[6.5rem] max-w-[7rem] pl-6"}`}
+          className={`
+           relative inline-flex items-center rounded-md border border-neutral-950 bg-neutral-200 px-[0.43rem]  py-[0.43rem] 
+            text-base font-medium text-neutral-950 shadow-md ring-offset-background transition-colors
+          duration-300 hover:cursor-pointer hover:border hover:bg-white focus-visible:border
+          focus-visible:border-neutral-400 
+            focus-visible:outline-none dark:bg-neutral-800  dark:text-neutral-100 dark:hover:bg-neutral-900
+          ${isExportable ? "max-w-[5.2rem]" : "w-[7.2rem] max-w-[7.2rem] pl-[1.9rem]"}`}
         >
           Import
           {/* Screen Reader */}
@@ -142,7 +145,11 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
       {isExportable && (
         <button
           onClick={exportTimers}
-          className=" h-10 max-w-[5.2rem] rounded-md border border-neutral-950 bg-neutral-800 px-2 py-2 text-base font-medium text-white ring-offset-background transition-colors duration-300 hover:cursor-pointer hover:border hover:bg-neutral-950 focus-visible:border focus-visible:border-neutral-400 focus-visible:outline-none "
+          className=" h-10 max-w-[5.2rem] rounded-md  border border-neutral-950 bg-neutral-200 px-2 
+           py-2  text-base font-medium text-neutral-950 shadow-md ring-offset-background 
+           transition-colors duration-300 hover:cursor-pointer hover:border hover:bg-white
+            focus-visible:border  focus-visible:border-neutral-400 focus-visible:outline-none 
+           dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-900 "
         >
           Export
         </button>

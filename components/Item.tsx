@@ -33,7 +33,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const { mutate, isLoading } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: async () => onDelete,
   });
 
@@ -149,7 +149,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
             e.stopPropagation();
             setIsModalOpen(false);
           }}
-          content={<DeleteModalContent type={type} id={id} title={title} isLoading={isLoading} openModal={openModal} onDelete={onDelete} />}
+          content={<DeleteModalContent type={type} id={id} title={title} isLoading={isPending} openModal={openModal} onDelete={onDelete} />}
         />
       )}
     </div>
