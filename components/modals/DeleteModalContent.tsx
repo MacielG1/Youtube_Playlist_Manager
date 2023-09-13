@@ -1,3 +1,5 @@
+import reduceStringSize from "@/utils/reduceStringLength";
+
 type Props = {
   type: string;
   title: string;
@@ -7,21 +9,13 @@ type Props = {
   isLoading?: boolean;
 };
 
-export default function DeleteModalContent({
-  type,
-  title,
-  id,
-  openModal,
-  onDelete,
-  isLoading = false,
-}: Props) {
+export default function DeleteModalContent({ type, title, id, openModal, onDelete, isLoading = false }: Props) {
+  let resizedTitle = reduceStringSize(title, 25);
   return (
-    <div className="flex max-w-[16rem] flex-col items-center justify-center gap-4 px-2 pb-6 pt-2 xs:max-w-sm sm:max-w-md">
-      <h2 className="text-lg font-semibold tracking-wide text-red-500 sm:text-2xl">
-        Confirm Deletion
-      </h2>
-      <h3 className="max-w-[16rem] break-words px-5 pt-2 text-center font-semibold text-neutral-800 dark:text-neutral-400 xs:max-w-sm sm:max-w-md sm:text-lg">
-        Delete {type}: {title}
+    <div className="flex max-w-[16rem] flex-col items-center justify-center gap-4 px-2 pb-6 pt-2 xs:max-w-sm sm:max-w-lg">
+      <h2 className="text-lg font-semibold tracking-wide text-red-500 sm:text-2xl">Confirm Deletion</h2>
+      <h3 className="max-w-full break-words px-2 pt-2 text-center font-semibold text-neutral-800 dark:text-neutral-400 sm:text-lg">
+        Delete {type}: {resizedTitle}
       </h3>
 
       <div className="flex gap-3 pt-3 text-lg">

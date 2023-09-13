@@ -57,7 +57,7 @@ export default function AllPlaylists() {
       </div>
     );
   }
-  if (isPlError) return <div>Error</div>;
+  if (isPlError) return <div className="text-center text-neutral-800 dark:text-neutral-300">Error Fetching the Data</div>;
 
   return (
     <>

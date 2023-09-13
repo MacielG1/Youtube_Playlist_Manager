@@ -36,7 +36,7 @@ export default function Input() {
         setAddedURL("");
 
         if (!channelId) {
-          toast.error("Invalid Input!", toastError);
+          toast.error("Invalid Channel!", toastError);
           return null;
         }
         const playlistKey = "pl=" + channelId;
