@@ -1,4 +1,4 @@
-export default async function fetchVideosIds(playlistId: string, existingVideoIds: string[] = [], videosIdsRef: React.MutableRefObject<string[]>) {
+export default async function fetchVideosIds(playlistId: string, existingVideoIds: string[] = [], videosIdsRef?: React.MutableRefObject<string[]>) {
   try {
     const res = await fetch(`/api/fetchVideosIds/${playlistId}`, {
       headers: {
@@ -13,7 +13,9 @@ export default async function fetchVideosIds(playlistId: string, existingVideoId
     }
     const data = await res.json();
 
-    videosIdsRef.current = data;
+    if (videosIdsRef) {
+      videosIdsRef.current = data;
+    }
     localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ videosIds: data, updatedTime: Date.now() }));
 
     return data;

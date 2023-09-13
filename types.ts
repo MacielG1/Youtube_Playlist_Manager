@@ -50,4 +50,5 @@ export type PlaylistInfo = {
   currentItem: number;
   initialTime: number;
   currentPage: number;
+  isChannel: boolean;
 };

@@ -13,8 +13,8 @@ export default async function savePlaylistsProgress(videoPlayer: YouTubePlayer, 
   const data = {
     ...currentPl,
     playlistId,
-    currentItem: index || ((await videoPlayer.getPlaylistIndex()) as number) || 0,
-    initialTime: ((await videoPlayer.getCurrentTime()) as number) || 0,
+    currentItem: index || ((await videoPlayer?.getPlaylistIndex()) as number) || 0,
+    initialTime: ((await videoPlayer?.getCurrentTime()) as number) || 0,
     currentPage: page || 1,
   };
 

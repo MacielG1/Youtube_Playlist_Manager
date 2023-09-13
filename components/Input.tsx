@@ -8,6 +8,7 @@ import getChannelId from "@/utils/createChannelPlaylist";
 import toast from "react-hot-toast";
 import getVideosData from "@/utils/getVideosData";
 import getPlaylistsData from "@/utils/getPlaylistsData";
+import fetchVideosIds from "@/utils/fetchVideosIds";
 
 export default function Input() {
   const [addedURL, setAddedURL] = useState("");
@@ -40,16 +41,16 @@ export default function Input() {
         }
         const playlistKey = "pl=" + channelId;
         if (localStorage.getItem(playlistKey)) {
-          toast.error("Playlist Already Added!", toastError);
+          toast.error("Channel Already Added!", toastError);
           return null;
         }
 
-        localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0, isChannel: true }));
-        // Saving playlist to all playlists Array
-        const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-        localStorage.setItem("playlists", JSON.stringify([...allPlaylists, channelId]));
-
         const data = await getPlaylistsData(channelId);
+
+        const allVideosIds = await fetchVideosIds(channelId);
+        const orderedVideos = allVideosIds.toReversed();
+
+        localStorage.setItem(`plVideos=${channelId}`, JSON.stringify({ videosIds: orderedVideos, updatedTime: Date.now() }));
 
         // Updating the query data with the new playlist
         if (data?.items?.length) {
@@ -61,6 +62,11 @@ export default function Input() {
               items: [...prev.items, data.items[0]],
             };
           });
+
+          localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0, isChannel: true }));
+          // Saving playlist to all playlists Array
+          const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
+          localStorage.setItem("playlists", JSON.stringify([...allPlaylists, channelId]));
         } else {
           toast.error("Playlist is Invalid or Private!", toastError);
           localStorage.removeItem(playlistKey);
@@ -85,11 +91,6 @@ export default function Input() {
           setAddedURL("");
           return;
         }
-        localStorage.setItem(videoKey, JSON.stringify({ initialTime: 0 }));
-
-        // Saving video to all videos Array
-        const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
-        localStorage.setItem("videos", JSON.stringify([...allVideos, videoId]));
 
         const data = await getVideosData(videoId);
 
@@ -103,6 +104,12 @@ export default function Input() {
               items: [...prev.items, ...data.items],
             };
           });
+
+          localStorage.setItem(videoKey, JSON.stringify({ initialTime: 0 }));
+
+          // Saving video to all videos Array
+          const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
+          localStorage.setItem("videos", JSON.stringify([...allVideos, videoId]));
         } else {
           toast.error("Video is Invalid or Private!", toastError);
           localStorage.removeItem(videoKey);
@@ -116,11 +123,6 @@ export default function Input() {
           setAddedURL("");
           return;
         }
-        localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0 }));
-
-        // Saving playlist to all playlists Array
-        const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-        localStorage.setItem("playlists", JSON.stringify([...allPlaylists, playlistID]));
 
         const data = await getPlaylistsData(playlistID);
 
@@ -134,6 +136,12 @@ export default function Input() {
               items: [...prev.items, ...data.items],
             };
           });
+
+          localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0 }));
+
+          // Saving playlist to all playlists Array
+          const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
+          localStorage.setItem("playlists", JSON.stringify([...allPlaylists, playlistID]));
         } else {
           toast.error("Playlist is Invalid or Private!", toastError);
           localStorage.removeItem(playlistKey);
