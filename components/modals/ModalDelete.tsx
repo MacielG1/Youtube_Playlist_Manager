@@ -5,11 +5,11 @@ type ModalSettingsProps = {
   content: React.ReactNode;
 };
 
-export default function ModalSettings({ onClose, content }: ModalSettingsProps) {
+export default function ModalDelete({ onClose, content }: ModalSettingsProps) {
   let modal = (
     <>
       {/* Backdrop */}
-      <button type="button" className="fixed left-0 top-0 z-20 h-[100vh] w-full cursor-default bg-black bg-opacity-60" onClick={onClose} />
+      <button type="button" className="fixed left-0 top-0 z-50 h-[100vh] w-full cursor-default bg-black bg-opacity-60" onClick={onClose} />
       <>
         {/* Modal */}
         <div className="absolute inset-0 flex items-center justify-center">

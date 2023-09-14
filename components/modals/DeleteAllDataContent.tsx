@@ -1,26 +1,19 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import ModalDelete from "../modals/ModalDelete";
 import { useRouter } from "next/navigation";
-import useIsExportable from "@/hooks/useIsExportable";
-import Button from "../Button";
 
 type Props = {
-  setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  closeModals: () => void;
 };
 
-export default function DeleteAllData({ setModalOpen }: Props) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export default function DeleteAllDataContent({ closeModals }: Props) {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const isExportable = useIsExportable();
 
   function deleteAllData() {
     localStorage.removeItem("playlists");
     localStorage.removeItem("videos");
 
     const allKeys = Object.keys(localStorage);
-
     const keysToRemove = ["pl=", "v=", "plVideos="];
 
     allKeys.forEach((key) => {
@@ -29,33 +22,19 @@ export default function DeleteAllData({ setModalOpen }: Props) {
       }
     });
 
-    // delete all queries
     queryClient.clear();
-
-    setIsModalOpen(false);
-    setModalOpen(false);
+    closeModals();
     router.refresh();
     router.push("/", { scroll: false });
   }
 
-  function ToggleModal() {
-    setIsModalOpen((prev) => !prev);
-  }
-
-  function onCancelDelete() {
-    setIsModalOpen(false);
-    setModalOpen(false);
-  }
-
-  if (!isExportable) return null;
-
-  const content = (
+  return (
     <div className="flex max-w-[20rem] flex-col items-center justify-center gap-4 px-2 pb-6 pt-2 xs:max-w-sm sm:max-w-md">
       <h2 className="text-center text-lg font-semibold tracking-wide text-red-500 sm:text-2xl">Delete All Saved Data</h2>
       <p className="px-4 text-center text-lg">This will remove all of your saved Playlists and Videos stored in here</p>
       <div className="flex gap-3 pt-3 text-lg">
         <button
-          onClick={onCancelDelete}
+          onClick={closeModals}
           className="cursor-pointer rounded-md border-2 border-neutral-900 bg-zinc-700 px-3 py-1 font-semibold text-neutral-300 transition duration-200 hover:bg-zinc-600 hover:text-neutral-200"
         >
           Cancel
@@ -68,14 +47,5 @@ export default function DeleteAllData({ setModalOpen }: Props) {
         </button>
       </div>
     </div>
-  );
-
-  return (
-    <>
-      <Button className="max-w-[9rem] whitespace-nowrap border border-neutral-950 px-[4rem]" onClick={ToggleModal}>
-        Delete Data
-      </Button>
-      {isModalOpen && <ModalDelete onClose={ToggleModal} content={content} />}
-    </>
   );
 }
