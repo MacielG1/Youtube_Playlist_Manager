@@ -1,4 +1,5 @@
 import reduceStringSize from "@/utils/reduceStringLength";
+import Button from "../Button";
 
 type Props = {
   type: string;
@@ -13,25 +14,21 @@ export default function DeleteModalContent({ type, title, id, openModal, onDelet
   let resizedTitle = reduceStringSize(title, 25);
   return (
     <div className="flex max-w-[16rem] flex-col items-center justify-center gap-4 px-2 pb-6 pt-2 xs:max-w-sm sm:max-w-lg">
-      <h2 className="text-lg font-semibold tracking-wide text-red-500 sm:text-2xl">Confirm Deletion</h2>
+      <h2 className="tracking-widetext-red-500 text-lg font-semibold  text-red-600  dark:text-red-500 sm:text-2xl">Confirm Deletion</h2>
       <h3 className="max-w-full break-words px-2 pt-2 text-center font-semibold text-neutral-800 dark:text-neutral-400 sm:text-lg">
         Delete {type}: {resizedTitle}
       </h3>
 
       <div className="flex gap-3 pt-3 text-lg">
-        <button
+        <Button
           onClick={openModal}
-          className="cursor-pointer rounded-md border-neutral-800 bg-gray-600/90 px-3 py-1 font-semibold text-neutral-300 transition duration-200 hover:bg-gray-700 hover:text-neutral-200"
+          className="bg-neutral-600 text-white ring-1 ring-neutral-500 hover:bg-neutral-700 dark:bg-neutral-700 dark:ring-0 dark:hover:bg-neutral-800"
         >
           Cancel
-        </button>
-        <button
-          onClick={() => onDelete(id)}
-          disabled={isLoading}
-          className="cursor-pointer rounded-md border-neutral-800 bg-red-500 px-3 py-1 font-semibold text-black transition duration-200 hover:bg-[#d32828]"
-        >
+        </Button>
+        <Button onClick={() => onDelete(id)} disabled={isLoading} variant="delete">
           Delete
-        </button>
+        </Button>
       </div>
     </div>
   );
