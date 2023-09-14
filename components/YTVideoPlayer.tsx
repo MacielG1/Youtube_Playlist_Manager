@@ -142,7 +142,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   return (
     <>
       <LogoButton />
-      <div className="flex h-screen flex-col items-center justify-center ">
+      <div className="flex h-screen flex-col items-center justify-center pt-5 ">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[75vw]">
           {!isLoaded && (
             <div role="status" className="-mt-20 flex items-center justify-center">
