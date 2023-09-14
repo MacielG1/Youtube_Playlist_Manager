@@ -163,32 +163,39 @@ export default function Input() {
   }
 
   return (
-    <nav className="sticky top-0 z-20 w-full bg-inherit px-2 pb-3 xs:pt-3 sm:pt-4 ">
-      <form className="flex max-h-12 justify-center gap-2 " onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={addedURL}
-          onChange={handleInputChange}
-          placeholder="Enter a Video or Playlist URL or Channel Name"
-          className="min-w[1rem] w-[65vw] rounded-md border-2 border-neutral-600 bg-neutral-300 px-3 text-neutral-900 placeholder-neutral-700 transition-colors
+    <header className="sticky">
+      <nav className="relative top-0 z-20 w-full bg-inherit px-2 pb-5 xs:pt-3 sm:pt-4 ">
+        <form className="flex max-h-12 justify-center gap-2 " onSubmit={handleSubmit}>
+          <input
+            type="text"
+            value={addedURL}
+            onChange={handleInputChange}
+            placeholder="Enter a Video or Playlist URL or Channel Name"
+            className="min-w[1rem] w-[65vw] rounded-md border-2 border-neutral-600 bg-neutral-300 px-3 text-neutral-900 placeholder-neutral-700 transition-colors
              duration-300 placeholder:text-sm hover:bg-neutral-200 focus:border-gray-600 
             focus:placeholder-neutral-500 focus-visible:border-[3px] focus-visible:border-neutral-900 focus-visible:bg-neutral-200 focus-visible:outline-none 
             dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300 dark:placeholder-neutral-400 dark:hover:bg-black dark:focus:border-gray-500 dark:focus:placeholder-neutral-500
             dark:focus-visible:border-neutral-700 dark:focus-visible:bg-neutral-950 xs:placeholder:text-base sm:text-lg md:w-[30rem] 
             "
-        />
-        <button
-          type="submit"
-          disabled={isLoading}
-          className={`group flex items-center justify-center rounded-lg border border-blue-800 bg-blue-700 px-4 py-2 text-gray-100 transition duration-300
+          />
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`group flex items-center justify-center rounded-lg border border-blue-800 bg-blue-700 px-4 py-2 text-gray-100 transition duration-300
            hover:border-blue-950 hover:bg-blue-800  hover:text-gray-200 disabled:border-neutral-600
              disabled:bg-neutral-700 dark:border-blue-800 dark:bg-blue-800 dark:hover:border-blue-900 dark:hover:bg-blue-900
              dark:hover:text-gray-200 dark:disabled:border-neutral-600 dark:disabled:bg-neutral-900`}
-        >
-          {/* {isLoading ? <Icons.spinIcon className="h-4 w-4 animate-spin text-blue-100 sm:h-7 sm:w-7" /> : <Icons.searchIcon className="h-4 w-4 sm:h-7 sm:w-7" />} */}
-          <Icons.searchIcon className="h-4 w-4 sm:h-7 sm:w-7" />
-        </button>
-      </form>
-    </nav>
+          >
+            {/* {isLoading ? <Icons.spinIcon className="h-4 w-4 animate-spin text-blue-100 sm:h-7 sm:w-7" /> : <Icons.searchIcon className="h-4 w-4 sm:h-7 sm:w-7" />} */}
+            <Icons.searchIcon className="h-4 w-4 sm:h-7 sm:w-7" />
+          </button>
+        </form>
+        {isLoading && (
+          <div className="absolute -bottom-1 left-1/2 flex items-center justify-center">
+            <Icons.spinIcon className="h-3 w-3 animate-spin text-indigo-500 sm:h-4 sm:w-4 " />
+          </div>
+        )}
+      </nav>
+    </header>
   );
 }
