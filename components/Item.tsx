@@ -102,39 +102,82 @@ export default function Item({ title, thumbnail, id, type }: Params) {
   let t = encodeURIComponent(title);
   let url = !isDraggingItem && !isSortingItem ? (type === "Playlist" ? `/playlist/p?list=${id}&title=${t}` : `/video/v?v=${id}&title=${t}`) : "#";
 
-  return (
-    <div className="mt-2  outline-none" ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <div className="flex cursor-default flex-col items-center justify-center space-y-2">
-        <div className="3xl:w-80 relative w-60  xs:w-52 md:w-56 lg:w-64 xl:w-[17.8rem]">
-          <div className="group h-full w-full  overflow-hidden rounded-xl">
-            <button
-              onClick={openModal}
-              className="peer absolute right-0 top-0 z-10 rounded-bl-md rounded-tr-[0.50rem] bg-neutral-800 p-1 text-neutral-400 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-500    "
-              aria-label="Delete Button"
-            >
-              <Icons.deleteIcon className="h-4 w-4" />
-            </button>
-            <div className="transition duration-300 hover:scale-105 peer-hover:scale-105 ">
-              <Link href={url} className="cursor-pointer">
-                <Image
-                  src={thumbnailURL}
-                  alt={title}
-                  width={300}
-                  height={300}
-                  className={`rounded-xl ${noBlackBars ? "-my-[1px]" : "-my-[32px]"} ${isDragging ? "cursor-grabbing" : "cursor-pointer"} `}
-                  priority
-                  unoptimized
-                />
-              </Link>
-            </div>
-          </div>
+  // return (
+  //   <div className="mt-2 outline-none" ref={setNodeRef} style={style} {...attributes} {...listeners}>
+  //     <div className="flex cursor-default flex-col items-center justify-center space-y-2">
+  //       <div className="relative w-60  xs:w-52 md:w-56 lg:w-64 xl:w-[17.8rem]">
+  //         <div className="group h-full w-full  overflow-hidden rounded-xl">
+  //           <button
+  //             onClick={openModal}
+  //             className="peer absolute right-0 top-0 z-10 rounded-bl-md rounded-tr-[0.50rem] bg-neutral-200 p-1 text-neutral-900 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-500 dark:bg-neutral-800 dark:text-neutral-400    "
+  //             aria-label="Delete Button"
+  //           >
+  //             <Icons.deleteIcon className="h-4 w-4" />
+  //           </button>
+  //           <div className="transition duration-300 hover:scale-105 peer-hover:scale-105 ">
+  //             <Link href={url} className="cursor-pointer">
+  //               <Image
+  //                 src={thumbnailURL}
+  //                 alt={title}
+  //                 width={300}
+  //                 height={300}
+  //                 className={`rounded-xl ${noBlackBars ? "-my-[1px]" : "-my-[32px]"} ${isDragging ? "cursor-grabbing" : "cursor-pointer"} `}
+  //                 priority
+  //                 unoptimized
+  //               />
+  //             </Link>
+  //           </div>
+  //         </div>
 
-          <h2 className="h-11 max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-sm font-normal text-black dark:text-white md:max-w-[19rem]">
-            <Link className="cursor-pointer" href={url}>
-              {title}
+  //         <h2 className="h-11 max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-sm font-normal text-black dark:text-white md:max-w-[19rem]">
+  //           <Link className="cursor-pointer" href={url}>
+  //             {title}
+  //           </Link>
+  //         </h2>
+  //       </div>
+  //     </div>
+  //     {isModalOpen && (
+  //       <ModalDelete
+  //         onClose={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  //           e.stopPropagation();
+  //           setIsModalOpen(false);
+  //         }}
+  //         content={<DeleteModalContent type={type} id={id} title={title} isLoading={isPending} openModal={openModal} onDelete={onDelete} />}
+  //       />
+  //     )}
+  //   </div>
+  // );
+  return (
+    <div className="mt-2 outline-none" ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <div className="relative flex cursor-default flex-col items-center justify-center ">
+        <div className="group aspect-video w-full overflow-hidden rounded-xl">
+          <button
+            onClick={openModal}
+            className="peer absolute right-0 top-0 z-10 rounded-bl-md rounded-tr-[0.50rem] bg-neutral-800 p-1 text-neutral-400 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-500"
+            aria-label="Delete Button"
+          >
+            <Icons.deleteIcon className="h-4 w-4" />
+          </button>
+          <div className="transition duration-300 hover:scale-105 peer-hover:scale-105">
+            <Link href={url} className="cursor-pointer">
+              <Image
+                src={thumbnailURL}
+                alt={title}
+                width={300}
+                height={300}
+                className={`rounded-xl ${noBlackBars ? "-my-[1px]" : "-my-[32px]"} ${isDragging ? "cursor-grabbing" : "cursor-pointer"}`}
+                priority
+                unoptimized
+              />
             </Link>
-          </h2>
+          </div>
         </div>
+
+        <h2 className="h-11 max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-sm font-normal text-black dark:text-white md:max-w-[19rem]">
+          <Link className="cursor-pointer" href={url}>
+            {title}
+          </Link>
+        </h2>
       </div>
       {isModalOpen && (
         <ModalDelete

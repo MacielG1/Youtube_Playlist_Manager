@@ -185,7 +185,8 @@ export default function Input() {
              disabled:bg-neutral-700 dark:border-blue-800 dark:bg-blue-800 dark:hover:border-blue-900 dark:hover:bg-blue-900
              dark:hover:text-gray-200 dark:disabled:border-neutral-600 dark:disabled:bg-neutral-900`}
         >
-          {isLoading ? <Icons.spinIcon className="h-4 w-4 animate-spin text-blue-100 sm:h-7 sm:w-7" /> : <Icons.searchIcon className="h-4 w-4 sm:h-7 sm:w-7" />}
+          {/* {isLoading ? <Icons.spinIcon className="h-4 w-4 animate-spin text-blue-100 sm:h-7 sm:w-7" /> : <Icons.searchIcon className="h-4 w-4 sm:h-7 sm:w-7" />} */}
+          <Icons.searchIcon className="h-4 w-4 sm:h-7 sm:w-7" />
         </button>
       </form>
     </nav>
