@@ -12,9 +12,9 @@ let texts = [
 
 export default function About() {
   return (
-    <div className="relative isolate z-10 mt-5 sm:mt-40">
+    <div className="pt-25 relative isolate z-10 flex items-center lg:h-screen">
       <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-2xl flex-col-reverse gap-16  bg-zinc-200/90 px-6 py-16 ring-1 ring-black/10 dark:bg-white/5 dark:ring-white/10 sm:flex-col sm:rounded-3xl sm:p-8 lg:mx-0 lg:max-w-none lg:flex-row lg:items-center lg:py-20 xl:gap-x-20 xl:px-20">
+        <div className="mx-auto flex max-w-2xl flex-col-reverse gap-16 bg-inherit px-6 py-16 ring-0 ring-black/10 dark:ring-white/10 sm:rounded-3xl sm:p-8 lg:mx-0 lg:max-w-none lg:flex-row lg:items-center lg:bg-zinc-200/90 lg:py-16 lg:ring-1 lg:dark:bg-white/5 xl:gap-x-20 xl:px-20">
           <Image src={aboutIMG} className="h-96 w-full flex-none rounded-2xl object-cover shadow-xl lg:h-auto lg:max-w-sm" alt="about image" priority />
           <div className="w-full flex-auto ">
             <h2 className="mb-8 text-center text-3xl font-bold tracking-wide text-black dark:text-neutral-200 sm:text-4xl">How It Works!</h2>
@@ -36,10 +36,6 @@ export default function About() {
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="absolute inset-x-0 -top-16 -z-10 flex transform-gpu justify-center overflow-hidden opacity-20 blur-3xl" aria-hidden="true">
-        <div className=" aspect-[1318/752] w-[82.375rem] flex-none bg-gradient-to-r from-[#80caff] to-[#4f46e5] opacity-20" />
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ export default function page() {
   return (
     <>
       <LogoButton />
+
       <About />
     </>
   );
