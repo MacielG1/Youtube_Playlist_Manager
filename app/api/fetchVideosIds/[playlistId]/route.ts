@@ -20,7 +20,7 @@ export async function POST(req: Request, { params }: { params: Params }) {
   try {
     do {
       const res = await fetch(
-        `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId=${playlistsToFetch}&maxResults=50&pageToken=${nextPageToken}&key=${API_KEY}`,
+        `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails,snippet&playlistId=${playlistsToFetch}&maxResults=50&pageToken=${nextPageToken}&key=${API_KEY}`,
       );
       if (!res.ok) {
         console.log("Error in /api/fetchVideosIds/[playlistId]", res.status, res.statusText);

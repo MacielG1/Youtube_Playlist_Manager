@@ -143,7 +143,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     <>
       <LogoButton />
       <div className="flex h-screen flex-col items-center justify-center pt-5 ">
-        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[75vw]">
+        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[73vw]">
           {!isLoaded && (
             <div role="status" className="-mt-20 flex items-center justify-center">
               <Icons.spinIcon className="mt-5 h-7 w-7 animate-spin text-blue-500" />
@@ -169,9 +169,9 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         {isLoaded && (
           <div className="flex max-w-[80vw] flex-col-reverse">
             {/* Title */}
-            <span className="text-balance break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200 sm:mt-0">{videoTitle}</span>
+            <span className="text-balance mt-0 break-words py-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{videoTitle}</span>
             {/* Menu Buttons */}
-            <div className="flex items-center justify-center gap-1 py-1 xs:gap-3">
+            <div className="flex items-center justify-center gap-1  xs:gap-3">
               <button
                 className=" cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                 onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}

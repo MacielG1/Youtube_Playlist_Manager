@@ -38,7 +38,7 @@ export default function SettingsMenu() {
   );
 
   return (
-    <div className="right-0 top-0 z-50 flex items-end justify-end p-1 pt-2  xs:fixed sm:px-5 xl:px-8">
+    <div className="right-2 top-0 z-30 flex items-end justify-end p-1 pt-2 xs:fixed sm:px-5 xl:px-8">
       <button onClick={ToggleModal}>
         <Icons.settingIcon className="h-8 w-8 cursor-pointer" />
       </button>

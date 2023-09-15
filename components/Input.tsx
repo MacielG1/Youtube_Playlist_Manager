@@ -31,6 +31,7 @@ export default function Input() {
 
       const isChannel = !/(list=|v=)/.test(addedURL);
 
+      // Channel
       if (isChannel) {
         const channelId = await getChannelId(addedURL);
         setAddedURL("");
@@ -84,10 +85,11 @@ export default function Input() {
         return console.log(error);
       }
 
-      // Saving specific video data
+      // Video
       if (videoId && !playlistID) {
         let videoKey = "v=" + videoId;
         if (localStorage.getItem(videoKey)) {
+          toast.error("Video Already Added!", toastError);
           setAddedURL("");
           return;
         }
@@ -116,10 +118,11 @@ export default function Input() {
         }
         setAddedURL("");
       } else if (playlistID) {
-        // if it's a playlist
+        // Playlist
         let playlistKey = "pl=" + playlistID;
 
         if (localStorage.getItem(playlistKey)) {
+          toast.error("Playlist Already Added!", toastError);
           setAddedURL("");
           return;
         }
@@ -164,7 +167,7 @@ export default function Input() {
 
   return (
     <header className="sticky">
-      <nav className="relative top-0 z-20 w-full bg-inherit px-2 pb-5 xs:pt-3 sm:pt-4 ">
+      <nav className="relative top-0 z-20 w-full bg-inherit px-2 pb-5 xs:pt-3 sm:pt-4">
         <form className="flex max-h-12 justify-center gap-2 " onSubmit={handleSubmit}>
           <input
             type="text"

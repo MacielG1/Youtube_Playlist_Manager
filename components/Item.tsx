@@ -30,7 +30,6 @@ export default function Item({ title, thumbnail, id, type }: Params) {
     transition,
   };
 
-  const router = useRouter();
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
