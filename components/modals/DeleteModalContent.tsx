@@ -11,11 +11,11 @@ type Props = {
 };
 
 export default function DeleteModalContent({ type, title, id, openModal, onDelete, isLoading = false }: Props) {
-  let resizedTitle = reduceStringSize(title, 25);
+  let resizedTitle = reduceStringSize(title, 100);
   return (
-    <div className="flex max-w-[16rem] flex-col items-center justify-center gap-4 px-2 pb-6 pt-2 xs:max-w-sm sm:max-w-lg">
-      <h2 className="tracking-widetext-red-500 text-lg font-semibold  text-red-600  dark:text-red-500 sm:text-2xl">Confirm Deletion</h2>
-      <h3 className="max-w-full break-words px-2 pt-2 text-center font-semibold text-neutral-800 dark:text-neutral-400 sm:text-lg">
+    <div className="flex max-w-[18rem] flex-col items-center justify-center gap-4  pb-6 pt-2 xs:max-w-sm sm:max-w-lg">
+      <h2 className="text-lg font-semibold tracking-wide  text-red-600  dark:text-red-500 sm:text-2xl">Confirm Deletion</h2>
+      <h3 className="max-w-full break-words px-2 pt-2 text-center text-sm font-semibold text-neutral-800 dark:text-neutral-400 sm:text-lg">
         Delete {type}: {resizedTitle}
       </h3>
 
