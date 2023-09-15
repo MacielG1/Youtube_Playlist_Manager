@@ -9,9 +9,6 @@ type Params = {
 
 let MAX_AMOUNT_OF_PAGES = 50;
 export async function POST(req: Request, { params }: { params: Params }) {
-  // let { existingVideoIds } = await req.json();
-  // const newExistingVideoIds = existingVideoIds.toReversed();
-
   const playlistsToFetch = params.playlistId;
 
   if (!playlistsToFetch) return;

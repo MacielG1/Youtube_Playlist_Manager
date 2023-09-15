@@ -137,7 +137,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     setIsModalOpen(false);
   }
 
-  let videoTitle = reduceStringSize(params.title, 50);
+  let videoTitle = reduceStringSize(params.title, 100);
 
   return (
     <>
@@ -168,7 +168,9 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         </div>
         {isLoaded && (
           <div className="flex max-w-[80vw] flex-col-reverse">
-            <span className="text-balance break-words py-1 text-center  tracking-wide text-neutral-800 dark:text-neutral-200 sm:mt-0">{videoTitle}</span>
+            {/* Title */}
+            <span className="text-balance break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200 sm:mt-0">{videoTitle}</span>
+            {/* Menu Buttons */}
             <div className="flex items-center justify-center gap-1 py-1 xs:gap-3">
               <button
                 className=" cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
