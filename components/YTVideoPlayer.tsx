@@ -167,11 +167,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
           </div>
         </div>
         {isLoaded && (
-          <div className="flex max-w-[80vw] flex-col-reverse">
-            {/* Title */}
-            <span className="text-balance mt-0 break-words py-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{videoTitle}</span>
-            {/* Menu Buttons */}
-            <div className="flex items-center justify-center gap-1  xs:gap-3">
+          <div className="flex max-w-[80vw] flex-col">
+            <div className="flex items-center justify-center gap-1 py-2 xs:gap-3 sm:py-1">
               <button
                 className=" cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                 onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}
@@ -191,6 +188,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                 <Icons.closeIcon className="h-6 w-6" />
               </button>
             </div>
+            {/* Title */}
+            <span className="text-balance mt-0 break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">{videoTitle}</span>
           </div>
         )}
 

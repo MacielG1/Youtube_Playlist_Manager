@@ -166,7 +166,7 @@ export default function Input() {
   }
 
   return (
-    <header className="sticky">
+    <header className="sticky pt-12 sm:pt-0">
       <nav className="relative top-0 z-20 w-full bg-inherit px-2 pb-5 xs:pt-3 sm:pt-4">
         <form className="flex max-h-12 justify-center gap-2 " onSubmit={handleSubmit}>
           <input

@@ -124,11 +124,13 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     };
   }, []);
 
-  function onReady(e: YouTubeEvent) {
+  async function onReady(e: YouTubeEvent) {
     setIsLoaded(true);
 
     const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
     PlaylistPlayerRef.current?.internalPlayer.setPlaybackRate(plRate);
+    const index = (await PlaylistPlayerRef.current?.internalPlayer?.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
+    setCurrentVideoIndex(index);
 
     const intervalId = setInterval(() => {
       if (isPlayingVideoRef.current) {
@@ -310,7 +312,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   return (
     <>
       <LogoButton />
-      <div className="flex h-screen max-h-full flex-col items-center justify-center pt-5">
+      <div className="flex h-screen max-h-full flex-col items-center justify-center pt-5 ">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[73vw]">
           {!isLoaded && (
             <div role="status" className="-mt-20 flex items-center justify-center">
@@ -334,11 +336,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
           </div>
         </div>
         {isLoaded && (
-          <div className="flex max-w-[80vw] flex-col-reverse">
-            {/* Title */}
-            <span className="text-balance mt-0 break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">{playlistTitle}</span>
-            {/* Menu Buttons */}
-            <div className="flex items-center justify-center gap-1 py-1 xs:gap-3">
+          <div className="flex max-w-[80vw] flex-col">
+            <div className="flex items-center justify-center gap-1 py-2 xs:gap-3 sm:py-1">
               <button
                 className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                 onClick={resetPlaylist}
@@ -380,6 +379,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                 <Icons.closeIcon className="h-6 w-6" />
               </button>
             </div>
+            {/* Title */}
+            <span className="text-balance mt-0 break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">{playlistTitle}</span>
           </div>
         )}
 

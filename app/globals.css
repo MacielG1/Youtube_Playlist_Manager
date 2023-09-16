@@ -38,17 +38,17 @@ body,
 }
 @media (max-height : 800px) {
     .videoPlayer {
-        max-width: 850px;
+        max-width: 840px;
     }
 }
 @media (max-height : 600px) {
     .videoPlayer {
-        max-width: 550px;
+        max-width: 500px;
     }
 }
 @media (max-height : 400px) {
     .videoPlayer {
-        max-width: 450px;
+        max-width: 400px;
     }
 }
 @media (max-height : 300px) {
