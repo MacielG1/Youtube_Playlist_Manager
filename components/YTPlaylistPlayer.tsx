@@ -373,7 +373,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                 {currentVideoIndex} / {plLengthRef.current}
               </span>
               <button
-                className="cursor-pointer pl-1 text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
+                className="cursor-pointer px-1 text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
                 onClick={openModal}
               >
                 <Icons.closeIcon className="h-6 w-6" />

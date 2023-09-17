@@ -6,7 +6,13 @@ export default async function getPlaylistsData(newPlaylistId?: string) {
   } else {
     const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
 
+<<<<<<< Updated upstream
     if (!allPlaylists.length) return {};
+=======
+    if (allPlaylists.length === 0) {
+      return {};
+    }
+>>>>>>> Stashed changes
     playlistsIds = allPlaylists.join(",");
   }
   try {
