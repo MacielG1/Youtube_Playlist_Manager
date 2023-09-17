@@ -3,10 +3,6 @@ import { toast } from "react-hot-toast";
 import useIsExportable from "@/hooks/useIsExportable";
 import { useQueryClient } from "@tanstack/react-query";
 import { toastError, toastSuccess } from "@/utils/toastStyles";
-<<<<<<< Updated upstream
-=======
-import { get, keys, set } from "idb-keyval";
->>>>>>> Stashed changes
 
 export default function ImportExportTimers({ setModalOpen }: { setModalOpen: React.Dispatch<React.SetStateAction<boolean>> }) {
   const isExportable = useIsExportable();
@@ -72,11 +68,7 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
       const jsonData = JSON.parse(fileContent);
 
       if (!jsonData.savedPlaylists || !jsonData.savedVideos) {
-<<<<<<< Updated upstream
         toast.error("Invalid File", toastError);
-=======
-        toast.error("Invalid File!", toastError);
->>>>>>> Stashed changes
       }
 
       // Getting the Current Saved Playlists and Videos
