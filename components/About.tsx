@@ -19,6 +19,7 @@ export default function About() {
             src={aboutIMG}
             className="hidden w-full rounded-2xl object-cover shadow-xl xs:block xs:flex-none sm:h-96 lg:h-auto lg:max-w-sm"
             alt="about image"
+            placeholder="blur"
             priority
           />
           <div className="w-full flex-auto pt-10 xs:pt-0 ">
