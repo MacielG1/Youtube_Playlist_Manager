@@ -102,7 +102,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
   let url = !isDraggingItem && !isSortingItem ? (type === "Playlist" ? `/playlist/p?list=${id}&title=${t}` : `/video/v?v=${id}&title=${t}`) : "#";
 
   return (
-    <div className="mt-2 outline-none" ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div className={`mt-2 outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <div className="relative flex cursor-default flex-col items-center justify-center ">
         <div className="group aspect-video w-full overflow-hidden rounded-xl">
           <button

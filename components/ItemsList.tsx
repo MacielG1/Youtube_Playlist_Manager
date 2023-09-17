@@ -18,7 +18,6 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
     },
   });
   const touchSensor = useSensor(TouchSensor, {
-    // Press delay of 250ms, with tolerance of 5px of movement.
     activationConstraint: {
       delay: 250,
       tolerance: 5,
