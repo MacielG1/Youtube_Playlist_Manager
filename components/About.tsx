@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import aboutIMG from "@/assets/aboutIMG.png";
+import aboutIMG from "@/assets/aboutIMG.webp";
 import { Icons } from "@/assets/Icons";
 
 let texts = [
@@ -15,10 +15,15 @@ export default function About() {
     <div className="pt-25 relative isolate z-10 flex items-center lg:h-screen">
       <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="mx-auto flex max-w-2xl flex-col-reverse gap-16 bg-inherit px-6 py-16 ring-0 ring-black/10 dark:ring-white/10 sm:rounded-3xl sm:p-8 lg:mx-0 lg:max-w-none lg:flex-row lg:items-center lg:bg-zinc-200/90 lg:py-16 lg:ring-1 lg:dark:bg-white/5 xl:gap-x-20 xl:px-20">
-          <Image src={aboutIMG} className="h-96 w-full flex-none rounded-2xl object-cover shadow-xl lg:h-auto lg:max-w-sm" alt="about image" priority />
-          <div className="w-full flex-auto ">
+          <Image
+            src={aboutIMG}
+            className="hidden w-full rounded-2xl object-cover shadow-xl xs:block xs:flex-none sm:h-96 lg:h-auto lg:max-w-sm"
+            alt="about image"
+            priority
+          />
+          <div className="w-full flex-auto pt-10 xs:pt-0 ">
             <h2 className="mb-8 text-center text-3xl font-bold tracking-wide text-black dark:text-neutral-200 sm:text-4xl">How It Works!</h2>
-            <div className="flex flex-col gap-3 text-lg">
+            <div className="flex flex-col  gap-3 text-lg">
               {texts.map((i) => (
                 <div key={i.id} className="flex items-center justify-start gap-2">
                   <Icons.checkMark className="h-5 w-5 min-w-[2rem]" />
