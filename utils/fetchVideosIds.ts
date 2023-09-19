@@ -1,3 +1,5 @@
+import { Playlist } from "@/types";
+
 export default async function fetchVideosIds(playlistId: string, existingVideoIds: string[] = [], videosIdsRef?: React.MutableRefObject<string[]>) {
   try {
     const res = await fetch(`/api/fetchVideosIds/${playlistId}`, {
@@ -13,10 +15,12 @@ export default async function fetchVideosIds(playlistId: string, existingVideoId
     }
     const data = await res.json();
 
+    const allVideosIds = data.map((item: Playlist) => item.id);
+
     if (videosIdsRef) {
-      videosIdsRef.current = data;
+      videosIdsRef.current = allVideosIds;
     }
-    localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ videosIds: data, updatedTime: Date.now() }));
+    localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ videosIds: allVideosIds, updatedTime: Date.now() }));
 
     return data;
   } catch (error) {

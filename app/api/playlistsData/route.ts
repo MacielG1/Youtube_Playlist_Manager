@@ -1,3 +1,4 @@
+import { Playlist, PlaylistAPI } from "@/types";
 import { NextResponse } from "next/server";
 
 const API_KEY = process.env.YOUTUBE_API;
@@ -23,7 +24,19 @@ export async function POST(req: Request) {
       console.log("Error", res.statusText);
       return {};
     }
-    return NextResponse.json(data);
+
+    // Extract the data we need
+    let newData = {
+      items: data.items.map((item: PlaylistAPI) => {
+        return {
+          id: item.id,
+          title: item.snippet.title,
+          thumbnails: item.snippet.thumbnails,
+        };
+      }),
+    };
+
+    return NextResponse.json(newData);
   } catch (e) {
     console.log("Error in /api/playlistsData", e);
     return new NextResponse("Error", { status: 400 });

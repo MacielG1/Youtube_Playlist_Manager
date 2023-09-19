@@ -48,6 +48,7 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
     }
   }
 
+  console.log("items", items);
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, setItems)}>
       {items?.length > 0 && (
@@ -60,7 +61,7 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
               </h2>
             )}
             <div className="mx-4 grid grid-cols-1 place-items-center gap-x-4  gap-y-2 pl-3 pt-1 xs:grid-cols-2 sm:pl-7 md:grid-cols-3 lg:mx-6 lg:grid-cols-4 2xl:mx-8 2xl:grid-cols-5 2xl:pt-3">
-              {items?.map((playlist) => <Item key={playlist.id} id={playlist.id} title={playlist.snippet.title} thumbnail={playlist.snippet.thumbnails} type={title} />)}
+              {items?.map((playlist) => <Item key={playlist.id} id={playlist.id} title={playlist.title} thumbnail={playlist.thumbnails} type={title} />)}
             </div>
           </>
         </SortableContext>

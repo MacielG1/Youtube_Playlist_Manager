@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useRouter } from "next/navigation";
 import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
 import type { Items, Thumbnails } from "@/types";
@@ -102,7 +101,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
   let url = !isDraggingItem && !isSortingItem ? (type === "Playlist" ? `/playlist/p?list=${id}&title=${t}` : `/video/v?v=${id}&title=${t}`) : "#";
 
   return (
-    <div className={`mt-2 outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div className={`mt-2 outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
       <div className="relative flex cursor-default flex-col items-center justify-center ">
         <div className="group aspect-video w-full overflow-hidden rounded-xl">
           <button
@@ -112,7 +111,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
           >
             <Icons.deleteIcon className="h-4 w-4" />
           </button>
-          <div className="transition duration-300 hover:scale-105 peer-hover:scale-105">
+          <div className="transition duration-300 hover:scale-105 peer-hover:scale-105" {...attributes} {...listeners}>
             <Link href={url} className="cursor-pointer">
               <Image
                 src={thumbnailURL}

@@ -46,26 +46,26 @@ export default function Input() {
           return null;
         }
 
-        const data = await getPlaylistsData(channelId);
+        const playlistData = await getPlaylistsData(channelId);
+        const videosData = await fetchVideosIds(channelId);
 
-        const allVideosIds = await fetchVideosIds(channelId);
-        const orderedVideos = allVideosIds.toReversed();
-
+        const orderedVideos = videosData?.map((item: any) => item.id).toReversed();
         localStorage.setItem(`plVideos=${channelId}`, JSON.stringify({ videosIds: orderedVideos, updatedTime: Date.now() }));
 
-        // Updating the query data with the new playlist
-        if (data?.items?.length) {
+        if (playlistData?.items?.length) {
           queryClient.setQueryData<Items>(["playlists"], (prev) => {
-            if (!prev || !prev?.items?.length) return data;
+            // add videosData Array to the playlist
+            playlistData.items[0].videosData = videosData;
+            // if no playlists saved, return the new one
+            if (!prev || !prev?.items?.length) return playlistData;
 
             return {
-              ...data,
-              items: [...prev.items, data.items[0]],
+              ...playlistData,
+              items: [...prev.items, playlistData.items[0]],
             };
           });
 
           localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0, isChannel: true }));
-          // Saving playlist to all playlists Array
           const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
           localStorage.setItem("playlists", JSON.stringify([...allPlaylists, channelId]));
         } else {
@@ -108,8 +108,6 @@ export default function Input() {
           });
 
           localStorage.setItem(videoKey, JSON.stringify({ initialTime: 0 }));
-
-          // Saving video to all videos Array
           const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
           localStorage.setItem("videos", JSON.stringify([...allVideos, videoId]));
         } else {
@@ -127,22 +125,25 @@ export default function Input() {
           return;
         }
 
-        const data = await getPlaylistsData(playlistID);
+        const playlistData = await getPlaylistsData(playlistID);
+        const videosData = await fetchVideosIds(playlistID);
 
         // Updating the query data with the new playlist
-        if (data?.items?.length) {
+        if (playlistData?.items?.length) {
           queryClient.setQueryData<Items>(["playlists"], (prev) => {
-            if (!prev || !prev?.items?.length) return data;
+            // add videosData Array to the playlist
+            playlistData.items[0].videosData = videosData;
+
+            // if no playlists saved, return the new one
+            if (!prev || !prev?.items?.length) return playlistData;
 
             return {
-              ...data,
-              items: [...prev.items, ...data.items],
+              ...playlistData,
+              items: [...prev.items, ...playlistData.items],
             };
           });
 
           localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0 }));
-
-          // Saving playlist to all playlists Array
           const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
           localStorage.setItem("playlists", JSON.stringify([...allPlaylists, playlistID]));
         } else {

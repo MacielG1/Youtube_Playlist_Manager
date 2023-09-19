@@ -1,12 +1,19 @@
-export type Playlist = {
+export type PlaylistAPI = {
   id: string;
   snippet: {
-    publishedAt: string;
     channelId: string;
     title: string;
-    description: string;
     thumbnails?: Thumbnails;
+    resourceId?: {
+      videoId: string;
+    };
   };
+};
+
+export type Playlist = {
+  id: string;
+  title: string;
+  thumbnails: Thumbnails;
 };
 
 export type Items = {

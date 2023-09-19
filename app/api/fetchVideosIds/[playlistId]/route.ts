@@ -1,3 +1,4 @@
+import { PlaylistAPI } from "@/types";
 import { NextResponse } from "next/server";
 
 const API_KEY = process.env.YOUTUBE_API;
@@ -16,11 +17,11 @@ export async function POST(req: Request, { params }: { params: Params }) {
   let pagesCounter = 0;
   let nextPageToken = "";
 
-  const allIds = [];
+  const allVideos = [];
   try {
     do {
       const res = await fetch(
-        `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails,snippet&playlistId=${playlistsToFetch}&maxResults=50&pageToken=${nextPageToken}&key=${API_KEY}`,
+        `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistsToFetch}&maxResults=50&pageToken=${nextPageToken}&key=${API_KEY}`,
       );
       if (!res.ok) {
         console.log("Error in /api/fetchVideosIds/[playlistId]", res.status, res.statusText);
@@ -29,7 +30,7 @@ export async function POST(req: Request, { params }: { params: Params }) {
       let data = await res.json();
 
       for (let item of data.items) {
-        allIds.push(item.contentDetails.videoId);
+        allVideos.push(item);
       }
 
       nextPageToken = data.nextPageToken;
@@ -40,10 +41,18 @@ export async function POST(req: Request, { params }: { params: Params }) {
       }
     } while (nextPageToken);
 
-    console.log("allIds", allIds.length);
-    return NextResponse.json(allIds);
-  } catch (e: any) {
-    console.log("Error in /api/fetch_write_videos/[playlistId]", e.message);
+    // Extract the data we need
+    let newData = allVideos.map((item: PlaylistAPI) => {
+      return {
+        id: item.snippet.resourceId?.videoId,
+        title: item.snippet.title,
+        thumbnails: item.snippet.thumbnails,
+      };
+    });
+
+    return NextResponse.json(newData);
+  } catch (e) {
+    console.log("Error in /api/fetch_write_videos/[playlistId]", e);
     return new NextResponse("Error", { status: 404 });
   }
 }
