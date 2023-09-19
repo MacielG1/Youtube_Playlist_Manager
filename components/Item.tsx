@@ -118,6 +118,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
                 alt={title}
                 width={300}
                 height={300}
+                style={{ width: "100%", height: "auto" }}
                 className={`rounded-xl ${noBlackBars ? "-my-[1px]" : "-my-[32px]"} ${isDragging ? "cursor-grabbing" : "cursor-pointer"}`}
                 priority
                 unoptimized
