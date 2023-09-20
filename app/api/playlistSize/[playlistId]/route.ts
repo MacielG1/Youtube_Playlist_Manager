@@ -6,7 +6,7 @@ type Params = {
   playlistId: string;
 };
 
-export async function GET(req: Request, { params }: { params: Params }) {
+export async function GET(req: Request, { params }: { params: Params }): Promise<NextResponse> {
   const playlistId = params.playlistId;
 
   try {
@@ -14,7 +14,7 @@ export async function GET(req: Request, { params }: { params: Params }) {
 
     if (!res.ok) {
       console.log(`Error in /api/playlistSize/[playlistId]`, res.status, res.statusText);
-      return null;
+      return new NextResponse("Error", { status: 404 });
     }
     let data = await res.json();
     let playlistLength = data.items[0].contentDetails.itemCount;

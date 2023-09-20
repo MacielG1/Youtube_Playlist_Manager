@@ -7,10 +7,10 @@ type Params = {
   name: string;
 };
 
-export async function GET(req: Request, { params }: { params: Params }) {
+export async function GET(req: Request, { params }: { params: Params }): Promise<NextResponse> {
   const name = params.name;
 
-  if (!name) return;
+  if (!name) return new NextResponse("No Channel Name", { status: 404 });
 
   try {
     const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&q=${name}&type=channel&part=id`);
