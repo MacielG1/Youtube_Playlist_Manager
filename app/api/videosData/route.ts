@@ -4,24 +4,24 @@ import { NextResponse } from "next/server";
 const API_KEY = process.env.YOUTUBE_API;
 
 export const runtime = "edge";
-export async function POST(req: Request) {
+export async function POST(req: Request): Promise<NextResponse> {
   const { videosIds } = await req.json();
 
-  if (!videosIds) return {};
+  if (!videosIds) return new NextResponse("No Playlist Id", { status: 404 });
 
   try {
     const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videosIds}&key=${API_KEY}&maxResults=50`);
 
     if (!res.ok) {
       console.log(`Error in /api/videosData`, res.status, res.statusText);
-      return null;
+      return new NextResponse("Error", { status: 404 });
     }
 
     const data = await res.json();
 
     if (!data) {
       console.log("Error", res.statusText);
-      return {};
+      return new NextResponse("Error", { status: 404 });
     }
 
     let newData = {
