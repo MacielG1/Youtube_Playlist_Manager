@@ -17,6 +17,7 @@ import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
 import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
+import Description from "./Description";
 
 type Params = {
   list: string;
@@ -27,6 +28,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(1);
+  const [description, setDescription] = useState("");
 
   const isPaused = useRef(false); // used to resume video if it was playing when delete modal was opened
   const pageRef = useRef(1);
@@ -129,8 +131,21 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
     const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
     PlaylistPlayerRef.current?.internalPlayer.setPlaybackRate(plRate);
+
     const index = (await PlaylistPlayerRef.current?.internalPlayer?.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
     setCurrentVideoIndex(index);
+
+    // get the video Id and set the description
+    let url = await PlaylistPlayerRef.current?.getInternalPlayer().getVideoUrl();
+    let videoId = new URL(url).searchParams.get("v") || "";
+
+    console.log(queryClient.getQueryData<Items>(["playlists"])?.items.find((pl) => pl.id === playlistId));
+    setDescription(
+      queryClient
+        .getQueryData<Items>(["playlists"])
+        ?.items.find((pl) => pl.id === playlistId)
+        ?.videosData?.find((v) => v.id === videoId)?.description || "",
+    );
 
     const intervalId = setInterval(() => {
       if (isPlayingVideoRef.current) {
@@ -312,15 +327,15 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   return (
     <>
       <LogoButton />
-      <div className="flex h-screen max-h-full flex-col items-center justify-center pt-5 ">
+      <div className="flex flex-col items-center justify-center pt-10  ">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[73vw]">
-          {!isLoaded && (
-            <div role="status" className="-mt-20 flex items-center justify-center">
-              <Icons.spinIcon className="mt-5 h-7 w-7 animate-spin text-blue-500 " />
-              <span className="sr-only">Loading...</span>
-            </div>
-          )}
-          <div className={`${isLoaded ? "visible" : "hidden"} relative w-full overflow-hidden pb-[56.25%] `}>
+          <div className={` relative w-full overflow-hidden pb-[56.25%] `}>
+            {!isLoaded && (
+              <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
+                <Icons.spinIcon className="h-7 w-7 animate-spin text-blue-500" />
+                <span className="sr-only">Loading...</span>
+              </div>
+            )}
             <YouTube
               ref={PlaylistPlayerRef}
               opts={plOptions}
@@ -331,7 +346,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               onError={onError}
               onStateChange={onStateChange}
               onPlaybackRateChange={onSpeedChange}
-              className="absolute left-0 right-0 top-0 h-full w-full border-none"
+              className={`${isLoaded ? "visible" : "hidden"} absolute left-0 right-0 top-0 h-full w-full border-none`}
             />
           </div>
         </div>
@@ -380,7 +395,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               </button>
             </div>
             {/* Title */}
-            <span className="text-balance mt-0 break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">{playlistTitle}</span>
+            <span className="text-balance break-words pb-[0.8rem] pt-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{playlistTitle}</span>
+            <Description description={description} />
           </div>
         )}
 

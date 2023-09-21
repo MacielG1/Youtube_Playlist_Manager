@@ -47,6 +47,7 @@ export async function POST(req: Request, { params }: { params: Params }): Promis
         id: item.snippet.resourceId?.videoId,
         title: item.snippet.title,
         thumbnails: item.snippet.thumbnails,
+        description: item.snippet.description,
       };
     });
 
