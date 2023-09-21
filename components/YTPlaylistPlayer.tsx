@@ -322,6 +322,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
   let playlistTitle = reduceStringSize(params.title, 100);
 
+  console.log("dd", description);
   return (
     <>
       <LogoButton />
