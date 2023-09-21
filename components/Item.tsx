@@ -10,6 +10,7 @@ import type { Items, Thumbnails } from "@/types";
 import { Icons } from "@/assets/Icons";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import LinkWrapper from "./LinkWrapper";
 
 type Params = {
   title: string;
@@ -97,13 +98,13 @@ export default function Item({ title, thumbnail, id, type }: Params) {
     noBlackBars = /(maxres|medium)/.test(thumbnailURL); // if it's maxres or medium it doesn't have blackbars
   }
 
-  let t = encodeURIComponent(title);
-  let url = !isDraggingItem && !isSortingItem ? (type === "Playlist" ? `/playlist/p?list=${id}&title=${t}` : `/video/v?v=${id}&title=${t}`) : "#";
+  let decodedTitled = encodeURIComponent(title);
+  let url = !isDraggingItem && !isSortingItem ? (type === "Playlist" ? `/playlist/p?list=${id}&title=${decodedTitled}` : `/video/v?v=${id}&title=${decodedTitled}`) : "#";
 
   return (
     <div className={`mt-2 outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
       <div className="relative flex cursor-default flex-col items-center justify-center ">
-        <div className="group aspect-video w-full overflow-hidden rounded-xl">
+        <div className="group aspect-video w-full overflow-hidden rounded-xl ">
           <button
             onClick={openModal}
             className="peer absolute right-0 top-0 z-10 rounded-bl-md rounded-tr-[0.50rem] bg-neutral-800 p-1 text-neutral-400 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-500"
@@ -112,7 +113,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
             <Icons.deleteIcon className="h-4 w-4" />
           </button>
           <div className="transition duration-300 hover:scale-105 peer-hover:scale-105" {...attributes} {...listeners}>
-            <Link href={url} className="cursor-pointer">
+            <LinkWrapper href={url} className="cursor-pointer">
               <Image
                 src={thumbnailURL}
                 alt={title}
@@ -123,7 +124,7 @@ export default function Item({ title, thumbnail, id, type }: Params) {
                 priority
                 unoptimized
               />
-            </Link>
+            </LinkWrapper>
           </div>
         </div>
 

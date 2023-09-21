@@ -95,6 +95,7 @@ export default function Input() {
         }
 
         const data = await getVideosData(videoId);
+        console.log(data);
 
         // Updating the query data with the new playlist
         if (data?.items?.length) {

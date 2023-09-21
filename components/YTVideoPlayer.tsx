@@ -13,6 +13,9 @@ import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
 import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
+import Link from "next/link";
+import { formatDescription } from "@/utils/formatDescription";
+import Description from "./Description";
 
 type Params = {
   v: string;
@@ -22,6 +25,7 @@ type Params = {
 export default function YTVideoPlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [description, setDescription] = useState("");
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -34,7 +38,6 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   const videoId = params.v;
   const item = `v=${videoId}`;
   let isBrowser = typeof window !== "undefined";
-
   useEffect(() => {
     const player = videoPlayerRef?.current?.getInternalPlayer(); // returns the iframe video  player
 
@@ -54,6 +57,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
     const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
     videoPlayerRef?.current?.internalPlayer.setPlaybackRate(plRate);
+
+    setDescription(queryClient.getQueryData<Items>(["videos"])?.items.find((v) => v.id === videoId)?.description || "");
 
     const intervalId = setInterval(() => {
       if (isPlayingVideoRef.current) {
@@ -142,15 +147,15 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   return (
     <>
       <LogoButton />
-      <div className="flex h-screen flex-col items-center justify-center pt-5 ">
+      <div className="flex flex-col items-center justify-center pt-10 ">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[73vw]">
-          {!isLoaded && (
-            <div role="status" className="-mt-20 flex items-center justify-center">
-              <Icons.spinIcon className="mt-5 h-7 w-7 animate-spin text-blue-500" />
-              <span className="sr-only">Loading...</span>
-            </div>
-          )}
-          <div className={`${isLoaded ? "visible" : "hidden"} relative w-full overflow-hidden pb-[56.25%] `}>
+          <div className={` relative w-full overflow-hidden pb-[56.25%] `}>
+            {!isLoaded && (
+              <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
+                <Icons.spinIcon className="h-7 w-7 animate-spin text-blue-500" />
+                <span className="sr-only">Loading...</span>
+              </div>
+            )}
             <YouTube
               videoId={videoId}
               ref={videoPlayerRef}
@@ -158,16 +163,16 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               onReady={onReady}
               onPlay={onPlay}
               onPause={onPause}
-              // onEnd={onEnd}
               onError={onError}
               onPlaybackRateChange={onSpeedChange}
+              // onEnd={onEnd}
               // onStateChange={onStateChange}
-              className="absolute left-0 right-0 top-0 h-full w-full border-none"
+              className={`${isLoaded ? "visible" : "hidden"} absolute left-0 right-0 top-0 h-full w-full border-none`}
             />
           </div>
         </div>
         {isLoaded && (
-          <div className="flex max-w-[80vw] flex-col">
+          <div className=" flex max-w-[80vw] flex-col">
             <div className="flex items-center justify-center gap-1 py-2 xs:gap-3 sm:py-1">
               <button
                 className=" cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
@@ -189,7 +194,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               </button>
             </div>
             {/* Title */}
-            <span className="text-balance mt-0 break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">{videoTitle}</span>
+            <span className="text-balance break-words pb-[0.8rem] pt-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{videoTitle}</span>
+            <Description description={description} />
           </div>
         )}
 

@@ -7,6 +7,7 @@ export type PlaylistAPI = {
     resourceId?: {
       videoId: string;
     };
+    description?: string;
   };
 };
 
@@ -14,6 +15,14 @@ export type Playlist = {
   id: string;
   title: string;
   thumbnails: Thumbnails;
+  description?: string;
+  videosData?: Video[];
+};
+export type Video = {
+  id: string;
+  title: string;
+  thumbnails: Thumbnails;
+  description: string;
 };
 
 export type Items = {

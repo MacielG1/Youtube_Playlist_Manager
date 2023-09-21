@@ -30,6 +30,7 @@ export async function POST(req: Request): Promise<NextResponse> {
           id: item.id,
           title: item.snippet.title,
           thumbnails: item.snippet.thumbnails,
+          description: item.snippet.description,
         };
       }),
     };
