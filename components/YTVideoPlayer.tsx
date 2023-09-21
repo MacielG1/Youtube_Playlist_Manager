@@ -13,8 +13,6 @@ import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
 import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
-import Link from "next/link";
-import { formatDescription } from "@/utils/formatDescription";
 import Description from "./Description";
 
 type Params = {
@@ -25,7 +23,7 @@ type Params = {
 export default function YTVideoPlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -58,7 +56,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
     videoPlayerRef?.current?.internalPlayer.setPlaybackRate(plRate);
 
-    setDescription(queryClient.getQueryData<Items>(["videos"])?.items.find((v) => v.id === videoId)?.description || "");
+    setDescription(queryClient.getQueryData<Items>(["videos"])?.items.find((v) => v.id === videoId)?.description || null);
 
     const intervalId = setInterval(() => {
       if (isPlayingVideoRef.current) {
@@ -195,7 +193,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
             </div>
             {/* Title */}
             <span className="text-balance break-words pb-[0.8rem] pt-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{videoTitle}</span>
-            <Description description={description} />
+            {/* {description && <Description description={description} />} */}
           </div>
         )}
 

@@ -28,7 +28,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(1);
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState<string | null>(null);
 
   const isPaused = useRef(false); // used to resume video if it was playing when delete modal was opened
   const pageRef = useRef(1);
@@ -138,13 +138,11 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     // get the video Id and set the description
     let url = await PlaylistPlayerRef.current?.getInternalPlayer().getVideoUrl();
     let videoId = new URL(url).searchParams.get("v") || "";
-
-    console.log(queryClient.getQueryData<Items>(["playlists"])?.items.find((pl) => pl.id === playlistId));
     setDescription(
       queryClient
         .getQueryData<Items>(["playlists"])
         ?.items.find((pl) => pl.id === playlistId)
-        ?.videosData?.find((v) => v.id === videoId)?.description || "",
+        ?.videosData?.find((v) => v.id === videoId)?.description || null,
     );
 
     const intervalId = setInterval(() => {
@@ -187,6 +185,16 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   async function onStateChange(e: YouTubeEvent) {
     const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
     setCurrentVideoIndex(index);
+
+    // get the video Id and set the description
+    let url = await PlaylistPlayerRef.current?.getInternalPlayer().getVideoUrl();
+    let videoId = new URL(url).searchParams.get("v") || "";
+    setDescription(
+      queryClient
+        .getQueryData<Items>(["playlists"])
+        ?.items.find((pl) => pl.id === playlistId)
+        ?.videosData?.find((v) => v.id === videoId)?.description || null,
+    );
   }
 
   async function onEnd(e: YouTubeEvent) {
@@ -329,13 +337,14 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       <LogoButton />
       <div className="flex flex-col items-center justify-center pt-10  ">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[73vw]">
-          <div className={` relative w-full overflow-hidden pb-[56.25%] `}>
+          <div className={` relative w-full overflow-auto pb-[56.25%]`}>
             {!isLoaded && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
                 <Icons.spinIcon className="h-7 w-7 animate-spin text-blue-500" />
                 <span className="sr-only">Loading...</span>
               </div>
             )}
+
             <YouTube
               ref={PlaylistPlayerRef}
               opts={plOptions}
@@ -396,7 +405,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             </div>
             {/* Title */}
             <span className="text-balance break-words pb-[0.8rem] pt-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{playlistTitle}</span>
-            <Description description={description} />
+
+            {/* {description && <Description description={description} />} */}
           </div>
         )}
 
