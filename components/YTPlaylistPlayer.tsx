@@ -28,7 +28,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(1);
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState<string | null>(null);
 
   const isPaused = useRef(false); // used to resume video if it was playing when delete modal was opened
   const pageRef = useRef(1);
@@ -138,13 +138,11 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     // get the video Id and set the description
     let url = await PlaylistPlayerRef.current?.getInternalPlayer().getVideoUrl();
     let videoId = new URL(url).searchParams.get("v") || "";
-
-    console.log(queryClient.getQueryData<Items>(["playlists"])?.items.find((pl) => pl.id === playlistId));
     setDescription(
       queryClient
         .getQueryData<Items>(["playlists"])
         ?.items.find((pl) => pl.id === playlistId)
-        ?.videosData?.find((v) => v.id === videoId)?.description || "",
+        ?.videosData?.find((v) => v.id === videoId)?.description || null,
     );
 
     const intervalId = setInterval(() => {
@@ -396,7 +394,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             </div>
             {/* Title */}
             <span className="text-balance break-words pb-[0.8rem] pt-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{playlistTitle}</span>
-            <Description description={description} />
+            {description && <Description description={description} />}
           </div>
         )}
 

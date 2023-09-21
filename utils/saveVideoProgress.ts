@@ -5,6 +5,8 @@ export default function saveVideoProgress(videoPlayer: YouTubePlayer, videoId: s
 
   const currentData = JSON.parse(localStorage.getItem(item) as string);
 
+  if (!currentData) return;
+
   const data = {
     ...currentData,
     videoId,
