@@ -145,16 +145,14 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   return (
     <>
       <LogoButton />
-      <div className="flex flex-col items-center justify-center pt-10 ">
-      <div className="flex flex-col items-center justify-center pt-10 ">
-        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[73vw]">
-          <div className={` relative w-full overflow-hidden pb-[56.25%] `}>
-            {!isLoaded && (
-              <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
-                <Icons.spinIcon className="h-7 w-7 animate-spin text-blue-500" />
-                <span className="sr-only">Loading...</span>
-              </div>
-            )}
+      <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[73vw]">
+        <div className={` relative w-full overflow-hidden pb-[56.25%] `}>
+          {!isLoaded && (
+            <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
+              <Icons.spinIcon className="h-7 w-7 animate-spin text-blue-500" />
+              <span className="sr-only">Loading...</span>
+            </div>
+          )}
           <div className={` relative w-full overflow-hidden pb-[56.25%] `}>
             {!isLoaded && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">

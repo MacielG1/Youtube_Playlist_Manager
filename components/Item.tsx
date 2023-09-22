@@ -113,16 +113,18 @@ export default function Item({ title, thumbnail, id, type }: Params) {
             <Icons.deleteIcon className="h-4 w-4" />
           </button>
           <div className="transition duration-300 hover:scale-105 peer-hover:scale-105" {...attributes} {...listeners}>
-            <LinkWrapper href={url} className="cursor-pointer">
+            <LinkWrapper href={url} className="h-auto w-full cursor-pointer">
               <Image
                 src={thumbnailURL}
                 alt={title}
-                width={300}
-                height={300}
-                style={{ width: "100%", height: "auto" }}
+                width={350}
+                height={350}
+                // style={{ width: "100%", height: "auto" }}
                 className={`rounded-xl ${noBlackBars ? "-my-[1px]" : "-my-[32px]"} ${isDragging ? "cursor-grabbing" : "cursor-pointer"}`}
                 priority
                 unoptimized
+                placeholder="blur"
+                blurDataURL="data:image/webp;base64,UklGRgACAABXRUJQVlA4WAoAAAAgAAAANQMAzgEASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDhMEQAAAC81g3MAB9CDJtSi/4GI6H8AAA=="
               />
             </LinkWrapper>
           </div>
