@@ -55,11 +55,9 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
           <>
             {/* if the other type of item doesnt have any items, dont show the title at all */}
             {otherTypeVideos?.length > 0 && (
-              <h2 className="mt-4 text-center font-semibold tracking-wide text-neutral-700 dark:text-zinc-300/90 xs:pl-16 xs:text-left sm:pl-24 xl:pl-28 2xl:mt-5 2xl:pl-32">
-                {title}s
-              </h2>
+              <h2 className="xl:pl- mt-2 text-center font-semibold tracking-wide text-neutral-700 dark:text-zinc-300/90 xs:pl-16 xs:text-left sm:pl-24 ">{title}s</h2>
             )}
-            <div className="mx-4 grid grid-cols-1 place-items-center gap-x-4 gap-y-2 pl-3 pt-1 xs:grid-cols-2 sm:pl-7 md:grid-cols-3 lg:mx-6 lg:grid-cols-4 2xl:mx-8 2xl:grid-cols-5 2xl:pt-3">
+            <div className="mx-4 grid grid-cols-1 place-items-center gap-x-4 gap-y-3 pl-3 pt-1 xs:grid-cols-2 sm:pl-7 md:grid-cols-3 lg:mx-6 lg:grid-cols-4 2xl:mx-8 2xl:grid-cols-5 2xl:pt-2">
               {items?.map((playlist) => <Item key={playlist.id} id={playlist.id} title={playlist.title} thumbnail={playlist.thumbnails} type={title} />)}
             </div>
           </>
