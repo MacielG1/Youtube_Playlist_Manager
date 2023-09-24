@@ -196,7 +196,6 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
             {/* {description && <Description description={description} />} */}
           </div>
         )}
-
         {isModalOpen && (
           <ModalDelete onClose={onCancel} content={<DeleteModalContent type="Video" id={videoId} title={params.title} openModal={onCancel} onDelete={onDelete} />} />
         )}
