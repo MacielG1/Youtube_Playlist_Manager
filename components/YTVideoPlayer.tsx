@@ -14,6 +14,7 @@ import ModalDelete from "./modals/ModalDelete";
 import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Description from "./Description";
+import Tooltip from "./ToolTip";
 
 type Params = {
   v: string;
@@ -150,7 +151,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
           <div className={` relative w-full overflow-auto pb-[56.25%]`}>
             {!isLoaded && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
-                <Icons.spinIcon className="h-7 w-7 animate-spin text-blue-500" />
+                <Icons.spinIcon className="h-7 w-7 animate-spin text-indigo-500" />
                 <span className="sr-only">Loading...</span>
               </div>
             )}
@@ -172,28 +173,35 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         {isLoaded && (
           <div className=" flex max-w-[80vw] flex-col">
             <div className="flex items-center justify-center gap-1 py-2 xs:gap-3 sm:py-1">
-              <button
-                className=" cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}
-              >
-                <Icons.rewind10 className="h-8 w-8" />
-              </button>
-              <button
-                className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, 10)}
-              >
-                <Icons.skip10 className="h-8 w-8" />
-              </button>
-              <button
-                className="cursor-pointer px-1 text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
-                onClick={openModal}
-              >
-                <Icons.closeIcon className="h-6 w-6 " />
-              </button>
+              <Tooltip text="Rewind 10s">
+                <button
+                  className=" cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}
+                >
+                  <Icons.rewind10 className="h-8 w-8" />
+                </button>
+              </Tooltip>
+              <Tooltip text="Skip 10s">
+                <button
+                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, 10)}
+                >
+                  <Icons.skip10 className="h-8 w-8" />
+                </button>
+              </Tooltip>
+              <Tooltip text="Delete video">
+                <button
+                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
+                  onClick={openModal}
+                >
+                  <Icons.closeIcon className="h-8 w-8 " />
+                </button>
+              </Tooltip>
             </div>
             {/* Title */}
+
             <span className="text-balance break-words pb-[0.8rem] pt-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{videoTitle}</span>
-            {/* {description && <Description description={description} />} */}
+            {description && <Description description={description} />}
           </div>
         )}
         {isModalOpen && (

@@ -53,7 +53,7 @@ export default function AllPlaylists() {
   if ((isPlFetching || isVidFetching) && !isPlFetched) {
     return (
       <div className="mx-auto flex justify-center pt-2">
-        <Icons.spinIcon className="mt-5 h-7 w-7 animate-spin text-blue-500" />
+        <Icons.spinIcon className="mt-5 h-7 w-7 animate-spin text-indigo-500" />
       </div>
     );
   }

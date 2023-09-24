@@ -38,16 +38,16 @@ export const Icons = {
     </svg>
   ),
   closeIcon: (props: SVGProps<SVGSVGElement>) => (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 32 32" fill="none">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="-6 -6 44 44" fill="none  " {...props}>
       <path
-        fillRule="evenodd"
+        fill-rule="evenodd"
         stroke="currentColor"
-        clipRule="evenodd"
+        clip-rule="evenodd"
         d="M16 31C24.2843 31 31 24.2843 31 16C31 7.71573 24.2843 1 16 1C7.71573 1 1 7.71573 1 16C1 24.2843 7.71573 31 16 31Z"
-        strokeWidth="2"
+        stroke-width="2"
       />
-      <path d="M9 9L24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="square" />
-      <path d="M8.49512 23.4586L24.5049 9.54144" stroke="currentColor" strokeWidth="2" strokeLinecap="square" />
+      <path d="M9 9L24 24" stroke="currentColor" stroke-width="2" stroke-linecap="square" />
+      <path d="M8.49512 23.4586L24.5049 9.54144" stroke="currentColor" stroke-width="2" stroke-linecap="square" />
     </svg>
   ),
   deleteIcon: (props: SVGProps<SVGSVGElement>) => (
@@ -130,6 +130,11 @@ export const Icons = {
       <circle cx="50" cy="50" r="45" fill="#2ecc71" />
 
       <polyline points="25,50 40,65 75,30" fill="none" stroke="#ffffff" stroke-width="10" />
+    </svg>
+  ),
+  arrowUp: (props: SVGProps<SVGSVGElement>) => (
+    <svg {...props} stroke="currentColor" fill="currentColor" strokeWidth="0" viewBox="0 0 1024 1024" height="18" width="18" xmlns="http://www.w3.org/2000/svg">
+      <path d="M868 545.5L536.1 163a31.96 31.96 0 0 0-48.3 0L156 545.5a7.97 7.97 0 0 0 6 13.2h81c4.6 0 9-2 12.1-5.5L474 300.9V864c0 4.4 3.6 8 8 8h60c4.4 0 8-3.6 8-8V300.9l218.9 252.3c3 3.5 7.4 5.5 12.1 5.5h81c6.8 0 10.5-8 6-13.2z"></path>
     </svg>
   ),
 };
