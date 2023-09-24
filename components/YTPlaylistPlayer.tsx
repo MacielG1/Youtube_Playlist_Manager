@@ -18,6 +18,7 @@ import ModalDelete from "./modals/ModalDelete";
 import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Description from "./Description";
+import Tooltip from "./ToolTip";
 
 type Params = {
   list: string;
@@ -340,7 +341,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
           <div className={` relative w-full overflow-auto pb-[56.25%]`}>
             {!isLoaded && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
-                <Icons.spinIcon className="h-7 w-7 animate-spin text-blue-500" />
+                <Icons.spinIcon className="h-7 w-7 animate-spin text-indigo-500" />
                 <span className="sr-only">Loading...</span>
               </div>
             )}
@@ -362,46 +363,58 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         {isLoaded && (
           <div className="flex max-w-[80vw] flex-col">
             <div className="flex items-center justify-center gap-1 py-2 xs:gap-3 sm:py-1">
-              <button
-                className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                onClick={resetPlaylist}
-              >
-                <Icons.resetIcon className="h-8 w-8" />
-              </button>
-              <button
-                className=" cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, -10)}
-              >
-                <Icons.rewind10 className="h-8 w-8" />
-              </button>
-              <button
-                className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                onClick={previousVideo}
-              >
-                <Icons.pointerLeft className="h-8 w-8" />
-              </button>
-              <button
-                className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                onClick={nextVideo}
-              >
-                <Icons.pointerRight className="h-8 w-8" />
-              </button>
-              <button
-                className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, 10)}
-              >
-                <Icons.skip10 className="h-8 w-8" />
-              </button>
+              <Tooltip text="Restart Playlist">
+                <button
+                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  onClick={resetPlaylist}
+                >
+                  <Icons.resetIcon className="h-8 w-8" />
+                </button>
+              </Tooltip>
+              <Tooltip text="Rewind 10s">
+                <button
+                  className=" cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, -10)}
+                >
+                  <Icons.rewind10 className="h-8 w-8" />
+                </button>
+              </Tooltip>
+              <Tooltip text="Previous Video">
+                <button
+                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  onClick={previousVideo}
+                >
+                  <Icons.pointerLeft className="h-8 w-8" />
+                </button>
+              </Tooltip>
+              <Tooltip text="Next Video">
+                <button
+                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  onClick={nextVideo}
+                >
+                  <Icons.pointerRight className="h-8 w-8" />
+                </button>
+              </Tooltip>
+              <Tooltip text="Skip 10s">
+                <button
+                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, 10)}
+                >
+                  <Icons.skip10 className="h-8 w-8" />
+                </button>
+              </Tooltip>
 
-              <span className="min-w-[4rem] text-xl text-neutral-600 dark:text-[#818386]">
+              <span className="min-w-[3.5rem] px-1 text-xl text-neutral-600 dark:text-[#818386]">
                 {currentVideoIndex} / {plLengthRef.current}
               </span>
-              <button
-                className="cursor-pointer px-1 text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
-                onClick={openModal}
-              >
-                <Icons.closeIcon className="h-6 w-6" />
-              </button>
+              <Tooltip text="Delete Playlist">
+                <button
+                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
+                  onClick={openModal}
+                >
+                  <Icons.closeIcon className="h-8 w-8 " />
+                </button>
+              </Tooltip>
             </div>
             {/* Title */}
             <span className="text-balance break-words pb-[0.8rem] pt-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{playlistTitle}</span>
