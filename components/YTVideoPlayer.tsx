@@ -201,7 +201,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
             {/* Title */}
 
             <span className="text-balance break-words pb-[0.8rem] pt-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{videoTitle}</span>
-            {/* {description && <Description description={description} />} */}
+            {description && <Description description={description} />}
           </div>
         )}
         {isModalOpen && (
