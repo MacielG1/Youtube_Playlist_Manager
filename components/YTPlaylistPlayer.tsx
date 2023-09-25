@@ -136,16 +136,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     const index = (await PlaylistPlayerRef.current?.internalPlayer?.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
     setCurrentVideoIndex(index);
 
-    // get the video Id and set the description
-    let url = await PlaylistPlayerRef.current?.getInternalPlayer().getVideoUrl();
-    let videoId = new URL(url).searchParams.get("v") || "";
-    setDescription(
-      queryClient
-        .getQueryData<Items>(["playlists"])
-        ?.items.find((pl) => pl.id === playlistId)
-        ?.videosData?.find((v) => v.id === videoId)?.description || null,
-    );
-
     const intervalId = setInterval(() => {
       if (isPlayingVideoRef.current) {
         savePlaylistsProgress(e.target, playlistId, pageRef.current);
@@ -184,6 +174,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }
 
   async function onStateChange(e: YouTubeEvent) {
+    console.log("state changed", e);
     const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
     setCurrentVideoIndex(index);
 
@@ -333,6 +324,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
   let playlistTitle = reduceStringSize(params.title, 100);
 
+  console.log(description);
   return (
     <>
       <LogoButton />
@@ -417,9 +409,9 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               </Tooltip>
             </div>
             {/* Title */}
-            <span className="text-balance break-words pb-[0.8rem] pt-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{playlistTitle}</span>
+            <span className="text-balance break-words pt-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{playlistTitle}</span>
 
-            {/* {description && <Description description={description} />} */}
+            {description && <Description description={description} />}
           </div>
         )}
 

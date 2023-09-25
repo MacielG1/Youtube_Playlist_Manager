@@ -171,7 +171,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
           </div>
         </div>
         {isLoaded && (
-          <div className=" flex max-w-[80vw] flex-col">
+          <div className="flex max-w-[80vw] flex-col">
             <div className="flex items-center justify-center gap-1 py-2 xs:gap-3 sm:py-1">
               <Tooltip text="Rewind 10s">
                 <button
@@ -199,8 +199,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               </Tooltip>
             </div>
             {/* Title */}
+            <span className="text-balance break-words pt-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{videoTitle}</span>
 
-            <span className="text-balance break-words pb-[0.8rem] pt-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{videoTitle}</span>
             {description && <Description description={description} />}
           </div>
         )}
