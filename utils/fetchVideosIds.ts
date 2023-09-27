@@ -1,6 +1,6 @@
 import { Playlist } from "@/types";
 
-export default async function fetchVideosIds(playlistId: string, existingVideoIds: string[] = [], videosIdsRef?: React.MutableRefObject<string[]>) {
+export default async function fetchVideosIds(playlistId: string, existingVideoIds: string[] = [], videosIdsRef?: React.MutableRefObject<string[]>, isChannel?: boolean) {
   try {
     const res = await fetch(`/api/fetchVideosIds/${playlistId}`, {
       headers: {
@@ -17,6 +17,9 @@ export default async function fetchVideosIds(playlistId: string, existingVideoId
 
     const allVideosIds = data.map((item: Playlist) => item.id);
 
+    if (isChannel) {
+      allVideosIds.reverse();
+    }
     if (videosIdsRef) {
       videosIdsRef.current = allVideosIds;
     }

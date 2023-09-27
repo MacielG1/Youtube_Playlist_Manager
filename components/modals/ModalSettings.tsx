@@ -9,7 +9,7 @@ export default function ModalSettings({ onClose, content }: ModalSettingsProps) 
   let modal = (
     <>
       {/* Backdrop */}
-      <button type="button" className="fixed left-0 top-0 z-20 h-[100vh] w-full cursor-default bg-black bg-opacity-60" onClick={onClose} />
+      <button type="button" className="fixed left-0 top-0 z-20 h-[100vh] w-full cursor-default bg-black bg-opacity-70" onClick={onClose} />
       <>
         {/* Modal */}
         <div

@@ -3,7 +3,7 @@ import { useRef, useEffect, useState, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
-import type { Items, PlVideos } from "@/types";
+import type { Items, PlVideos, Playlist } from "@/types";
 import { Icons } from "@/assets/Icons";
 
 import fetchVideosIds from "@/utils/fetchVideosIds";
@@ -19,6 +19,8 @@ import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Description from "./Description";
 import Tooltip from "./ToolTip";
+import Image from "next/image";
+import { getThumbnailInfo } from "@/utils/getThumbnailInfo";
 
 type Params = {
   list: string;
@@ -30,6 +32,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(1);
   const [description, setDescription] = useState<string | null>(null);
+  const [videosList, setVideosList] = useState<Items["items"]>([]);
 
   const isPaused = useRef(false); // used to resume video if it was playing when delete modal was opened
   const pageRef = useRef(1);
@@ -58,6 +61,14 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     }
   }
 
+  let playlistInfo = { currentItem: 0, initialTime: 0, currentPage: 0, isChannel: false };
+
+  if (isBrowser) {
+    playlistInfo = JSON.parse(localStorage.getItem(item) || JSON.stringify({ currentItem: 0, initialTime: 0, currentPage: 1, isChannel: false }));
+  }
+
+  const { currentItem, initialTime, currentPage } = playlistInfo;
+
   let allIds = plVideos?.videosIds || [];
   let playlistIsInStorage = plVideos?.videosIds?.length;
   let smallerThan200 = plVideos.updatedTime && allIds.length == 0;
@@ -65,8 +76,24 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 24 * 60 * 60 * 1000;
   let olderThan3days = Date.now() - (plVideos.updatedTime || 0) > 3 * 24 * 60 * 60 * 1000;
 
-  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 40000; // to test
-  // let olderThan3days = Date.now() - (plVideos.updatedTime || 0) > 40000; // to test
+  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // to test
+  // let olderThan3days = Date.now() - (plVideos.updatedTime || 0) > 20000; // to test
+
+  async function updateQueryData(data: Playlist["videosData"], playlistId: string) {
+    queryClient.setQueryData<Items>(["playlists"], (prev) => {
+      if (!prev) return { items: [] };
+
+      const pl = prev.items.find((pl) => pl.id === playlistId);
+      if (pl) {
+        pl.videosData = data;
+      }
+
+      return {
+        ...prev,
+        items: [...prev.items],
+      };
+    });
+  }
 
   useEffect(() => {
     async function run() {
@@ -77,20 +104,26 @@ export default function YoutubePlayer({ params }: { params: Params }) {
           plLengthRef.current = playlistLength;
 
           if (playlistLength > 200) {
-            await fetchVideosIds(playlistId, allIds, allVideosIdsRef);
+            let data = await fetchVideosIds(playlistId, allIds, allVideosIdsRef, isChannel);
+
+            updateQueryData(data, playlistId);
           } else {
             localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ updatedTime: Date.now() }));
           }
         } else if (allIds.length && olderThan1day) {
           // if the playlist is bigger than 200 and older re-fetch new videos
+
           plLengthRef.current = allIds.length;
 
-          const data = await fetchVideosIds(playlistId, allIds, allVideosIdsRef);
+          const data = await fetchVideosIds(playlistId, allIds, allVideosIdsRef, isChannel);
+          updateQueryData(data, playlistId);
+
           plLengthRef.current = data?.length || allIds;
 
           setCurrentVideoIndex((prev) => prev); // Forces re-render so the ref above updates the UI
         } else if (allIds.length && !olderThan1day) {
           // if the playlist is saved and recent than 1 day, just set the length
+
           allVideosIdsRef.current = allIds;
           plLengthRef.current = allIds.length;
         } else if (!allIds.length) {
@@ -104,7 +137,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         plLengthRef.current = playlistLength;
 
         if (playlistLength > 200) {
-          await fetchVideosIds(playlistId, allIds, allVideosIdsRef);
+          const data = await fetchVideosIds(playlistId, allIds, allVideosIdsRef, isChannel);
+          updateQueryData(data, playlistId);
         } else {
           localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ updatedTime: Date.now() }));
         }
@@ -135,6 +169,9 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
     const index = (await PlaylistPlayerRef.current?.internalPlayer?.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
     setCurrentVideoIndex(index);
+
+    const vids = queryClient.getQueryData<Items>(["playlists"])?.items.find((pl) => pl.id === playlistId)?.videosData || [];
+    setVideosList(vids);
 
     const intervalId = setInterval(() => {
       if (isPlayingVideoRef.current) {
@@ -174,7 +211,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }
 
   async function onStateChange(e: YouTubeEvent) {
-    console.log("state changed", e);
     const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
     setCurrentVideoIndex(index);
 
@@ -259,14 +295,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     setCurrentVideoIndex(1);
   }
 
-  let playlistInfo = { currentItem: 0, initialTime: 0, currentPage: 0, isChannel: false };
-
-  if (isBrowser) {
-    playlistInfo = JSON.parse(localStorage.getItem(item) || JSON.stringify({ currentItem: 0, initialTime: 0, currentPage: 1, isChannel: false }));
-  }
-
-  const { currentItem, initialTime, currentPage } = playlistInfo;
-
   const plOptions: YouTubeProps["opts"] = useMemo(() => {
     pageRef.current = currentPage || 1;
     return {
@@ -282,11 +310,11 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     };
   }, []);
 
-  if (pageRef.current > 1 || isChannel) {
-    plOptions.playerVars.playlist = getVideosSlice(allIds, pageRef.current).join(",");
-  } else {
-    plOptions.playerVars.list = playlistId;
-  }
+  // if (pageRef.current > 1 || isChannel) {
+  plOptions.playerVars.playlist = getVideosSlice(allIds, pageRef.current).join(",");
+  // } else {
+  //   plOptions.playerVars.list = playlistId;
+  // }
 
   function onDelete() {
     onDeleteItems(playlistId, "playlists");
@@ -324,7 +352,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
   let playlistTitle = reduceStringSize(params.title, 100);
 
-  console.log(description);
   return (
     <>
       <LogoButton />

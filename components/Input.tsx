@@ -47,10 +47,7 @@ export default function Input() {
         }
 
         const playlistData = await getPlaylistsData(channelId);
-        const videosData = await fetchVideosIds(channelId);
-
-        const orderedVideos = videosData?.map((item: any) => item.id).toReversed();
-        localStorage.setItem(`plVideos=${channelId}`, JSON.stringify({ videosIds: orderedVideos, updatedTime: Date.now() }));
+        const videosData = await fetchVideosIds(channelId, [], undefined, true);
 
         if (playlistData?.items?.length) {
           queryClient.setQueryData<Items>(["playlists"], (prev) => {
@@ -95,7 +92,6 @@ export default function Input() {
         }
 
         const data = await getVideosData(videoId);
-        console.log(data);
 
         // Updating the query data with the new playlist
         if (data?.items?.length) {
