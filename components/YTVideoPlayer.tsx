@@ -15,6 +15,7 @@ import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Description from "./Description";
 import Tooltip from "./ToolTip";
+import { get } from "idb-keyval";
 
 type Params = {
   v: string;
@@ -51,13 +52,15 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     };
   }, []);
 
-  function onReady(e: YouTubeEvent) {
+  async function onReady(e: YouTubeEvent) {
     setIsLoaded(true);
 
     const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
     videoPlayerRef?.current?.internalPlayer.setPlaybackRate(plRate);
 
-    setDescription(queryClient.getQueryData<Items>(["videos"])?.items.find((v) => v.id === videoId)?.description || null);
+    let data = await get(`v=${videoId}`);
+    console.log(data);
+    setDescription(data.description);
 
     const intervalId = setInterval(() => {
       if (isPlayingVideoRef.current) {

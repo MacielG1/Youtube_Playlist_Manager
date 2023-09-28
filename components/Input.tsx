@@ -9,6 +9,7 @@ import toast from "react-hot-toast";
 import getVideosData from "@/utils/getVideosData";
 import getPlaylistsData from "@/utils/getPlaylistsData";
 import fetchVideosIds from "@/utils/fetchVideosIds";
+import { set } from "idb-keyval";
 
 export default function Input() {
   const [addedURL, setAddedURL] = useState("");
@@ -49,10 +50,9 @@ export default function Input() {
         const playlistData = await getPlaylistsData(channelId);
         const videosData = await fetchVideosIds(channelId, [], undefined, true);
 
+        await set(playlistKey, videosData);
         if (playlistData?.items?.length) {
           queryClient.setQueryData<Items>(["playlists"], (prev) => {
-            // add videosData Array to the playlist
-            playlistData.items[0].videosData = videosData;
             // if no playlists saved, return the new one
             if (!prev || !prev?.items?.length) return playlistData;
 
@@ -93,6 +93,8 @@ export default function Input() {
 
         const data = await getVideosData(videoId);
 
+        await set(videoKey, { id: videoId, description: data.items[0].description });
+
         // Updating the query data with the new playlist
         if (data?.items?.length) {
           queryClient.setQueryData<Items>(["videos"], (prev) => {
@@ -125,12 +127,12 @@ export default function Input() {
         const playlistData = await getPlaylistsData(playlistID);
         const videosData = await fetchVideosIds(playlistID);
 
+        console.log(videosData);
+        await set(playlistKey, videosData);
+
         // Updating the query data with the new playlist
         if (playlistData?.items?.length) {
           queryClient.setQueryData<Items>(["playlists"], (prev) => {
-            // add videosData Array to the playlist
-            playlistData.items[0].videosData = videosData;
-
             // if no playlists saved, return the new one
             if (!prev || !prev?.items?.length) return playlistData;
 
