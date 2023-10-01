@@ -26,7 +26,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
       if (item) {
         let scrollAmount;
         if (window.innerWidth > 1280) {
-          scrollAmount = item.offsetTop - 8;
+          scrollAmount = item.offsetTop - 10;
         } else {
           scrollAmount = item.offsetTop - 700;
         }
@@ -50,7 +50,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
         <div
           ref={sidebarRef}
           className={cn(
-            "custom-scrollbar 1.5xl:right-5 right-1 top-0 mt-12 flex max-h-[90vh] flex-col gap-3 overflow-y-auto overflow-x-hidden rounded-md p-1 px-2 pr-5 ring ring-neutral-300 dark:ring-neutral-800 2xl:right-11",
+            "custom-scrollbar right-1 top-0 mt-12 flex max-h-[90vh] flex-col gap-3 overflow-y-auto overflow-x-hidden rounded-md border border-neutral-400 p-1 px-2 pr-4 dark:border-neutral-700 1.5xl:right-5 2xl:right-11",
             className,
           )}
         >
@@ -58,16 +58,12 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
             const { thumbnailURL = "" } = getThumbnailInfo(video.thumbnails);
             const title = reduceStringSize(video.title, 60);
             return (
-              <button
-                onClick={() => playVideoAt(i)}
-                className="relative flex cursor-default flex-col items-center justify-center text-center first:pt-3 last:pb-3"
-                key={video.id}
-              >
+              <div className="relative flex cursor-default flex-col items-center justify-center text-center first:pt-3 last:pb-3" key={video.id}>
                 <div className="group flex aspect-video items-center justify-center gap-2 rounded-xl">
                   <span className="text-center text-xs">
                     {currentVideoIndex && currentVideoIndex - 1 === i ? <Icons.arrowRight className="h-4 w-4 text-indigo-500" /> : i + 1}
                   </span>
-                  <div className="flex transition duration-300">
+                  <div className="flex transition duration-300" onClick={() => playVideoAt(i)}>
                     <div className="h-auto cursor-pointer overflow-hidden rounded-xl">
                       <Image
                         src={thumbnailURL}
@@ -83,9 +79,11 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                   </div>
                 </div>
                 <h2 className="w-[10rem] max-w-fit overflow-hidden whitespace-normal break-words pl-5 text-xs font-normal text-black dark:text-neutral-100">
-                  <span className="cursor-pointer">{title}</span>
+                  <span className="cursor-pointer" onClick={() => playVideoAt(i)}>
+                    {title}
+                  </span>
                 </h2>
-              </button>
+              </div>
             );
           })}
         </div>

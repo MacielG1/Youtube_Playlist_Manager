@@ -21,8 +21,11 @@ export default function Description({ description }: { description: string }) {
   return (
     <div className={`flex w-[85vw] max-w-[85vw] flex-col justify-center px-8 py-3 text-sm text-neutral-400 sm:justify-start xl:w-[68vw] xl:max-w-[68vw]`}>
       <div className="mb-2">
-        <button onClick={toggleAccordion} className="flex items-center text-white transition-colors duration-300 hover:text-neutral-300 focus:outline-none md:pl-4">
-          Description {isAccordionOpen ? <Icons.arrowUp className="h-4 w-4 " /> : <Icons.arrowDown className="h-4 w-4 " />}
+        <button
+          onClick={toggleAccordion}
+          className="flex items-center text-base text-neutral-700  transition-colors duration-300 hover:text-neutral-950 focus:outline-none dark:text-white dark:hover:text-neutral-300 md:pl-4"
+        >
+          Description {isAccordionOpen ? <Icons.arrowUp className="ml-1 h-4 w-4" /> : <Icons.arrowDown className="ml-1 h-4 w-4" />}
         </button>
       </div>
       {isAccordionOpen && (
@@ -35,7 +38,7 @@ export default function Description({ description }: { description: string }) {
                     {part}
                   </Link>
                 ) : (
-                  <span key={i} className=" text-neutral-200">
+                  <span key={i} className=" text-neutral-900 dark:text-neutral-200">
                     {part}
                   </span>
                 ),

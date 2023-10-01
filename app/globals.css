@@ -26,7 +26,7 @@ body,
 .custom-scrollbar::-webkit-scrollbar-thumb {
     border-radius: 0.6rem;
     height: 2rem;
-    @apply dark:bg-neutral-600 bg-neutral-500
+    @apply  bg-neutral-500
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {

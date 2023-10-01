@@ -13,12 +13,6 @@ export const Icons = {
       />
     </svg>
   ),
-  arrowLeft: (props: SVGProps<SVGSVGElement>) => (
-    <svg {...props} version="1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="24" height="24" stroke="currentColor">
-      <path fill="currentColor" d="m4 19 14 11.7V7.3z" />
-      <path fill="currentColor" d="M42 27v13h-8V27c0-2.2-1.8-4-4-4H13v-8h17c6.6 0 12 5.4 12 12z" />
-    </svg>
-  ),
   pointerLeft: (props: SVGProps<SVGSVGElement>) => (
     <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
       <g transform="translate(24) scale(-1,1)">
@@ -133,15 +127,27 @@ export const Icons = {
     </svg>
   ),
   arrowUp: (props: SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" {...props}>
-      <path d="M10.5 21l7.5-7.5 7.5 7.5z" fill="currentColor" />
-      <path d="M0 0h36v36h-36z" fill="none" />
+    // <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" {...props}>
+    //   <path d="M10.5 21l7.5-7.5 7.5 7.5z" fill="currentColor" />
+    //   <path d="M0 0h36v36h-36z" fill="none" />
+    // </svg>
+    <svg data-name="1.Arrow Up" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props} fill="currentColor">
+      <path d="M12 24a12 12 0 1 1 12-12 12.013 12.013 0 0 1-12 12zm0-22a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2z" />
+      <path d="M15.293 11.707 12 8.414l-3.293 3.293-1.414-1.414L12 5.586l4.707 4.707-1.414 1.414z" />
+      <path d="M11 7h2v11h-2z" />
     </svg>
   ),
   arrowDown: (props: SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" {...props}>
-      <path d="M10.5 15l7.5 7.5 7.5-7.5z" fill="currentColor" />
-      <path d="M0 0h36v36h-36z" fill="none" />
+    // <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" {...props}>
+    //   <path d="M10.5 15l7.5 7.5 7.5-7.5z" fill="currentColor" />
+    //   <path d="M0 0h36v36h-36z" fill="none" />
+    // </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props} fill="currentColor">
+      <g>
+        <path d="M12 24a12 12 0 1 1 12-12 12.013 12.013 0 0 1-12 12zm0-22a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2z" />
+        <path d="m12 18.414-4.707-4.707 1.414-1.414L12 15.586l3.293-3.293 1.414 1.414L12 18.414z" />
+        <path d="M11 6h2v11h-2z" />
+      </g>
     </svg>
   ),
   arrowRight: (props: SVGProps<SVGSVGElement>) => (
