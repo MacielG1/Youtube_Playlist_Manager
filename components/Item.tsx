@@ -87,9 +87,9 @@ export default function Item({ title, thumbnails, id, type }: Params) {
   let url = !isDragging && !isSorting ? (type === "Playlist" ? `/playlist/p?list=${id}&title=${decodedTitled}` : `/video/v?v=${id}&title=${decodedTitled}`) : "#";
 
   return (
-    <div className={`mt-2 outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
+    <div className={`mt-2  outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
       <div className="relative flex cursor-default flex-col items-center justify-center ">
-        <div className="group aspect-video w-full overflow-hidden rounded-xl ">
+        <div className="group aspect-video w-full select-none overflow-hidden rounded-xl ">
           <button
             onClick={openModal}
             className="peer absolute right-0 top-0 z-10 rounded-bl-md rounded-tr-[0.50rem] bg-neutral-800 p-1 text-neutral-400 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-500"

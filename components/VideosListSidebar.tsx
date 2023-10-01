@@ -56,13 +56,13 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
           )}
         >
           {videosList.map((video, i) => {
-            const { thumbnailURL = "" } = getThumbnailInfo(video.thumbnails);
+            const { thumbnailURL = "", noBlackBars = false } = getThumbnailInfo(video.thumbnails);
             const title = reduceStringSize(video.title, 60);
             return (
               <div className="relative flex cursor-default flex-col items-center justify-center text-center first:pt-3 last:pb-3" key={video.id}>
                 <div className="group flex aspect-video items-center justify-center gap-2 rounded-xl">
                   <span className="text-center text-xs">
-                    {currentVideoIndex && currentVideoIndex - 1 === i ? <Icons.arrowRight className="h-4 w-4 text-indigo-500" /> : i + 1}
+                    {currentVideoIndex && currentVideoIndex - 1 === i ? <Icons.arrowRight className="h-5 w-5 text-indigo-500" /> : i + 1}
                   </span>
                   <div className="flex transition duration-300" onClick={() => playVideoAt(i)}>
                     <div className="h-auto cursor-pointer overflow-hidden rounded-xl">
@@ -72,7 +72,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                         width={150}
                         height={150}
                         style={{ width: windowWidth < 700 ? "40vw" : windowWidth < 1280 ? "25vw" : windowWidth < 1500 ? "130px" : "150px", height: "auto" }}
-                        className="rounded-xl transition duration-300 hover:scale-105"
+                        className={`rounded-xl transition duration-300 hover:scale-[1.03] ${noBlackBars ? "-my-[1px]" : "-my-[14px]"} `}
                         priority
                         unoptimized
                       />
