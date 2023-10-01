@@ -127,27 +127,29 @@ export const Icons = {
     </svg>
   ),
   arrowUp: (props: SVGProps<SVGSVGElement>) => (
-    // <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" {...props}>
-    //   <path d="M10.5 21l7.5-7.5 7.5 7.5z" fill="currentColor" />
-    //   <path d="M0 0h36v36h-36z" fill="none" />
-    // </svg>
-    <svg data-name="1.Arrow Up" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props} fill="currentColor">
-      <path d="M12 24a12 12 0 1 1 12-12 12.013 12.013 0 0 1-12 12zm0-22a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2z" />
-      <path d="M15.293 11.707 12 8.414l-3.293 3.293-1.414-1.414L12 5.586l4.707 4.707-1.414 1.414z" />
-      <path d="M11 7h2v11h-2z" />
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="colorCurrent"
+      viewBox="0 0 330 330"
+      transform="matrix(1,-1.2246467991473532e-16,-1.2246467991473532e-16,-1,0,0)"
+      {...props}
+    >
+      <circle id="XMLID_24_" cx="165" cy="165" r="160" stroke="currentColor" stroke-width="10" fill="fillCurrent"></circle>
+      <path
+        id="XMLID_25_"
+        d="M255.606,135.606l-79.998,80c-2.813,2.813-6.628,4.394-10.606,4.394c-3.979,0-7.793-1.58-10.607-4.394  l-80.002-80c-5.858-5.857-5.858-15.355,0-21.213c5.857-5.858,15.355-5.858,21.213,0l69.396,69.393l69.392-69.393  c5.857-5.858,15.355-5.858,21.213,0C261.465,120.251,261.465,129.749,255.606,135.606z"
+        fill="currentColor"
+      ></path>
     </svg>
   ),
   arrowDown: (props: SVGProps<SVGSVGElement>) => (
-    // <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36" {...props}>
-    //   <path d="M10.5 15l7.5 7.5 7.5-7.5z" fill="currentColor" />
-    //   <path d="M0 0h36v36h-36z" fill="none" />
-    // </svg>
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" {...props} fill="currentColor">
-      <g>
-        <path d="M12 24a12 12 0 1 1 12-12 12.013 12.013 0 0 1-12 12zm0-22a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2z" />
-        <path d="m12 18.414-4.707-4.707 1.414-1.414L12 15.586l3.293-3.293 1.414 1.414L12 18.414z" />
-        <path d="M11 6h2v11h-2z" />
-      </g>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="colorCurrent" viewBox="0 0 330 330" {...props}>
+      <circle id="XMLID_24_" cx="165" cy="165" r="160" stroke="currentColor" stroke-width="10" fill="fillCurrent"></circle>
+      <path
+        id="XMLID_25_"
+        d="M255.606,135.606l-79.998,80c-2.813,2.813-6.628,4.394-10.606,4.394c-3.979,0-7.793-1.58-10.607-4.394  l-80.002-80c-5.858-5.857-5.858-15.355,0-21.213c5.857-5.858,15.355-5.858,21.213,0l69.396,69.393l69.392-69.393  c5.857-5.858,15.355-5.858,21.213,0C261.465,120.251,261.465,129.749,255.606,135.606z"
+        fill="currentColor"
+      ></path>
     </svg>
   ),
   arrowRight: (props: SVGProps<SVGSVGElement>) => (
