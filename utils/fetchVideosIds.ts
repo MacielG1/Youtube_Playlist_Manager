@@ -13,16 +13,19 @@ export default async function fetchVideosIds(playlistId: string, existingVideoId
     if (!res.ok) {
       return console.log("Error", res.statusText);
     }
-    const data = await res.json();
+    let data = await res.json();
 
     const allVideosIds = data.map((item: Playlist) => item.id);
 
     if (isChannel) {
       allVideosIds.reverse();
+      data.reverse(); // Reverse the data array
     }
+
     if (videosIdsRef) {
       videosIdsRef.current = allVideosIds;
     }
+
     localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ videosIds: allVideosIds, updatedTime: Date.now() }));
 
     return data;

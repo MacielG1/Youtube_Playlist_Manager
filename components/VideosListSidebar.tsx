@@ -44,6 +44,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
     }
   }, [currentVideoIndex, videosList]);
 
+  console.log("videosList", videosList);
   return (
     <aside>
       {videosList.length > 0 && (
