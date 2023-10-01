@@ -156,9 +156,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
     setCurrentVideoIndex(index);
 
-    // get the video Id and set the description
-    let url = await PlaylistPlayerRef.current?.internalPlayer.getVideoUrl();
-    let videoId = new URL(url).searchParams.get("v") || "";
+    let videoId = e.target.getVideoData().video_id;
     let pl = await get(`pl=${playlistId}`);
 
     const desc = pl?.find((v: PlaylistAPI) => v.id === videoId)?.description;
@@ -212,7 +210,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     const player = PlaylistPlayerRef.current?.getInternalPlayer();
     const index = await player.getPlaylistIndex();
 
-    console.log(plLengthRef.current, index);
     if (plLengthRef.current > 200) {
       if ((index + 1) % 200 === 0) {
         pageRef.current += 1;
@@ -303,7 +300,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       <LogoButton />
       <div className="flex flex-col items-center justify-center pt-12  ">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:max-w-[64vw] xl:pt-0 2xl:max-w-[67vw]">
-          <div className={` relative w-full overflow-auto pb-[56.25%]`}>
+          <div className=" relative w-full overflow-auto pb-[56.25%]">
             {!isLoaded && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
                 <Icons.spinIcon className="h-7 w-7 animate-spin text-indigo-500" />
@@ -325,10 +322,10 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             />
           </div>
 
-          {windowWidth > 1279 && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className=" xl:absolute" />}
+          {windowWidth > 1279 && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className="xl:absolute" />}
         </div>
         {isLoaded && (
-          <div className="flex max-w-[80vw] flex-col">
+          <div className="flex max-w-[80vw] flex-col pt-0 2xl:pt-2">
             <div className="flex items-center justify-center gap-1 py-2 xs:gap-3 sm:py-0">
               <Tooltip text="Restart Playlist">
                 <button

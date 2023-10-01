@@ -28,7 +28,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
         if (window.innerWidth > 1280) {
           scrollAmount = item.offsetTop - 8;
         } else {
-          scrollAmount = item.offsetTop - 550;
+          scrollAmount = item.offsetTop - 700;
         }
 
         if (isInitialMount.current) {
@@ -63,7 +63,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                 className="relative flex cursor-default flex-col items-center justify-center text-center first:pt-3 last:pb-3"
                 key={video.id}
               >
-                <div className="group flex aspect-video items-center justify-center gap-2 rounded-xl ">
+                <div className="group flex aspect-video items-center justify-center gap-2 rounded-xl">
                   <span className="text-center text-xs">
                     {currentVideoIndex && currentVideoIndex - 1 === i ? <Icons.arrowRight className="h-4 w-4 text-indigo-500" /> : i + 1}
                   </span>

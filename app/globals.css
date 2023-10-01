@@ -20,21 +20,19 @@ body,
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
+    width: 0.6rem
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: #646668;
-    border-radius: 4px;
-    /* Increase the height of the scrollbar thumb */
-    height: 24px;
+    border-radius: 0.6rem;
+    height: 2rem;
+    @apply dark:bg-neutral-600 bg-neutral-500
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
     background-color: transparent;
     margin-top: 5px;
-    /* Increase the height of the scrollbar track to match the thumb */
-    height: 32px;
+    height: 3rem;
 }
 
 @layer base {
