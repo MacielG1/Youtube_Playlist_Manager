@@ -25,11 +25,16 @@ export default function Description({ description }: { description: string }) {
           onClick={toggleAccordion}
           className="flex items-center text-base text-neutral-700  transition-colors duration-300 hover:text-neutral-950 focus:outline-none dark:text-white dark:hover:text-neutral-300 md:pl-4"
         >
-          Description {isAccordionOpen ? <Icons.arrowUp className="ml-1 h-4 w-4" /> : <Icons.arrowDown className="ml-1 h-4 w-4" />}
+          Description{" "}
+          {isAccordionOpen ? (
+            <Icons.arrowUp className="ml-1 h-4 w-4 fill-neutral-200 text-neutral-800   dark:fill-neutral-800 dark:text-white " />
+          ) : (
+            <Icons.arrowDown className="ml-1 h-4 w-4 fill-neutral-200 text-neutral-800   dark:fill-neutral-800 dark:text-white " />
+          )}
         </button>
       </div>
       {isAccordionOpen && (
-        <div className="flex flex-col gap-1 py-7 pt-2 ">
+        <div className="flex flex-col gap-1 pb-10 pt-2 ">
           {lines.map((line, index) => (
             <span key={index} className="text-sm md:text-base">
               {line.split(urlRegex).map((part, i) =>
