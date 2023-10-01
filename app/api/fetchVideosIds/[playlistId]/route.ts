@@ -1,4 +1,4 @@
-import { PlaylistAPI } from "@/types";
+import { Playlist, PlaylistAPI } from "@/types";
 import { NextResponse } from "next/server";
 
 const API_KEY = process.env.YOUTUBE_API;
@@ -11,6 +11,8 @@ type Params = {
 let MAX_AMOUNT_OF_PAGES = 50;
 export async function POST(req: Request, { params }: { params: Params }): Promise<NextResponse> {
   const playlistsToFetch = params.playlistId;
+
+  // const { existingVideoIds } = await req.json();
 
   if (!playlistsToFetch) return new NextResponse("No Playlist Id", { status: 404 });
 
@@ -41,14 +43,19 @@ export async function POST(req: Request, { params }: { params: Params }): Promis
       }
     } while (nextPageToken);
 
-    // Extract the data we need
-    let newData = allVideos.map((item: PlaylistAPI) => {
-      return {
-        id: item.snippet.resourceId?.videoId,
-        title: item.snippet.title,
-        thumbnails: item.snippet.thumbnails,
-        description: item.snippet.description,
-      };
+    let newData: Playlist[] = [];
+
+    allVideos.forEach((item: PlaylistAPI) => {
+      const title = item.snippet.title;
+
+      if (title !== "Private video" && title !== "Deleted video" && item.snippet.resourceId?.videoId) {
+        newData.push({
+          id: item.snippet.resourceId.videoId,
+          title: title,
+          thumbnails: item.snippet.thumbnails || {},
+          description: item.snippet.description,
+        });
+      }
     });
 
     return NextResponse.json(newData);

@@ -5,7 +5,7 @@ import { Icons } from "@/assets/Icons";
 
 let texts = [
   { id: 1, text: "This app makes it simple to organize and manage your playlists" },
-  { id: 2, text: "You can add either a public or unlisted YouTube playlists, or type a channel name to create a playlist with all the videos from it" },
+  { id: 2, text: "You can add either public or unlisted YouTube playlists, or enter a channel name to create a playlist with all the videos from it" },
   { id: 3, text: "You can also drag and drop the items to reorder them as you like" },
   { id: 4, text: "The app will remember the playlist and video position and will continue to play from where you left off" },
 ];

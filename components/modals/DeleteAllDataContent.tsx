@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { clear, del } from "idb-keyval";
 import { useRouter } from "next/navigation";
 
 type Props = {
@@ -9,7 +10,7 @@ export default function DeleteAllDataContent({ closeModals }: Props) {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  function deleteAllData() {
+  async function deleteAllData() {
     localStorage.removeItem("playlists");
     localStorage.removeItem("videos");
 
@@ -22,6 +23,7 @@ export default function DeleteAllDataContent({ closeModals }: Props) {
       }
     });
 
+    await clear();
     queryClient.clear();
     closeModals();
     router.refresh();

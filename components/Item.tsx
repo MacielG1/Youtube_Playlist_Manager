@@ -12,6 +12,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import LinkWrapper from "./LinkWrapper";
 import { getThumbnailInfo } from "@/utils/getThumbnailInfo";
+import { del } from "idb-keyval";
 
 type Params = {
   title: string;
@@ -35,7 +36,7 @@ export default function Item({ title, thumbnails, id, type }: Params) {
     mutationFn: async () => onDelete,
   });
 
-  function onDelete(id: string) {
+  async function onDelete(id: string) {
     if (type === "Playlist") {
       localStorage.removeItem(`pl=${id}`);
       localStorage.removeItem(`plVideos=${id}`);
@@ -53,6 +54,8 @@ export default function Item({ title, thumbnails, id, type }: Params) {
         const newPlaylists = { ...prev, items: newPlaylistsData };
         return newPlaylists;
       });
+
+      await del(`pl=${id}`);
     } else if (type === "Video") {
       localStorage.removeItem(`v=${id}`);
 
@@ -101,7 +104,7 @@ export default function Item({ title, thumbnails, id, type }: Params) {
                 alt={title}
                 width={350}
                 height={350}
-                // style={{ width: "100%", height: "auto" }}
+                style={{ width: "100%", height: "auto" }}
                 className={`rounded-xl ${noBlackBars ? "-my-[1px]" : "-my-[32px]"} ${isDragging ? "cursor-grabbing" : "cursor-pointer"}`}
                 priority
                 unoptimized

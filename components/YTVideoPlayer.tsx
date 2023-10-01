@@ -37,6 +37,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   const videoId = params.v;
   const item = `v=${videoId}`;
+
   let isBrowser = typeof window !== "undefined";
   useEffect(() => {
     const player = videoPlayerRef?.current?.getInternalPlayer(); // returns the iframe video  player

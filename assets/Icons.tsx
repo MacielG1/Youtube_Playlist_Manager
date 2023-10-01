@@ -144,4 +144,9 @@ export const Icons = {
       <path d="M0 0h36v36h-36z" fill="none" />
     </svg>
   ),
+  arrowRight: (props: SVGProps<SVGSVGElement>) => (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" {...props}>
+      <polygon points="30,20 30,80 80,50" fill="currentColor" />
+    </svg>
+  ),
 };

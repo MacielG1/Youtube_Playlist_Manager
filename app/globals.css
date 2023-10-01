@@ -19,6 +19,23 @@ body,
     -webkit-text-size-adjust: 100%; 
 }
 
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #646668;
+    border-radius: 4px;
+    /* Increase the height of the scrollbar thumb */
+    height: 24px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background-color: transparent;
+    margin-top: 5px;
+    /* Increase the height of the scrollbar track to match the thumb */
+    height: 32px;
+}
 
 @layer base {
     :root {

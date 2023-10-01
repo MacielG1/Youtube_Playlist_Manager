@@ -18,8 +18,9 @@ import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Description from "./Description";
 import Tooltip from "./ToolTip";
-import PlaylistSidebar from "./PlaylistSidebar";
-import { get, set } from "idb-keyval";
+import { del, get, set } from "idb-keyval";
+import VideosListSidebar from "./VideosListSidebar";
+import useWindowWidth from "@/hooks/useWindowWidth";
 
 type Params = {
   list: string;
@@ -30,8 +31,9 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(1);
+
   const [description, setDescription] = useState<string | null>(null);
-  // const [videosList, setVideosList] = useState<Items["items"]>([]);
+  const [videosList, setVideosList] = useState<Items["items"]>([]);
 
   const isPaused = useRef(false); // used to resume video if it was playing when delete modal was opened
   const pageRef = useRef(1);
@@ -41,8 +43,9 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const isPlayingVideoRef = useRef<boolean | null>(false);
   const videosIdsRef = useRef<string[]>([]);
 
-  const router = useRouter();
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const windowWidth = useWindowWidth();
 
   const playlistId = params.list;
   const item = `pl=${playlistId}`;
@@ -70,8 +73,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   videosIdsRef.current = plVideos?.videosIds || [];
   plLengthRef.current = videosIdsRef.current.length;
 
-  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 24 * 60 * 60 * 1000;
-  let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // to test
+  let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 24 * 60 * 60 * 1000;
+  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // to test
 
   useEffect(() => {
     async function run() {
@@ -79,7 +82,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
       if (shouldFetch) {
         const data = await fetchVideosIds(playlistId, videosIdsRef.current, videosIdsRef, isChannel);
-        plLengthRef.current = data.length;
+        plLengthRef.current = data?.length;
         await set(`pl=${playlistId}`, data);
       }
     }
@@ -109,6 +112,9 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     const index = (await PlaylistPlayerRef.current?.internalPlayer?.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
     setCurrentVideoIndex(index);
 
+    let vidsData = await get(`pl=${playlistId}`);
+    if (vidsData) setVideosList(vidsData);
+
     const intervalId = setInterval(() => {
       if (isPlayingVideoRef.current) {
         savePlaylistsProgress(e.target, playlistId, pageRef.current);
@@ -136,7 +142,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       playbackSpeed: 1,
     };
     setTimeout(async () => {
-      let state = e.target.getPlayerState();
+      let state = e.target?.getPlayerState();
       if (state == -1) {
         localStorage.setItem(`pl=${playlistId}`, JSON.stringify(data));
         await resetPlaylist();
@@ -155,7 +161,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     let videoId = new URL(url).searchParams.get("v") || "";
     let pl = await get(`pl=${playlistId}`);
 
-    const desc = pl?.find((v: PlaylistAPI) => v.id === videoId).description;
+    const desc = pl?.find((v: PlaylistAPI) => v.id === videoId)?.description;
     setDescription(desc);
   }
 
@@ -206,6 +212,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     const player = PlaylistPlayerRef.current?.getInternalPlayer();
     const index = await player.getPlaylistIndex();
 
+    console.log(plLengthRef.current, index);
     if (plLengthRef.current > 200) {
       if ((index + 1) % 200 === 0) {
         pageRef.current += 1;
@@ -221,6 +228,13 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       player.playVideoAt(index + 1);
       player.seekTo(0);
     }
+  }
+  async function playVideoAt(index: number) {
+    const player = PlaylistPlayerRef.current?.getInternalPlayer();
+
+    pageRef.current = Math.floor(index / 200) + 1;
+    const paginatedIndex = index % 200;
+    await loadPlaylist(player, videosIdsRef.current, pageRef.current, paginatedIndex);
   }
 
   async function resetPlaylist() {
@@ -239,14 +253,14 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         listType: "playlist",
         index: currentItem + 1,
         start: Math.floor(initialTime) || 0 || 1,
-        origin: window?.location?.origin || "http://localhost:3000",
+        origin: isBrowser ? window?.location?.origin : "https://localhost:3000",
       },
     };
   }, []);
 
   plOptions.playerVars.playlist = getVideosSlice(videosIdsRef.current, pageRef.current).join(",");
 
-  function onDelete() {
+  async function onDelete() {
     onDeleteItems(playlistId, "playlists");
 
     queryClient.setQueryData<Items>(["playlists"], (oldData) => {
@@ -258,6 +272,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       }
       return oldData;
     });
+
+    await del(item);
 
     isPlayingVideoRef.current = null;
     router.replace("/");
@@ -285,8 +301,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   return (
     <>
       <LogoButton />
-      <div className="flex flex-col items-center justify-center pt-10  ">
-        <div className="videoPlayer relativeflex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:pt-0 2xl:max-w-[73vw]">
+      <div className="flex flex-col items-center justify-center pt-12  ">
+        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:max-w-[64vw] xl:pt-0 2xl:max-w-[67vw]">
           <div className={` relative w-full overflow-auto pb-[56.25%]`}>
             {!isLoaded && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
@@ -308,11 +324,12 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               className={`${isLoaded ? "visible" : "hidden"} absolute left-0 right-0 top-0 h-full w-full border-none`}
             />
           </div>
-          {/* <PlaylistSidebar videosList={videosList} /> */}
+
+          {windowWidth > 1279 && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className=" xl:absolute" />}
         </div>
         {isLoaded && (
           <div className="flex max-w-[80vw] flex-col">
-            <div className="flex items-center justify-center gap-1 py-2 xs:gap-3 sm:py-1">
+            <div className="flex items-center justify-center gap-1 py-2 xs:gap-3 sm:py-0">
               <Tooltip text="Restart Playlist">
                 <button
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
@@ -367,10 +384,10 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               </Tooltip>
             </div>
             {/* Title */}
-            <span className="text-balance break-words pt-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{playlistTitle}</span>
+            <span className="text-balance break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">{playlistTitle}</span>
 
             {description && <Description description={description} />}
-            <div></div>
+            <div>{windowWidth < 1279 && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className="" />}</div>
           </div>
         )}
 

@@ -10,7 +10,7 @@ export default function Description({ description }: { description: string }) {
   function toggleAccordion() {
     if (isAccordionOpen) {
       window.scrollTo({ top: 0, behavior: "instant" });
-    } else {
+    } else if (window.innerWidth > 1280) {
       setTimeout(() => {
         window.scrollTo({ top: document.body.scrollHeight, behavior: "instant" });
       }, 1);
@@ -19,14 +19,14 @@ export default function Description({ description }: { description: string }) {
   }
 
   return (
-    <div className={`my-1 w-[85vw] max-w-[85vw] px-6 py-5 text-sm text-neutral-400 xl:w-[72vw] xl:max-w-[72vw] `}>
+    <div className={`flex w-[85vw] max-w-[85vw] flex-col justify-center px-8 py-3 text-sm text-neutral-400 sm:justify-start xl:w-[68vw] xl:max-w-[68vw]`}>
       <div className="mb-2">
-        <button onClick={toggleAccordion} className="flex items-center pl-4 text-white transition-colors duration-300 hover:text-neutral-300 focus:outline-none">
+        <button onClick={toggleAccordion} className="flex items-center text-white transition-colors duration-300 hover:text-neutral-300 focus:outline-none md:pl-4">
           Description {isAccordionOpen ? <Icons.arrowUp className="h-4 w-4 " /> : <Icons.arrowDown className="h-4 w-4 " />}
         </button>
       </div>
       {isAccordionOpen && (
-        <div className="flex flex-col gap-1 py-7 pt-2">
+        <div className="flex flex-col gap-1 py-7 pt-2 ">
           {lines.map((line, index) => (
             <span key={index} className="text-sm md:text-base">
               {line.split(urlRegex).map((part, i) =>

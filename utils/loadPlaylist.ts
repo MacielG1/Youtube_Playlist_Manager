@@ -4,7 +4,7 @@ import { YouTubePlayer } from "react-youtube";
 export default async function loadPlaylist(Player: YouTubePlayer, videoIds: string[], page = 1, index = 0) {
   const videosArr = getVideosSlice(videoIds, page);
 
-  await Player.cuePlaylist({ playlist: videosArr, index: index, startSeconds: 0.1 });
+  await Player.cuePlaylist({ playlist: videosArr, index, startSeconds: 0.1 });
 
   setTimeout(async () => {
     const loadPlaylist = async () => {
