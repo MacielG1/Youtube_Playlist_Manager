@@ -99,6 +99,9 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   function onDelete() {
     onDeleteItems(videoId, "videos");
 
+    isPlayingVideoRef.current = null;
+    router.replace("/");
+
     queryClient.setQueryData<Items>(["videos"], (oldData) => {
       if (oldData) {
         return {
@@ -107,9 +110,6 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         };
       }
     });
-
-    isPlayingVideoRef.current = null;
-    router.replace("/");
   }
 
   let initialTime = 0;

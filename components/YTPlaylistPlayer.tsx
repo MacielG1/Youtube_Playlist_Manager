@@ -257,8 +257,29 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
   plOptions.playerVars.playlist = getVideosSlice(videosIdsRef.current, pageRef.current).join(",");
 
+  // async function onDelete() {
+  //   onDeleteItems(playlistId, "playlists");
+
+  //   queryClient.setQueryData<Items>(["playlists"], (oldData) => {
+  //     if (oldData) {
+  //       return {
+  //         ...oldData,
+  //         items: oldData.items.filter((pl) => pl.id !== playlistId),
+  //       };
+  //     }
+  //     return oldData;
+  //   });
+
+  //   await del(item);
+
+  //   isPlayingVideoRef.current = null;
+  //   router.replace("/");
+  // }
   async function onDelete() {
     onDeleteItems(playlistId, "playlists");
+
+    isPlayingVideoRef.current = null;
+    router.replace("/");
 
     queryClient.setQueryData<Items>(["playlists"], (oldData) => {
       if (oldData) {
@@ -271,9 +292,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     });
 
     await del(item);
-
-    isPlayingVideoRef.current = null;
-    router.replace("/");
   }
 
   async function openModal() {
