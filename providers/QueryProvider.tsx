@@ -31,8 +31,13 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
 
   const persister = createIDBPersister();
 
+  const options = {
+    persister,
+    maxAge: 60 * 1000 * 60 * 24, // 24 hours
+  };
+
   return (
-    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+    <PersistQueryClientProvider client={queryClient} persistOptions={options}>
       {children}
     </PersistQueryClientProvider>
   );

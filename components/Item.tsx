@@ -1,4 +1,3 @@
-"use client";
 import { useMutation } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import Image from "next/image";
@@ -13,15 +12,18 @@ import Link from "next/link";
 import LinkWrapper from "./LinkWrapper";
 import { getThumbnailInfo } from "@/utils/getThumbnailInfo";
 import { del } from "idb-keyval";
+import { Roboto } from "next/font/google";
+const font = Roboto({ subsets: ["latin"], weight: ["400", "700"] });
 
 type Params = {
   title: string;
   thumbnails: Thumbnails | undefined;
   id: string;
   type: string;
+  duration?: string;
 };
 
-export default function Item({ title, thumbnails, id, type }: Params) {
+export default function Item({ title, thumbnails, id, type, duration }: Params) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging, isSorting } = useSortable({ id, disabled: isModalOpen });
@@ -81,15 +83,15 @@ export default function Item({ title, thumbnails, id, type }: Params) {
     e.stopPropagation();
     setIsModalOpen(!isModalOpen);
   }
-  const { thumbnailURL = "", noBlackBars = false } = useMemo(() => getThumbnailInfo(thumbnails), [thumbnails]);
+  const { thumbnailURL = "" } = useMemo(() => getThumbnailInfo(thumbnails), [thumbnails]);
 
   let decodedTitled = encodeURIComponent(title);
   let url = !isDragging && !isSorting ? (type === "Playlist" ? `/playlist/p?list=${id}&title=${decodedTitled}` : `/video/v?v=${id}&title=${decodedTitled}`) : "#";
 
   return (
-    <div className={`mt-2  outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
-      <div className="relative flex cursor-default flex-col items-center justify-center ">
-        <div className="group aspect-video w-full select-none overflow-hidden rounded-xl ">
+    <div className={`mt-2 flex flex-col items-center outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
+      <div className="relative  flex cursor-default flex-col items-center justify-center ">
+        <div className="group flex aspect-video w-full select-none items-center justify-center overflow-hidden rounded-xl ">
           <button
             onClick={openModal}
             className="peer absolute right-0 top-0 z-10 rounded-bl-md rounded-tr-[0.50rem] bg-neutral-800 p-1 text-neutral-400 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-500"
@@ -98,14 +100,14 @@ export default function Item({ title, thumbnails, id, type }: Params) {
             <Icons.deleteIcon className="h-4 w-4" />
           </button>
           <div className="transition duration-300 hover:scale-105 peer-hover:scale-105" {...attributes} {...listeners}>
-            <LinkWrapper href={url} className="h-auto w-full cursor-pointer">
+            <LinkWrapper href={url} className="w-full cursor-pointer ">
               <Image
                 src={thumbnailURL}
                 alt={title}
                 width={350}
                 height={350}
-                style={{ width: "100%", height: "auto" }}
-                className={`rounded-xl ${noBlackBars ? "-my-[1px]" : "-my-[32px]"} ${isDragging ? "cursor-grabbing" : "cursor-pointer"}`}
+                style={{ width: "100%", height: "100%" }}
+                className={` ${isDragging ? "cursor-grabbing" : "cursor-pointer"}`}
                 priority
                 unoptimized
                 placeholder="blur"
@@ -113,13 +115,22 @@ export default function Item({ title, thumbnails, id, type }: Params) {
               />
             </LinkWrapper>
           </div>
+          {type === "Video" && (
+            <span
+              className={`${font.className} absolute bottom-0 right-0 z-10 rounded-tl-md
+             bg-black px-1 pb-[0.1rem] pt-[0.18rem] text-[0.8rem] leading-3 tracking-wide text-white`}
+            >
+              {duration}
+            </span>
+          )}
         </div>
-        <h2 className="h-11 max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-sm font-medium text-black dark:text-white md:max-w-[18rem]">
-          <Link className="cursor-pointer" href={url}>
-            {title}
-          </Link>
-        </h2>
       </div>
+      <h2 className="h-11 max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-sm font-medium text-black dark:text-white md:max-w-[18rem]">
+        <Link className="cursor-pointer" href={url}>
+          {title}
+        </Link>
+      </h2>
+
       {isModalOpen && (
         <ModalDelete
           onClose={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {

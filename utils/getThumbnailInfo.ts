@@ -8,7 +8,7 @@ export function getThumbnailInfo(thumbnails?: Thumbnails) {
     thumbnailURL = thumbnails?.medium?.url || thumbnails?.default?.url || "";
     noBlackBars = true;
   } else {
-    thumbnailURL = thumbnails?.maxres?.url || thumbnails?.standard?.url || thumbnails?.high?.url || thumbnails?.medium?.url || thumbnails?.default?.url || "";
+    thumbnailURL = thumbnails?.maxres?.url || thumbnails?.standard?.url || thumbnails?.high?.url || thumbnails?.medium?.url || "";
     noBlackBars = /(maxres|medium)/.test(thumbnailURL);
   }
 

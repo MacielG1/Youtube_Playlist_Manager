@@ -58,7 +58,7 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
             )}
             <div className="mx-4 grid grid-cols-1 place-items-center gap-x-4 gap-y-3 pl-3 pt-1 xs:grid-cols-2 sm:pl-7 md:grid-cols-3 lg:mx-6 lg:grid-cols-4 2xl:mx-8 2xl:grid-cols-5 2xl:pt-2">
               {items?.map((playlist) => {
-                return <Item key={playlist.id} id={playlist.id} title={playlist.title} thumbnails={playlist.thumbnails} type={title} />;
+                return <Item key={playlist.id} id={playlist.id} duration={playlist.duration} title={playlist.title} thumbnails={playlist.thumbnails} type={title} />;
               })}
             </div>
           </>

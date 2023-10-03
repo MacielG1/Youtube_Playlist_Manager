@@ -9,6 +9,20 @@ export type PlaylistAPI = {
     };
     description?: string;
   };
+  contentDetails?: {
+    itemCount?: number;
+  };
+};
+export type VideoAPI = {
+  id: string;
+  snippet: {
+    title: string;
+    thumbnails?: Thumbnails;
+    description?: string;
+  };
+  contentDetails: {
+    duration: string;
+  };
 };
 
 export type Playlist = {
@@ -17,6 +31,7 @@ export type Playlist = {
   thumbnails: Thumbnails;
   description?: string;
   videosData?: Video[];
+  duration?: string;
 };
 export type Video = {
   id: string;

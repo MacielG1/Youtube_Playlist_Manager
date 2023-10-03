@@ -61,7 +61,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
     let data = await get(`v=${videoId}`);
     console.log(data);
-    setDescription(data.description);
+    setDescription(data?.description);
 
     const intervalId = setInterval(() => {
       if (isPlayingVideoRef.current) {
@@ -203,7 +203,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               </Tooltip>
             </div>
             {/* Title */}
-            <span className="text-balance break-words pt-1 text-center tracking-wide text-neutral-800 dark:text-neutral-200">{videoTitle}</span>
+            <span className="text-balance break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">{videoTitle}</span>
 
             {description && <Description description={description} />}
           </div>
