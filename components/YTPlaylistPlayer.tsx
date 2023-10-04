@@ -31,6 +31,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(1);
+  const [currentVideoTitle, setCurrentVideoTitle] = useState("");
 
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
@@ -109,6 +110,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
     PlaylistPlayerRef.current?.internalPlayer.setPlaybackRate(plRate);
 
+    setCurrentVideoTitle(e.target.getVideoData().title || "");
+
     const index = (await PlaylistPlayerRef.current?.internalPlayer?.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
     setCurrentVideoIndex(index);
 
@@ -155,6 +158,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   async function onStateChange(e: YouTubeEvent) {
     const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
     setCurrentVideoIndex(index);
+
+    setCurrentVideoTitle(e.target.getVideoData().title || "");
 
     let videoId = e.target.getVideoData().video_id;
     let pl = await get(`pl=${playlistId}`);
@@ -399,7 +404,11 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               </Tooltip>
             </div>
             {/* Title */}
-            <span className="text-balance break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">{playlistTitle}</span>
+            {currentVideoTitle && (
+              <span className="text-balance break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">
+                {currentVideoTitle} - {playlistTitle}
+              </span>
+            )}
 
             {description && <Description description={description} />}
             <div>{windowWidth < 1279 && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className="" />}</div>
