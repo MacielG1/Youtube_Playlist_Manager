@@ -1,6 +1,6 @@
 export default function convertDurationTime(duration: string): string {
   // Use a single regular expression to extract hours, minutes, and seconds
-  const regex = /PT(?:(\d+)H)?(?:(\d+)M)?(\d+)S/;
+  const regex = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
 
   // Use regex to match and extract hours, minutes, and seconds
   const [, hours, minutes, seconds] = duration.match(regex) || [];
@@ -11,7 +11,7 @@ export default function convertDurationTime(duration: string): string {
   const s = Number(seconds) || 0;
 
   // Format the time as HH:MM:SS
-  const formattedTime = (h > 0 ? h.toString().padStart(2, "0") + ":" : "") + m.toString().padStart(2, "0") + ":" + s.toString().padStart(2, "0");
+  const formattedTime = (h > 0 ? h.toString() + ":" : "") + m.toString().padStart(2, "0") + ":" + s.toString().padStart(2, "0");
 
   return formattedTime;
 }
