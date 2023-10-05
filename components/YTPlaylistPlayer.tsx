@@ -322,7 +322,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     <>
       <LogoButton />
       <div className="flex flex-col items-center justify-center pt-12  ">
-        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:max-w-[64vw] xl:pt-0 2xl:max-w-[67vw]">
+        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:max-w-[62vw] xl:pt-0 2xl:max-w-[67vw]">
           <div className=" relative w-full overflow-auto pb-[56.25%]">
             {!isLoaded && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
@@ -348,7 +348,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
           {windowWidth > 1279 && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className="xl:absolute" />}
         </div>
         {isLoaded && (
-          <div className="flex max-w-[80vw] flex-col pt-0 2xl:pt-2">
+          <div className="flex max-w-[80vw] flex-col pt-0 md:max-w-[60vw] 2xl:max-w-[80vw] 2xl:pt-2">
             <div className="flex items-center justify-center gap-1 py-2 xs:gap-3 sm:py-0">
               <Tooltip text="Restart Playlist">
                 <button
@@ -405,13 +405,13 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             </div>
             {/* Title */}
             {currentVideoTitle && (
-              <span className="text-balance break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">
+              <span className="flex justify-center break-words pb-5 text-center tracking-wide text-neutral-800 dark:text-neutral-200  2xl:pb-0">
                 {currentVideoTitle} - {playlistTitle}
               </span>
             )}
 
             {description && <Description description={description} />}
-            <div>{windowWidth < 1279 && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className="" />}</div>
+            <div>{windowWidth < 1279 && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} />}</div>
           </div>
         )}
 
