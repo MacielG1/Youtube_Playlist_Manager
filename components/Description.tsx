@@ -1,8 +1,15 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Icons } from "@/assets/Icons";
+import { type } from "os";
+import { cn } from "@/utils/cn";
 
-export default function Description({ description }: { description: string }) {
+type Props = {
+  description: string;
+  className?: string;
+};
+
+export default function Description({ description, className }: Props) {
   const urlRegex = /(https?:\/\/[^\s]+)/g;
   const lines = description.split("\n");
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
@@ -19,7 +26,7 @@ export default function Description({ description }: { description: string }) {
   }
 
   return (
-    <div className={`flex w-[85vw] max-w-[85vw] flex-col justify-center px-8 py-3 text-sm text-neutral-400 sm:justify-start xl:w-[68vw] xl:max-w-[68vw]`}>
+    <div className={cn(`flex w-[85vw] max-w-[85vw] flex-col justify-center px-8 py-3 text-sm text-neutral-400 sm:justify-start xl:w-[68vw] xl:max-w-[68vw]`, className)}>
       <div className="mb-2">
         <button
           onClick={toggleAccordion}
