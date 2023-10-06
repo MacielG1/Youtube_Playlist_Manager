@@ -3,7 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import type { Playlist } from "@/types";
 import { Icons } from "@/assets/Icons";
-
 import getPlaylistsData from "@/utils/getPlaylistsData";
 import getVideosData from "@/utils/getVideosData";
 import Link from "next/link";

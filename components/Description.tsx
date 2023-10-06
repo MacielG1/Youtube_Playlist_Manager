@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { Icons } from "@/assets/Icons";
-import { type } from "os";
 import { cn } from "@/utils/cn";
 
 type Props = {

@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { clear, del } from "idb-keyval";
+import { clear } from "idb-keyval";
 import { useRouter } from "next/navigation";
 
 type Props = {

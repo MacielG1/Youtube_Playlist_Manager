@@ -125,7 +125,7 @@ export default function Item({ title, thumbnails, id, type, duration }: Params) 
           )}
         </div>
       </div>
-      <h2 className="h-11 max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-sm font-medium text-black dark:text-white md:max-w-[18rem]">
+      <h2 className=" h-11 max-w-[10rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-sm font-medium text-black dark:text-white xs:max-w-[12rem] sm:max-w-[14rem] md:max-w-[15rem] md:max-w-[18rem]">
         <Link className="cursor-pointer" href={url}>
           {title}
         </Link>
