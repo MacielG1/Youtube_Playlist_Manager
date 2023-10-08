@@ -20,11 +20,11 @@ body,
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-    width: 0.6rem
+    width: 0.5rem
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-    border-radius: 0.6rem;
+    border-radius: 0.5rem;
     height: 2rem;
     @apply  bg-neutral-500
 }

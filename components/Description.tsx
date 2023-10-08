@@ -29,9 +29,9 @@ export default function Description({ description, className }: Props) {
       <div className="mb-2">
         <button
           onClick={toggleAccordion}
-          className="flex items-center text-base text-neutral-700  transition-colors duration-300 hover:text-neutral-950 focus:outline-none dark:text-white dark:hover:text-neutral-300 md:pl-4"
+          className="flex items-center text-base text-neutral-700 transition-colors duration-300 hover:text-neutral-950 focus:outline-none dark:text-white dark:hover:text-neutral-300 md:pl-4"
         >
-          Description{" "}
+          Description
           {isAccordionOpen ? (
             <Icons.arrowUp className="ml-1 h-4 w-4 fill-neutral-200 text-neutral-800   dark:fill-neutral-800 dark:text-white " />
           ) : (

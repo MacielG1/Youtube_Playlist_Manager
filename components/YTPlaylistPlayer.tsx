@@ -262,24 +262,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
   plOptions.playerVars.playlist = getVideosSlice(videosIdsRef.current, pageRef.current).join(",");
 
-  // async function onDelete() {
-  //   onDeleteItems(playlistId, "playlists");
-
-  //   queryClient.setQueryData<Items>(["playlists"], (oldData) => {
-  //     if (oldData) {
-  //       return {
-  //         ...oldData,
-  //         items: oldData.items.filter((pl) => pl.id !== playlistId),
-  //       };
-  //     }
-  //     return oldData;
-  //   });
-
-  //   await del(item);
-
-  //   isPlayingVideoRef.current = null;
-  //   router.replace("/");
-  // }
   async function onDelete() {
     onDeleteItems(playlistId, "playlists");
 
@@ -391,7 +373,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                 </button>
               </Tooltip>
 
-              <span className="min-w-[3.5rem] px-1 text-xl text-neutral-600 dark:text-[#818386]">
+              <span className="min-w-[3.5rem] px-1 pb-[0.3rem] text-xl text-neutral-600 dark:text-[#818386]">
                 {currentVideoIndex} / {plLengthRef.current}
               </span>
               <Tooltip text="Delete Playlist">
