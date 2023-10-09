@@ -14,7 +14,7 @@ export default function About() {
   return (
     <div className="pt-25 relative isolate z-10 flex items-center lg:h-screen">
       <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-        <div className="mx-auto flex max-w-2xl flex-col-reverse gap-16 bg-inherit px-6 py-16 ring-0 ring-black/10 dark:ring-white/10 sm:rounded-3xl sm:p-8 lg:mx-0 lg:max-w-none lg:flex-row lg:items-center lg:bg-zinc-200/90 lg:py-16 lg:ring-1 lg:dark:bg-white/5 xl:gap-x-20 xl:px-20">
+        <div className="flex max-w-2xl flex-col-reverse gap-16 bg-inherit px-6 py-16 ring-0 ring-black/10 dark:ring-white/10 max-lg:mx-auto sm:rounded-3xl sm:p-8 lg:max-w-none lg:flex-row lg:items-center lg:bg-zinc-200/90 lg:py-16 lg:ring-1 lg:dark:bg-white/5 xl:gap-x-20 xl:px-20">
           <Image
             src={aboutIMG}
             className="hidden w-full rounded-2xl object-cover shadow-xl xs:block xs:flex-none sm:h-96 lg:h-auto lg:max-w-sm"
@@ -22,7 +22,7 @@ export default function About() {
             placeholder="blur"
             priority
           />
-          <div className="w-full flex-auto pt-10 xs:pt-0 ">
+          <div className="w-full flex-auto max-sm:pt-10 ">
             <h2 className="mb-8 text-center text-3xl font-bold tracking-wide text-black dark:text-neutral-200 sm:text-4xl">How It Works!</h2>
             <div className="flex flex-col  gap-3 text-lg">
               {texts.map((i) => (
