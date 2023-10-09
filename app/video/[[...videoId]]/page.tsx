@@ -7,11 +7,7 @@ type searchParams = {
 };
 
 export default function page({ searchParams }: { searchParams: searchParams }) {
-  return (
-    <>
-      <YTVideoPlayer params={searchParams} />
-    </>
-  );
+  return <YTVideoPlayer params={searchParams} />;
 }
 
 export async function generateMetadata({ searchParams }: { searchParams: searchParams }) {

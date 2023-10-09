@@ -86,7 +86,7 @@ export default function Item({ title, thumbnails, id, type, duration }: Params) 
   const { thumbnailURL = "" } = useMemo(() => getThumbnailInfo(thumbnails), [thumbnails]);
 
   let decodedTitled = encodeURIComponent(title);
-  let url = !isDragging && !isSorting ? (type === "Playlist" ? `/playlist/p?list=${id}&title=${decodedTitled}` : `/video/v?v=${id}&title=${decodedTitled}`) : "#";
+  let url = !isDragging && !isSorting ? (type === "Playlist" ? `/playlist?list=${id}&title=${decodedTitled}` : `/video?v=${id}&title=${decodedTitled}`) : "#";
 
   return (
     <div className={`mt-2 flex flex-col items-center outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
