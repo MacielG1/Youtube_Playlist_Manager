@@ -5,6 +5,7 @@ import { cn } from "@/utils/cn";
 import { getThumbnailInfo } from "@/utils/getThumbnailInfo";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 
 type Props = {
@@ -44,6 +45,13 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
     }
   }, [currentVideoIndex, videosList]);
 
+  function leftClickHandler(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, index: number) {
+    if (e.button === 0) {
+      e.preventDefault(); // prevent left click default behavior
+      playVideoAt(index);
+    }
+  }
+
   return (
     <aside>
       {videosList.length > 0 && (
@@ -57,13 +65,14 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
           {videosList.map((video, i) => {
             const { thumbnailURL = "", noBlackBars = false } = getThumbnailInfo(video.thumbnails);
             const title = reduceStringSize(video.title, 60);
+            const url = `/video/v?v=${video.id}&title=${encodeURIComponent(video.title)}`;
             return (
               <div className="relative flex cursor-default flex-col items-center justify-center text-center first:pt-3 last:pb-3" key={video.id}>
                 <div className="group flex aspect-video items-center justify-center gap-2 rounded-xl">
                   <span className="text-center text-xs">
                     {currentVideoIndex && currentVideoIndex - 1 === i ? <Icons.arrowRight className="h-5 w-5 text-indigo-500" /> : i + 1}
                   </span>
-                  <div className="flex transition duration-300" onClick={() => playVideoAt(i)}>
+                  <Link onClick={(e) => leftClickHandler(e, i)} href={url} className="flex transition duration-300">
                     <div className="h-auto cursor-pointer overflow-hidden rounded-xl">
                       <Image
                         src={thumbnailURL}
@@ -76,13 +85,15 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                         unoptimized
                       />
                     </div>
-                  </div>
+                  </Link>
                 </div>
-                <h2 className="w-[10rem] max-w-fit overflow-hidden whitespace-normal break-words pl-5 text-xs font-normal text-black dark:text-neutral-100">
-                  <span className="cursor-pointer" onClick={() => playVideoAt(i)}>
-                    {title}
-                  </span>
-                </h2>
+                <Link
+                  href={url}
+                  onClick={(e) => leftClickHandler(e, i)}
+                  className="w-[10rem] max-w-fit overflow-hidden whitespace-normal break-words pl-5 text-xs font-normal text-black dark:text-neutral-100"
+                >
+                  <span className="cursor-pointer">{title}</span>
+                </Link>
               </div>
             );
           })}
