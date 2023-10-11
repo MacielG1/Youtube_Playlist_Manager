@@ -18,7 +18,8 @@ export default function Description({ description, className }: Props) {
       window.scrollTo({ top: 0, behavior: "instant" });
     } else if (window.innerWidth > 1280) {
       setTimeout(() => {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+        const screenHeight = window.innerHeight;
+        window.scrollTo({ top: (screenHeight * 98) / 100, behavior: "smooth" });
       }, 1);
     }
     setIsAccordionOpen((prev) => !prev);
