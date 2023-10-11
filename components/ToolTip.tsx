@@ -28,7 +28,7 @@ export default function Tooltip({ text, children }: Props) {
         {children}
       </div>
       {isVisible && (
-        <div className="absolute bottom-[120%] left-1/2 z-10 mt-5 -translate-x-1/2 transform whitespace-nowrap rounded bg-neutral-200 p-1 py-2 text-sm font-medium text-black shadow-md dark:bg-neutral-800 dark:font-normal dark:text-white">
+        <div className="absolute bottom-[108%] left-1/2 z-10 mt-5 -translate-x-1/2 transform whitespace-nowrap rounded bg-neutral-200 p-1 py-1 text-sm font-medium text-black shadow-md dark:bg-neutral-800 dark:font-normal dark:text-white">
           {text}
         </div>
       )}
