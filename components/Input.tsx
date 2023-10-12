@@ -127,7 +127,6 @@ export default function Input() {
         const playlistData = await getPlaylistsData(playlistID);
         const videosData = await fetchVideosIds(playlistID);
 
-        console.log(videosData);
         await set(playlistKey, videosData);
 
         // Updating the query data with the new playlist

@@ -387,7 +387,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             </div>
             {/* Title */}
             {currentVideoTitle && (
-              <span className="flex justify-center break-words pb-5 text-center tracking-wide text-neutral-800 dark:text-neutral-200 2xl:pb-0 2xl:pt-[0.15rem]">
+              <span className="flex justify-center break-words pb-5 text-center tracking-wide text-neutral-800 dark:text-neutral-200 2xl:pb-0 ">
                 {currentVideoTitle} - {playlistTitle}
               </span>
             )}

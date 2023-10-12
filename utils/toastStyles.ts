@@ -15,12 +15,13 @@ export const toastError: ToastOptions = {
 };
 
 export const toastSuccess: ToastOptions = {
-  position: "top-center",
+  position: "top-right",
   style: {
     border: "1px solid #14ff76",
     padding: "12px",
     color: "#b5b5b5",
     backgroundColor: "#000",
+    marginRight: "5rem",
   },
   iconTheme: {
     primary: "#14ff76",
