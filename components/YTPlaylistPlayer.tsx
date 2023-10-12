@@ -74,15 +74,15 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   videosIdsRef.current = plVideos?.videosIds || [];
   plLengthRef.current = videosIdsRef.current.length;
 
-  let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 24 * 60 * 60 * 1000;
-  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // to test
+  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 24 * 60 * 60 * 1000;
+  let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // to test
 
   useEffect(() => {
     async function run() {
       const shouldFetch = !videosIdsRef.current.length || olderThan1day;
 
       if (shouldFetch) {
-        const data = await fetchVideosIds(playlistId, videosIdsRef.current, videosIdsRef, isChannel);
+        const data = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
         plLengthRef.current = data?.length;
         await set(`pl=${playlistId}`, data);
       }

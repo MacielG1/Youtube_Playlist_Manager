@@ -1,13 +1,22 @@
 import { Playlist } from "@/types";
+import getPlaylistSize from "./getPlaylistSize";
+import { get } from "idb-keyval";
 
-export default async function fetchVideosIds(playlistId: string, existingVideoIds: string[] = [], videosIdsRef?: React.MutableRefObject<string[]>, isChannel?: boolean) {
+export default async function fetchVideosIds(playlistId: string, videosIdsRef?: React.MutableRefObject<string[]>, isChannel?: boolean) {
+  const currentPlaylistSize = await getPlaylistSize(playlistId);
+  let savedVideos = await get(`pl=${playlistId}`);
+
+  if (savedVideos && savedVideos.length === currentPlaylistSize) {
+    return savedVideos;
+  }
+
   try {
     const res = await fetch(`/api/fetchVideosIds/${playlistId}`, {
       headers: {
         "Content-Type": "application/json",
       },
       method: "POST",
-      body: JSON.stringify({ existingVideoIds }),
+      // body: JSON.stringify({ existingVideoIds }),
     });
 
     if (!res.ok) {

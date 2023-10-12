@@ -106,7 +106,7 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
           }
 
           const playlistData = await getPlaylistsData(channelId);
-          const videosData = await fetchVideosIds(channelId, [], undefined, true);
+          const videosData = await fetchVideosIds(channelId, undefined, true);
 
           await set(playlistKey, videosData);
 

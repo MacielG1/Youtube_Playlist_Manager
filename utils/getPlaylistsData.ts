@@ -20,6 +20,14 @@ export default async function getPlaylistsData(newPlaylistId?: string) {
       body: JSON.stringify({ playlistsIds }),
     });
 
+    if (!res.ok) {
+      if (res.status === 429) {
+        throw new Error("Too many requests. Please try again later.");
+      } else {
+        throw new Error("Something went wrong. Please try again later.");
+      }
+    }
+
     let data = await res.json();
     if (!data) {
       console.log("Error", res.statusText);
@@ -29,6 +37,6 @@ export default async function getPlaylistsData(newPlaylistId?: string) {
     return data;
   } catch (error) {
     console.log("Error in getPlaylistsData", error);
-    return {};
+    throw error;
   }
 }

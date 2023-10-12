@@ -339,7 +339,7 @@ export default function Input() {
         }
 
         const playlistData = await getPlaylistsData(channelId);
-        const videosData = await fetchVideosIds(channelId, [], undefined, true);
+        const videosData = await fetchVideosIds(channelId, undefined, true);
 
         await set(playlistKey, videosData);
         if (playlistData?.items?.length) {
@@ -378,8 +378,9 @@ export default function Input() {
         return;
       }
     } catch (error) {
-      console.log(error);
-      toast.error("Something Went Wrong, Try again Later!", toastError);
+      if (error instanceof Error) {
+        toast.error(error.message, toastError);
+      }
     } finally {
       setIsLoading(false);
     }
