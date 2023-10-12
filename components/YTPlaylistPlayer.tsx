@@ -82,7 +82,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       const shouldFetch = !videosIdsRef.current.length || olderThan1day;
 
       if (shouldFetch) {
-        const data = await fetchVideosIds(playlistId, videosIdsRef.current, videosIdsRef, isChannel);
+        const data = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
         plLengthRef.current = data?.length;
         await set(`pl=${playlistId}`, data);
       }

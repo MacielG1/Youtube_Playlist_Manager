@@ -7,7 +7,11 @@ export default async function getChannelId(name: string) {
       method: "GET",
     });
     if (!res.ok) {
-      return null;
+      if (res.status === 429) {
+        throw new Error("Too many requests. Please try again later.");
+      } else {
+        throw new Error("Something went wrong. Please try again later.");
+      }
     }
 
     const channelId = await res.json();
@@ -18,6 +22,6 @@ export default async function getChannelId(name: string) {
     return channelId;
   } catch (e) {
     console.log(e);
-    return null;
+    throw e;
   }
 }
