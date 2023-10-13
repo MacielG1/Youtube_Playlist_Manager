@@ -21,6 +21,7 @@ export default async function getPlaylistsData(newPlaylistId?: string) {
     });
 
     if (!res.ok) {
+      console.log("Error", res);
       if (res.status === 429) {
         throw new Error("Too many requests. Please try again later.");
       } else {

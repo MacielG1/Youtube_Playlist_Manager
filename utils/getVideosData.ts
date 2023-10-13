@@ -19,6 +19,7 @@ export default async function getVideoData(newVideoId?: string) {
       body: JSON.stringify({ videosIds }),
     });
     if (!res.ok) {
+      console.log("Error", res);
       if (res.status === 429) {
         throw new Error("Too many requests. Please try again later.");
       } else {

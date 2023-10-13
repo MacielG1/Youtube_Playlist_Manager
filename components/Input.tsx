@@ -232,21 +232,20 @@ export default function Input() {
         toast.error("Please Enter a URL!", toastError);
         return;
       }
-      let isChannelName, playlistID, videoId, isChannelUrl, isChannelNameUrl, url;
+      let isChannelName = false;
+      let playlistID, videoId, isChannelUrl, isChannelNameUrl, url;
 
       try {
         url = new URL(addedURL);
-        isChannelName = false;
-        playlistID = url.searchParams.get("list");
-        videoId = url.searchParams.get("v");
-        isChannelUrl = url.pathname.includes("channel");
-        isChannelNameUrl = url.pathname.startsWith("/@");
       } catch (error) {
         isChannelName = true; // if not url is a entered name
       }
 
-      if (videoId) {
-        console.log(url!.pathname.split("/")[1].replace("@", ""));
+      if (url) {
+        playlistID = url.searchParams.get("list");
+        videoId = url.searchParams.get("v");
+        isChannelUrl = url.pathname.includes("channel");
+        isChannelNameUrl = url.pathname.startsWith("/@");
       }
 
       // Video
