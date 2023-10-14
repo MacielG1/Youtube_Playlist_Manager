@@ -197,12 +197,12 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               </Tooltip>
               <Tooltip text="Open on Youtube">
                 <Link
-                  href={`https://www.youtube.com/watch?v=${videoId}`}
+                  href={`https://www.youtube.com/watch?v=${videoId}&t=${Math.floor(initialTime)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
                 >
-                  <Icons.youtubeOpen className="h-8 w-8 fill-neutral-200 text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
+                  <Icons.youtubeOpen className="h-8 w-8 fill-neutral-200 px-[0.075rem] text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
                 </Link>
               </Tooltip>
               <Tooltip text="Delete Video">
@@ -210,7 +210,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
                   onClick={openModal}
                 >
-                  <Icons.closeIcon className="h-8 w-8 " />
+                  <Icons.closeIcon className="h- w-8 " />
                 </button>
               </Tooltip>
             </div>
