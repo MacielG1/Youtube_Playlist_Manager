@@ -75,7 +75,7 @@ export default function AllPlaylists() {
         </div>
       )}
 
-      <section className="pb-2 max-md:pb-6">
+      <section className="pb-2' max-md:pb-6">
         <ItemsList title="Playlist" setItems={setPlaylistItems} items={playlistItems} otherTypeVideos={videoItems} />
         <ItemsList title="Video" setItems={setVideoItems} items={videoItems} otherTypeVideos={playlistItems} />
       </section>

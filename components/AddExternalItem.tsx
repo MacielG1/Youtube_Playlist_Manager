@@ -140,8 +140,9 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
     run();
   }, []);
   return (
-    <div className="flex min-h-[10vh] w-full items-center justify-center">
-      <Icons.spinIcon className="h-6 w-6 animate-spin text-indigo-500" />
+    <div className="flex min-h-[10vh] w-full items-center justify-center gap-2">
+      <span className="text-base tracking-wide text-indigo-100">Adding Item</span>
+      <Icons.loadingIcon className="h-6 w-6 text-indigo-500" />
     </div>
   );
 }
