@@ -132,7 +132,7 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
           className={`
            relative inline-flex items-center rounded-md border border-neutral-950 bg-neutral-200 px-[0.43rem]  py-[0.43rem] 
             text-base font-medium text-neutral-950 shadow-md ring-offset-background transition-colors 
-          duration-300 hover:cursor-pointer hover:border hover:bg-white focus-visible:outline-none  dark:bg-neutral-800  dark:text-neutral-100 dark:hover:bg-neutral-900
+          duration-300 hover:cursor-pointer hover:border hover:bg-white focus-visible:outline-none  dark:bg-neutral-800  dark:text-neutral-100 dark:hover:bg-neutral-950
           ${isExportable ? "max-w-[5.2rem]" : "w-[7.2rem] max-w-[7.2rem] pl-[1.9rem]"}`}
         >
           Import

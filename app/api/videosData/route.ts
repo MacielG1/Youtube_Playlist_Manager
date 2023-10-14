@@ -1,4 +1,4 @@
-import { PlaylistAPI, VideoAPI } from "@/types";
+import { VideoAPI } from "@/types";
 import convertDurationTime from "@/utils/convertDurationTime";
 import { NextResponse } from "next/server";
 

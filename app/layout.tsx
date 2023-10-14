@@ -26,7 +26,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </ThemeProvider>
         </QueryProvider>
-        <div id="modal-root" />
+        <div id="modal-delete" />
+        <div id="modal-settings" />
       </body>
     </html>
   );
