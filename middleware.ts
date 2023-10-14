@@ -17,7 +17,7 @@ const shortRangeLimiter = new Ratelimit({
 // Create a long range limiter for 100 requests per day
 const longRangeLimiter = new Ratelimit({
   redis: redis,
-  limiter: Ratelimit.fixedWindow(200, "1 d"),
+  limiter: Ratelimit.fixedWindow(500, "1 d"),
   prefix: "ratelimit:long",
 });
 

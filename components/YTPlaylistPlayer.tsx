@@ -21,6 +21,7 @@ import Tooltip from "./ToolTip";
 import { del, get, set } from "idb-keyval";
 import VideosListSidebar from "./VideosListSidebar";
 import useWindowWidth from "@/hooks/useWindowWidth";
+import Link from "next/link";
 
 type Params = {
   list: string;
@@ -39,6 +40,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const isPaused = useRef(false); // used to resume video if it was playing when delete modal was opened
   const pageRef = useRef(1);
   const plLengthRef = useRef(0);
+  const currentVideoId = useRef(0);
 
   const PlaylistPlayerRef = useRef<YouTube | null>(null);
   const isPlayingVideoRef = useRef<boolean | null>(false);
@@ -162,6 +164,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     setCurrentVideoTitle(e.target.getVideoData().title || "");
 
     let videoId = e.target.getVideoData().video_id;
+    currentVideoId.current = videoId;
     let pl = await get(`pl=${playlistId}`);
 
     const desc = pl?.find((v: PlaylistAPI) => v.id === videoId)?.description;
@@ -331,7 +334,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         </div>
         {isLoaded && (
           <div className="flex max-w-[80vw] flex-col md:max-w-[60vw] 2xl:max-w-[65vw] 2xl:pt-2">
-            <div className="flex items-center justify-center gap-1 py-2 xs:gap-3 sm:py-0">
+            <div className="flex justify-center gap-1 py-2 xs:gap-3 sm:py-0">
               <Tooltip text="Restart Playlist">
                 <button
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
@@ -372,8 +375,18 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   <Icons.skip10 className="h-8 w-8" />
                 </button>
               </Tooltip>
-
-              <span className="min-w-[3.5rem] px-1 pb-[0.3rem] text-xl text-neutral-600 dark:text-[#818386]">
+              <Tooltip text="Open on Youtube">
+                <Link
+                  // href={`https://www.youtube.com/playlist?list=${playlistId}`}
+                  href={`https://www.youtube.com/watch?v=${currentVideoId.current}&list=${playlistId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
+                >
+                  <Icons.youtubeOpen className="h-8 w-8 fill-neutral-200 text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
+                </Link>
+              </Tooltip>
+              <span className="min-w-[3.5rem] whitespace-nowrap px-1 pt-[0.15rem] text-xl text-neutral-600 dark:text-[#818386]">
                 {currentVideoIndex} / {plLengthRef.current}
               </span>
               <Tooltip text="Delete Playlist">

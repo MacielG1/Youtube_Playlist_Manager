@@ -16,6 +16,8 @@ import reduceStringSize from "@/utils/reduceStringLength";
 import Description from "./Description";
 import Tooltip from "./ToolTip";
 import { get } from "idb-keyval";
+import Link from "next/link";
+import Button from "./Button";
 
 type Params = {
   v: string;
@@ -176,7 +178,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         </div>
         {isLoaded && (
           <div className="flex max-w-[80vw] flex-col">
-            <div className="flex items-center justify-center gap-1 py-2 xs:gap-3 sm:py-1">
+            <div className="flex  justify-center gap-1 py-2 xs:gap-3 sm:py-1">
               <Tooltip text="Rewind 10s">
                 <button
                   className=" cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
@@ -192,6 +194,16 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                 >
                   <Icons.skip10 className="h-8 w-8" />
                 </button>
+              </Tooltip>
+              <Tooltip text="Open on Youtube">
+                <Link
+                  href={`https://www.youtube.com/watch?v=${videoId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
+                >
+                  <Icons.youtubeOpen className="h-8 w-8 fill-neutral-200 text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
+                </Link>
               </Tooltip>
               <Tooltip text="Delete Video">
                 <button
