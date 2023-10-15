@@ -34,6 +34,7 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
   const options = {
     persister,
     maxAge: 60 * 1000 * 60 * 24, // 24 hours
+    // maxAge: 21, //  1 minute
   };
 
   return (

@@ -58,7 +58,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
         <div
           ref={sidebarRef}
           className={cn(
-            "custom-scrollbar right-1 top-0 mt-4 flex max-h-[90vh] flex-col gap-3 overflow-y-auto overflow-x-hidden rounded-md border border-neutral-400 p-1 px-2 pr-4 dark:border-neutral-700 lg:mt-12 1.5xl:right-5 2xl:right-11",
+            "custom-scrollbar right-1 top-0 mt-4 flex max-h-[90vh] flex-col gap-3 overflow-y-auto overflow-x-hidden rounded-md border border-neutral-400 p-1 px-2 pr-[1.05rem] dark:border-neutral-700 lg:mt-12 1.5xl:right-5 2xl:right-11",
             className,
           )}
         >
@@ -80,6 +80,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                         width={150}
                         height={150}
                         style={{ width: windowWidth < 700 ? "40vw" : windowWidth < 1280 ? "25vw" : windowWidth < 1500 ? "130px" : "150px", height: "auto" }}
+                        // styles height needs to be auto for no layout shift to happen when hovering
                         className={`rounded-xl transition duration-300 hover:scale-[1.03] ${noBlackBars ? "-my-[1px]" : "-my-[14px]"} `}
                         priority
                         unoptimized

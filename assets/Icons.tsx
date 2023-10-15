@@ -170,7 +170,7 @@ export const Icons = {
     </svg>
   ),
   youtubeOpen: (props: SVGProps<SVGSVGElement>) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width={50} height={50} viewBox="0 0 256 256" {...props}>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 250" {...props}>
       <g
         strokeMiterlimit={10}
         fontFamily="none"

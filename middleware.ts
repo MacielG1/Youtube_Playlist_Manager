@@ -17,7 +17,7 @@ const shortRangeLimiter = new Ratelimit({
 // Create a long range limiter for 100 requests per day
 const longRangeLimiter = new Ratelimit({
   redis: redis,
-  limiter: Ratelimit.fixedWindow(500, "1 d"),
+  limiter: Ratelimit.fixedWindow(300, "1 d"),
   prefix: "ratelimit:long",
 });
 
@@ -41,4 +41,5 @@ export default async function middleware(request: NextRequest, event: NextFetchE
 
 export const config = {
   matcher: "/api/:path*",
+  runtime: "experimental-edge",
 };
