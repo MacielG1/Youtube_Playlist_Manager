@@ -27,14 +27,24 @@ import { QueryClient } from "@tanstack/react-query";
 import { PersistedClient, Persister, PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 
 export default function QueryProvider({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient({}));
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            gcTime: 60 * 1000 * 60 * 24, // 24 hours
+            // gcTime: 21, //  21 seconds
+          },
+        },
+      }),
+  );
 
   const persister = createIDBPersister();
 
   const options = {
     persister,
     maxAge: 60 * 1000 * 60 * 24, // 24 hours
-    // maxAge: 21, //  1 minute
+    // maxAge: 21, //  21 seconds
   };
 
   return (
