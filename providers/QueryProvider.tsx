@@ -32,8 +32,8 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
       new QueryClient({
         defaultOptions: {
           queries: {
-            gcTime: 60 * 1000 * 60 * 24, // 24 hours
-            // gcTime: 21, //  21 seconds
+            refetchInterval: 1000 * 60 * 60 * 24, // 24 hours
+            retry: 1,
           },
         },
       }),
@@ -43,8 +43,6 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
 
   const options = {
     persister,
-    maxAge: 60 * 1000 * 60 * 24, // 24 hours
-    // maxAge: 21, //  21 seconds
   };
 
   return (

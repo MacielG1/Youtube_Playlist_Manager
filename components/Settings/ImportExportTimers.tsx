@@ -122,11 +122,11 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
       queryClient.refetchQueries({ queryKey: ["playlists"] });
       queryClient.refetchQueries({ queryKey: ["videos"] });
 
-      for (let i of uniqueNewPlaylists) {
-        let data = await fetchVideosIds(i);
-        let playlistKey = `pl=${i}`;
-        await set(playlistKey, data);
-      }
+      // for (let i of uniqueNewPlaylists) {
+      //   let data = await fetchVideosIds(i);
+      //   let playlistKey = `pl=${i}`;
+      //   await set(playlistKey, data);
+      // }
 
       setModalOpen(false);
     };

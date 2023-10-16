@@ -154,7 +154,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       } else {
         e.target.playVideo();
       }
-    }, 1000);
+    }, 400);
   }
 
   async function onStateChange(e: YouTubeEvent) {
@@ -326,7 +326,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               onError={onError}
               onStateChange={onStateChange}
               onPlaybackRateChange={onSpeedChange}
-              className={`${isLoaded ? "visible" : "hidden"} absolute left-0 right-0 top-0 h-full w-full border-none`}
+              className={`${isLoaded ? "visible" : "hidden"}  absolute left-0 right-0 top-0 h-full w-full border-none`}
             />
           </div>
 
@@ -377,7 +377,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               </Tooltip>
               <Tooltip text="Open on Youtube">
                 <Link
-                  // href={`https://www.youtube.com/playlist?list=${playlistId}`}
                   href={`https://www.youtube.com/watch?v=${currentVideoId.current}&list=${playlistId}&t=${Math.floor(initialTime)}`}
                   target="_blank"
                   rel="noopener noreferrer"

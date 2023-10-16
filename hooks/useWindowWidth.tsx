@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 
 // Custom hook to track window width
 export default function useWindowWidth() {
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  if (typeof window === "undefined") return 0;
+  const [windowWidth, setWindowWidth] = useState(window?.innerWidth);
 
   useEffect(() => {
     const updateWindowWidth = () => {
