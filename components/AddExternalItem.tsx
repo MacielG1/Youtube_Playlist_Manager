@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import getVideosData from "@/utils/getVideosData";
 import getPlaylistsData from "@/utils/getPlaylistsData";
 import fetchVideosIds from "@/utils/fetchVideosIds";
-import { get, set } from "idb-keyval";
+import { set } from "idb-keyval";
 import { Items } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";

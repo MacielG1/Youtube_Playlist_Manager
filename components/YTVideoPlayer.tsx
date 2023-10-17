@@ -5,7 +5,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { Items } from "@/types";
 import { Icons } from "@/assets/Icons";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
-
 import seekTime from "@/utils/seekTime";
 import LogoButton from "./LogoButton";
 import saveVideoProgress from "@/utils/saveVideoProgress";
@@ -17,7 +16,6 @@ import Description from "./Description";
 import Tooltip from "./ToolTip";
 import { get } from "idb-keyval";
 import Link from "next/link";
-import Button from "./Button";
 
 type Params = {
   v: string;
