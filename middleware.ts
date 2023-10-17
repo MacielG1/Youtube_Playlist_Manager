@@ -28,13 +28,12 @@ export default async function middleware(request: NextRequest, event: NextFetchE
   const shortRangeResult = await shortRangeLimiter.limit(ip);
   const longRangeResult = await longRangeLimiter.limit(ip);
 
-  console.log(`Short range attempts left: ${shortRangeResult.remaining}`);
-  console.log(`Long range attempts left: ${longRangeResult.remaining}`);
+  // console.log(`Short range attempts left: ${shortRangeResult.remaining}`);
+  // console.log(`Long range attempts left: ${longRangeResult.remaining}`);
 
   // If either of the limiters is exceeded, return a redirect response
   if (!shortRangeResult.success || !longRangeResult.success) {
-    // return NextResponse.redirect(new URL("/blocked", request.url), { status: 429 });
-    return new NextResponse("Error", { status: 429 });
+    // return new NextResponse("Error", { status: 429 });
   }
 
   // Otherwise, proceed with the request

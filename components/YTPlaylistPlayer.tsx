@@ -36,6 +36,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
+  const [currentTime, setCurrentTime] = useState(0);
 
   const isPaused = useRef(false); // used to resume video if it was playing when delete modal was opened
   const pageRef = useRef(1);
@@ -160,8 +161,9 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   async function onStateChange(e: YouTubeEvent) {
     const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
     setCurrentVideoIndex(index);
-
     setCurrentVideoTitle(e.target.getVideoData().title || "");
+
+    setCurrentTime(e.target.getCurrentTime());
 
     let videoId = e.target.getVideoData().video_id;
     currentVideoId.current = videoId;
@@ -258,7 +260,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         listType: "playlist",
         index: currentItem + 1,
         start: Math.floor(initialTime) || 0 || 1,
-        origin: isBrowser ? window?.location?.origin : "https://localhost:3000",
+        origin: isBrowser ? window.location?.origin : "https://localhost:3000",
       },
     };
   }, []);
@@ -377,7 +379,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               </Tooltip>
               <Tooltip text="Open on Youtube">
                 <Link
-                  href={`https://www.youtube.com/watch?v=${currentVideoId.current}&list=${playlistId}&t=${Math.floor(initialTime)}`}
+                  href={`https://www.youtube.com/watch?v=${currentVideoId.current}&list=${playlistId}&t=${Math.floor(currentTime)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                 >

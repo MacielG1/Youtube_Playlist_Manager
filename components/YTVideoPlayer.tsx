@@ -37,6 +37,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   const videoId = params.v;
   const item = `v=${videoId}`;
+  const [currentTime, setCurrentTime] = useState(0);
 
   let isBrowser = typeof window !== "undefined";
   useEffect(() => {
@@ -60,7 +61,6 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     videoPlayerRef?.current?.internalPlayer.setPlaybackRate(plRate);
 
     let data = await get(`v=${videoId}`);
-    console.log(data);
     setDescription(data?.description);
 
     const intervalId = setInterval(() => {
@@ -91,8 +91,11 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     localStorage.setItem(item, JSON.stringify(currentData));
   }
 
-  // function onStateChange(e: YouTubeEvent) {
-  // }
+  function onStateChange(e: YouTubeEvent) {
+    if (e.target) {
+      setCurrentTime(e.target.getCurrentTime());
+    }
+  }
 
   // function onEnd(e: YouTubeEvent) {}
 
@@ -169,7 +172,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               onError={onError}
               onPlaybackRateChange={onSpeedChange}
               // onEnd={onEnd}
-              // onStateChange={onStateChange}
+              onStateChange={onStateChange}
               className={`${isLoaded ? "visible" : "hidden"} absolute left-0 right-0 top-0 h-full w-full border-none`}
             />
           </div>
@@ -194,7 +197,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                 </button>
               </Tooltip>
               <Tooltip text="Open on Youtube">
-                <Link href={`https://www.youtube.com/watch?v=${videoId}&t=${Math.floor(initialTime)}`} target="_blank" rel="noopener noreferrer">
+                <Link href={`https://www.youtube.com/watch?v=${videoId}&t=${Math.floor(currentTime)}`} target="_blank" rel="noopener noreferrer">
                   <Icons.youtubeOpen className="ml-[0.15rem] h-8 w-8 fill-neutral-200 px-[0.075rem] text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
                 </Link>
               </Tooltip>
