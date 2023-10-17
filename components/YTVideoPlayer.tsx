@@ -178,10 +178,10 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         </div>
         {isLoaded && (
           <div className="flex max-w-[80vw] flex-col">
-            <div className="flex  justify-center gap-1 py-2 xs:gap-3 sm:py-1">
+            <div className="flex justify-center gap-1  pt-1 xs:gap-3 sm:pt-1">
               <Tooltip text="Rewind 10s">
                 <button
-                  className=" cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                   onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}
                 >
                   <Icons.rewind10 className="h-8 w-8" />
@@ -205,7 +205,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
                   onClick={openModal}
                 >
-                  <Icons.closeIcon className="h- w-8 " />
+                  <Icons.closeIcon className="h-8 w-8 " />
                 </button>
               </Tooltip>
             </div>
