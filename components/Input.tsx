@@ -392,6 +392,7 @@ export default function Input() {
           <input
             type="text"
             value={addedURL}
+            id="input"
             onChange={handleInputChange}
             placeholder="Enter a Video or Playlist URL or Channel Name"
             className="min-w[1rem] w-[65vw] rounded-md border-2 border-neutral-600 bg-neutral-300 px-3 text-neutral-900 placeholder-neutral-700 caret-neutral-800 transition-colors
