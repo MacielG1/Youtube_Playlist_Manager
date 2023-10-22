@@ -23,7 +23,7 @@ export default function Tooltip({ text, children }: Props) {
   };
 
   return (
-    <div className="relative inline-block">
+    <div className="relative">
       <div onMouseEnter={showTooltip} onMouseLeave={hideTooltip}>
         {children}
       </div>

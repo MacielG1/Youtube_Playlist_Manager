@@ -128,7 +128,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
       playerVars: {
         autoplay: 1,
         start: Math.floor(initialTime),
-        origin: window.location.origin || "http://localhost:3000",
+        origin: isBrowser ? window.location.origin : "http://localhost:3000",
       },
     };
   }, []);
@@ -153,9 +153,9 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   return (
     <>
       <LogoButton />
-      <div className="flex flex-col items-center justify-center pt-12  ">
+      <div className="flex min-h-screen flex-col items-center justify-center pt-12  ">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center pt-2 max-xl:p-[0.15rem] 2xl:max-w-[73vw]">
-          <div className={` relative w-full overflow-auto pb-[56.25%]`}>
+          <div className="relative w-full overflow-auto pb-[56.25%]">
             {!isLoaded && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
                 <Icons.spinIcon className="h-7 w-7 animate-spin text-indigo-500" />
@@ -179,22 +179,22 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         </div>
         {isLoaded && (
           <div className="flex max-w-[80vw] flex-col">
-            <div className="flex justify-center gap-1  pt-1 xs:gap-3 sm:pt-1">
+            <div className="flex justify-center gap-1 pt-1 xs:gap-3 ">
               <Tooltip text="Rewind 10s">
-                <button
+                <span
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                   onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}
                 >
                   <Icons.rewind10 className="h-8 w-8" />
-                </button>
+                </span>
               </Tooltip>
               <Tooltip text="Skip 10s">
-                <button
+                <span
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                   onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, 10)}
                 >
                   <Icons.skip10 className="h-8 w-8" />
-                </button>
+                </span>
               </Tooltip>
               <Tooltip text="Open on Youtube">
                 <Link href={`https://www.youtube.com/watch?v=${videoId}&t=${Math.floor(currentTime)}`} target="_blank" rel="noopener noreferrer">
@@ -202,16 +202,16 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                 </Link>
               </Tooltip>
               <Tooltip text="Delete Video">
-                <button
+                <span
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
                   onClick={openModal}
                 >
                   <Icons.closeIcon className="h-8 w-8 " />
-                </button>
+                </span>
               </Tooltip>
             </div>
             {/* Title */}
-            <span className="text-balance break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">{videoTitle}</span>
+            <span className="text-balance break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200 ">{videoTitle}</span>
 
             {description && <Description description={description} className="pb-2 pt-6" />}
           </div>
