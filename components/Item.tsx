@@ -118,7 +118,7 @@ export default function Item({ title, thumbnails, id, type, duration }: Params) 
           {type === "Video" && (
             <span
               className={`${font.className} absolute bottom-0 right-0 z-10 rounded-tl-md
-             bg-black px-1 pb-[0.1rem] pt-[0.18rem] text-[0.8rem] leading-3 tracking-wide text-white`}
+             bg-black px-1 pb-[0.125rem] pl-[0.26rem] pt-[0.2rem] text-[0.8rem] leading-3 tracking-wide text-white`}
             >
               {duration}
             </span>

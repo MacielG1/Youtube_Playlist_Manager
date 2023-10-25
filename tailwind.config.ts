@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import defaultTheme from "tailwindcss/defaultTheme";
 
 const config: Config = {
   content: ["./pages/**/*.{js,ts,jsx,tsx,mdx}", "./components/**/*.{js,ts,jsx,tsx,mdx}", "./app/**/*.{js,ts,jsx,tsx,mdx}"],
@@ -10,8 +11,9 @@ const config: Config = {
       },
       screens: {
         xs: "500px",
-        lg: "1124px",
         "1.5xl": "1300px",
+        ...defaultTheme.screens,
+        lg: "1124px",
       },
       colors: {
         // Using modern `rgb`
