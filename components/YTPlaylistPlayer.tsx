@@ -33,6 +33,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(1);
   const [currentVideoTitle, setCurrentVideoTitle] = useState("");
+  const [isError, setIsError] = useState(false);
 
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
@@ -139,6 +140,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     savePlaylistsProgress(e.target, playlistId, pageRef.current);
   }
   async function onError(e: YouTubeEvent) {
+    setIsError(true);
     pageRef.current = 1;
     let data = {
       playlistId,
@@ -152,13 +154,16 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       if (state == -1) {
         localStorage.setItem(`pl=${playlistId}`, JSON.stringify(data));
         await resetPlaylist();
+        await PlaylistPlayerRef.current?.resetPlayer();
       } else {
         e.target.playVideo();
       }
-    }, 400);
+    }, 1000);
   }
 
   async function onStateChange(e: YouTubeEvent) {
+    if (e.data === -1) setIsError(false);
+
     const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
     setCurrentVideoIndex(index);
     setCurrentVideoTitle(e.target.getVideoData().title || "");
@@ -311,7 +316,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       <div className="flex flex-col items-center justify-center pt-12  ">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:max-w-[62vw] xl:pt-0 2xl:max-w-[67vw]">
           <div className=" relative w-full overflow-auto pb-[56.25%]">
-            {!isLoaded && (
+            {(!isLoaded || isError) && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
                 <Icons.spinIcon className="h-7 w-7 animate-spin text-indigo-500" />
                 <span className="sr-only">Loading...</span>
@@ -328,7 +333,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               onError={onError}
               onStateChange={onStateChange}
               onPlaybackRateChange={onSpeedChange}
-              className={`${isLoaded ? "visible" : "hidden"}  absolute left-0 right-0 top-0 h-full w-full border-none`}
+              className={`${isLoaded && !isError ? "visible" : "hidden"}  absolute left-0 right-0 top-0 h-full w-full border-none`}
             />
           </div>
 

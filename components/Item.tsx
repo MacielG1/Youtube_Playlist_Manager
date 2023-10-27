@@ -89,12 +89,14 @@ export default function Item({ title, thumbnails, id, type, duration }: Params) 
   let url = !isDragging && !isSorting ? (type === "Playlist" ? `/playlist?list=${id}&title=${decodedTitled}` : `/video?v=${id}&title=${decodedTitled}`) : "#";
 
   return (
-    <div className={`mt-2 flex flex-col items-center outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
-      <div className="relative  flex cursor-default flex-col items-center justify-center ">
+    <div className={`mt-2 flex  flex-col items-center outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
+      <div className="relative flex  cursor-default flex-col items-center justify-center ">
         <div className="group flex aspect-video w-full select-none items-center justify-center overflow-hidden rounded-xl ">
           <button
             onClick={openModal}
-            className="peer absolute right-0 top-0 z-10 rounded-bl-md rounded-tr-[0.50rem] bg-neutral-800 p-1 text-neutral-400 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-500"
+            className={`peer absolute right-0 top-0 z-10 rounded-bl-md rounded-tr-[0.50rem] bg-neutral-800 p-1 text-neutral-400 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-500 ${
+              (isDragging || isSorting) && "hidden opacity-0"
+            }}`}
             aria-label="Delete Button"
           >
             <Icons.deleteIcon className="h-4 w-4" />
@@ -117,8 +119,8 @@ export default function Item({ title, thumbnails, id, type, duration }: Params) 
           </div>
           {type === "Video" && (
             <span
-              className={`${font.className} absolute bottom-0 right-0 z-10 rounded-tl-md
-             bg-black px-1 pb-[0.125rem] pl-[0.26rem] pt-[0.2rem] text-[0.8rem] leading-3 tracking-wide text-white`}
+              className={`${font.className} absolute bottom-0 right-0 z-10 rounded-tl-lg
+             bg-black px-1 text-[0.8rem]  tracking-wide text-white`}
             >
               {duration}
             </span>

@@ -154,7 +154,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     <>
       <LogoButton />
       <div className="flex min-h-screen flex-col items-center justify-center pt-12  ">
-        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center pt-2 max-xl:p-[0.15rem] 2xl:max-w-[73vw]">
+        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center pt-2 max-xl:p-[0.15rem] 2xl:max-w-[71vw]">
           <div className="relative w-full overflow-auto pb-[56.25%]">
             {!isLoaded && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
