@@ -157,11 +157,12 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center pt-2 max-xl:p-[0.15rem] 2xl:max-w-[71vw]">
           <div className="relative w-full overflow-auto pb-[56.25%]">
             {!isLoaded && (
-              <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
+              <div className="fixed inset-0 -mt-16 flex items-center justify-center md:-mt-10">
                 <Icons.spinIcon className="h-7 w-7 animate-spin text-indigo-500" />
                 <span className="sr-only">Loading...</span>
               </div>
             )}
+
             <YouTube
               videoId={videoId}
               ref={videoPlayerRef}
@@ -213,7 +214,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
             {/* Title */}
             <span className="text-balance break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200 ">{videoTitle}</span>
 
-            {description && <Description description={description} className="pb-2 pt-6" />}
+            {description && <Description description={description} className="pb-2 pt-5 2xl:pt-3" />}
           </div>
         )}
         {isModalOpen && (

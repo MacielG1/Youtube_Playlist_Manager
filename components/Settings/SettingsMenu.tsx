@@ -9,10 +9,13 @@ import DeleteAllDataContent from "../modals/DeleteAllDataContent";
 import HowItWorks from "./HowItWorks";
 import ModalDelete from "../modals/ModalDelete";
 import DeleteAllBtn from "./DeleteAllBtn";
+import { usePathname } from "next/navigation";
 
 export default function SettingsMenu() {
   let [isOpen, setIsOpen] = useState(false);
   let [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const pathname = usePathname();
 
   function openDeleteModal() {
     setIsDeleteModalOpen(true);
@@ -36,9 +39,10 @@ export default function SettingsMenu() {
       <DeleteAllBtn openDeleteModal={openDeleteModal} />
     </div>
   );
+  const isPlaylist = pathname.includes("/playlist");
 
   return (
-    <div className="fixed right-2 top-0 z-30 p-1 px-5 pt-2 sm:px-6 xl:px-7">
+    <div className={`fixed right-2 top-0 z-30 p-1 px-5 pt-2 sm:px-6  ${isPlaylist ? "xl:px-0" : "xl:px-7"}`}>
       <button onClick={ToggleModal}>
         <Icons.settingIcon className="h-8 w-8 cursor-pointer" />
       </button>
