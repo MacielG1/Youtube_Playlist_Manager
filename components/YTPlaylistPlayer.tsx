@@ -255,28 +255,11 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     setCurrentVideoIndex(1);
   }
 
-  const plOptions: YouTubeProps["opts"] = useMemo(() => {
-    pageRef.current = currentPage || 1;
-    return {
-      height: "100%",
-      width: "100%",
-      playerVars: {
-        autoplay: 1,
-        listType: "playlist",
-        index: currentItem + 1,
-        start: Math.floor(initialTime) || 0 || 1,
-        origin: isBrowser ? window.location?.origin : "https://localhost:3000",
-      },
-    };
-  }, []);
-
-  plOptions.playerVars.playlist = getVideosSlice(videosIdsRef.current, pageRef.current).join(",");
-
   async function onDelete() {
-    onDeleteItems(playlistId, "playlists");
-
     isPlayingVideoRef.current = null;
     router.replace("/");
+
+    onDeleteItems(playlistId, "playlists");
 
     queryClient.setQueryData<Items>(["playlists"], (oldData) => {
       if (oldData) {
@@ -307,6 +290,23 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
     setIsModalOpen(false);
   }
+
+  const plOptions: YouTubeProps["opts"] = useMemo(() => {
+    pageRef.current = currentPage || 1;
+    return {
+      height: "100%",
+      width: "100%",
+      playerVars: {
+        autoplay: 1,
+        listType: "playlist",
+        index: currentItem + 1,
+        start: Math.floor(initialTime) || 0 || 1,
+        origin: isBrowser ? window.location?.origin : "https://localhost:3000",
+      },
+    };
+  }, []);
+
+  plOptions.playerVars.playlist = getVideosSlice(videosIdsRef.current, pageRef.current).join(",");
 
   let playlistTitle = reduceStringSize(params.title, 100);
 

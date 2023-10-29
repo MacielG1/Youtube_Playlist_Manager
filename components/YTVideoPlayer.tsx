@@ -100,10 +100,10 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   // function onEnd(e: YouTubeEvent) {}
 
   function onDelete() {
-    onDeleteItems(videoId, "videos");
-
     isPlayingVideoRef.current = null;
     router.replace("/");
+
+    onDeleteItems(videoId, "videos");
 
     queryClient.setQueryData<Items>(["videos"], (oldData) => {
       if (oldData) {
@@ -113,6 +113,21 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         };
       }
     });
+  }
+
+  async function openModal() {
+    videoPlayerRef?.current?.internalPlayer.pauseVideo();
+    isPaused.current = (await videoPlayerRef?.current?.internalPlayer.getPlayerState()) === 2;
+    setIsModalOpen(!isModalOpen);
+  }
+
+  // called when cancel or backdrop is clicked
+  function onCancel() {
+    if (!isPaused.current) {
+      videoPlayerRef?.current?.internalPlayer.playVideo();
+      isPaused.current = false;
+    }
+    setIsModalOpen(false);
   }
 
   let initialTime = 0;
@@ -132,21 +147,6 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
       },
     };
   }, []);
-
-  async function openModal() {
-    videoPlayerRef?.current?.internalPlayer.pauseVideo();
-    isPaused.current = (await videoPlayerRef?.current?.internalPlayer.getPlayerState()) === 2;
-    setIsModalOpen(!isModalOpen);
-  }
-
-  // called when cancel or backdrop is clicked
-  function onCancel() {
-    if (!isPaused.current) {
-      videoPlayerRef?.current?.internalPlayer.playVideo();
-      isPaused.current = false;
-    }
-    setIsModalOpen(false);
-  }
 
   let videoTitle = reduceStringSize(params.title, 100);
 
