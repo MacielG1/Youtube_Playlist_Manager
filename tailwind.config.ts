@@ -12,6 +12,7 @@ const config: Config = {
       screens: {
         xs: "500px",
         "1.5xl": "1300px",
+        "3xl": "1700px",
         ...defaultTheme.screens,
         lg: "1124px",
       },

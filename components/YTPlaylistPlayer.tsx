@@ -20,8 +20,8 @@ import Description from "./Description";
 import Tooltip from "./ToolTip";
 import { del, get, set } from "idb-keyval";
 import VideosListSidebar from "./VideosListSidebar";
-import useWindowWidth from "@/hooks/useWindowWidth";
 import Link from "next/link";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 type Params = {
   list: string;
@@ -50,7 +50,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
   const queryClient = useQueryClient();
   const router = useRouter();
-  const windowWidth = useWindowWidth();
 
   const playlistId = params.list;
   const item = `pl=${playlistId}`;
@@ -310,11 +309,12 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
   let playlistTitle = reduceStringSize(params.title, 100);
 
+  const isSmaller = useMediaQuery("(max-width: 1280px)");
   return (
     <>
       <LogoButton />
-      <div className="flex flex-col items-center justify-center pt-12  ">
-        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:max-w-[62vw] xl:pt-0 2xl:max-w-[67vw]">
+      <div className="flex flex-col items-center justify-center pt-12">
+        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:max-w-[62vw] xl:pt-0 2xl:max-w-[70vw]">
           <div className=" relative w-full overflow-auto pb-[56.25%]">
             {(!isLoaded || isError) && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
@@ -337,7 +337,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             />
           </div>
 
-          {windowWidth > 1279 && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className="xl:absolute" />}
+          {!isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className="xl:absolute" />}
         </div>
         {isLoaded && (
           <div className="flex max-w-[80vw] flex-col  pt-1 md:max-w-[60vw] 2xl:max-w-[65vw] 2xl:pt-2">
@@ -411,7 +411,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
             )}
 
             {description && <Description description={description} />}
-            <div>{windowWidth < 1279 && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} />}</div>
+            <div>{isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} />}</div>
           </div>
         )}
 

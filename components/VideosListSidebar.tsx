@@ -1,5 +1,5 @@
 import { Icons } from "@/assets/Icons";
-import useWindowWidth from "@/hooks/useWindowWidth";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Items } from "@/types";
 import { cn } from "@/utils/cn";
 import { getThumbnailInfo } from "@/utils/getThumbnailInfo";
@@ -19,7 +19,9 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const isInitialMount = useRef(true); // to prevent scrolling on initial mount
 
-  const windowWidth = useWindowWidth();
+  const is700 = useMediaQuery("(max-width: 700px)");
+  const is1280 = useMediaQuery("(max-width: 1280px)");
+  const is1500 = useMediaQuery("(max-width: 1500px)");
 
   useEffect(() => {
     if (sidebarRef.current && currentVideoIndex !== null) {
@@ -59,7 +61,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
       <div
         ref={sidebarRef}
         className={cn(
-          "custom-scrollbar right-1 top-0 mt-4 flex max-h-[90vh] flex-col gap-3 overflow-y-auto overflow-x-hidden rounded-md border border-neutral-400 p-1 px-2 pr-[1.05rem] dark:border-neutral-700 lg:mt-12 1.5xl:right-5 2xl:right-11",
+          "custom-scrollbar 3xl:right-11 right-1 top-0 mt-4 flex max-h-[90vh] flex-col gap-3 overflow-y-auto overflow-x-hidden rounded-md border border-neutral-400 p-1 px-2 pr-[1.05rem] dark:border-neutral-700  lg:mt-12 1.5xl:right-3 2xl:right-4",
           className,
         )}
       >
@@ -81,10 +83,9 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                     <Image
                       src={thumbnailURL}
                       alt={video.title}
-                      width={150}
-                      height={150}
-                      style={{ width: windowWidth < 700 ? "40vw" : windowWidth < 1280 ? "25vw" : windowWidth < 1500 ? "130px" : "150px", height: "auto" }}
-                      // styles height needs to be auto for no layout shift to happen when hovering
+                      width={is700 ? 150 : is1280 ? 240 : is1500 ? 130 : 150}
+                      height={is700 ? 84 : is1280 ? 135 : is1500 ? 73 : 84}
+                      // style={{ width: is700 ? "40vw" : is1280 ? "25vw" : is1500 ? "130px" : "150px", height: "auto" }}
                       className={`rounded-xl transition duration-300 hover:scale-[1.03] ${noBlackBars ? "-my-[1px]" : "-my-[14px]"} `}
                       priority
                       unoptimized
