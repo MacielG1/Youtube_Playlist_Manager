@@ -7,6 +7,7 @@ import getPlaylistsData from "@/utils/getPlaylistsData";
 import getVideosData from "@/utils/getVideosData";
 import Link from "next/link";
 import ItemsList from "./ItemsList";
+import { set } from "idb-keyval";
 
 export default function AllPlaylists() {
   const [playlistItems, setPlaylistItems] = useState<Playlist[]>([]);
@@ -35,7 +36,9 @@ export default function AllPlaylists() {
   } = useQuery({
     queryKey: ["videos"],
     queryFn: async () => {
-      return await getVideosData();
+      let data = await getVideosData();
+
+      return data;
     },
     refetchOnWindowFocus: false,
     refetchOnMount: false,

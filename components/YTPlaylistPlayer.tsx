@@ -156,6 +156,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         await PlaylistPlayerRef.current?.resetPlayer();
       } else {
         e.target.playVideo();
+        setIsError(false);
       }
     }, 1000);
   }

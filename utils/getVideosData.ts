@@ -1,3 +1,6 @@
+import { VideoAPI } from "@/types";
+import { set } from "idb-keyval";
+
 export default async function getVideoData(newVideoId?: string) {
   let videosIds = "";
 
@@ -33,6 +36,11 @@ export default async function getVideoData(newVideoId?: string) {
       console.log("Error", res.statusText);
       return {};
     }
+    data.items.map(async (item: VideoAPI) => {
+      await set(item.id, item);
+      return item;
+    });
+
     return data;
   } catch (err) {
     console.log("Error in getVideosData", err);
