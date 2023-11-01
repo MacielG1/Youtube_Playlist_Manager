@@ -42,7 +42,7 @@ export default function SettingsMenu() {
   const isPlaylist = pathname.includes("/playlist");
 
   return (
-    <div className={`fixed right-2 top-0 z-30 p-1 px-5 pt-2 sm:px-6  ${isPlaylist ? "xl:px-0" : "xl:px-7"}`}>
+    <div className={`absolute right-2 top-0 z-30 p-1 px-5 pt-2 sm:px-6 ${isPlaylist ? "xl:px-0" : "xl:px-7"}`}>
       <button onClick={ToggleModal}>
         <Icons.settingIcon className="h-8 w-8 cursor-pointer" />
       </button>
