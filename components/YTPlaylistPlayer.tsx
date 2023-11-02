@@ -201,38 +201,26 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     const player = PlaylistPlayerRef.current?.getInternalPlayer();
     const index = await player.getPlaylistIndex();
 
-    if (plLengthRef.current > 200) {
-      if (index === 0 && pageRef.current > 1) {
-        pageRef.current -= 1;
-        await loadPlaylist(player, videosIdsRef.current, pageRef.current, 199);
-      } else {
-        // player.previousVideo();
-        player.playVideoAt(index - 1);
-        player.seekTo(0);
-      }
+    // if the pl is bigger than 200 and we're on the first video of the page
+    if (plLengthRef.current > 200 && index === 0 && pageRef.current > 1) {
+      pageRef.current -= 1;
+      await loadPlaylist(player, videosIdsRef.current, pageRef.current, 199);
     } else {
-      // player.previousVideo();
-      player.playVideoAt(index - 1);
-      player.seekTo(0);
+      const targetIndex = index > 0 ? index - 1 : 0;
+      player.playVideoAt(targetIndex);
+      // player.seekTo(0);
     }
   }
   async function nextVideo() {
     const player = PlaylistPlayerRef.current?.getInternalPlayer();
     const index = await player.getPlaylistIndex();
 
-    if (plLengthRef.current > 200) {
-      if ((index + 1) % 200 === 0) {
-        pageRef.current += 1;
-
-        await loadPlaylist(player, videosIdsRef.current, pageRef.current);
-      } else {
-        // player.nextVideo();
-        player.playVideoAt(index + 1);
-        player.seekTo(0);
-      }
+    if (plLengthRef.current > 200 && (index + 1) % 200 === 0) {
+      pageRef.current += 1;
+      await loadPlaylist(player, videosIdsRef.current, pageRef.current);
     } else {
-      // player.nextVideo();
-      player.playVideoAt(index + 1);
+      const targetIndex = index + 1;
+      player.playVideoAt(targetIndex);
       player.seekTo(0);
     }
   }
