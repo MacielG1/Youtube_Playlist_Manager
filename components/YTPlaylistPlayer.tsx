@@ -138,6 +138,11 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     savePlaylistsProgress(e.target, playlistId, pageRef.current);
   }
   async function onError(e: YouTubeEvent) {
+    if (e.data === 150) {
+      // go to next video
+      e.target.nextVideo();
+    }
+
     pageRef.current = 1;
     let data = {
       playlistId,
@@ -290,7 +295,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }, []);
 
   plOptions.playerVars.playlist = getVideosSlice(videosIdsRef.current, pageRef.current).join(",");
-
   let playlistTitle = reduceStringSize(params.title, 100);
 
   const isSmaller = useMediaQuery("(max-width: 1280px)");
@@ -306,7 +310,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                 <span className="sr-only">Loading...</span>
               </div>
             )}
-
             <YouTube
               ref={PlaylistPlayerRef}
               opts={plOptions}
@@ -317,7 +320,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               onError={onError}
               onStateChange={onStateChange}
               onPlaybackRateChange={onSpeedChange}
-              className={`${isLoaded ? "visible" : "hidden"}  absolute left-0 right-0 top-0 h-full w-full border-none`}
+              className={`${isLoaded ? "visible" : "hidden"} absolute left-0 right-0 top-0 h-full w-full border-none`}
             />
           </div>
 
