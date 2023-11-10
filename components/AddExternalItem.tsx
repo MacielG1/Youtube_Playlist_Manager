@@ -10,10 +10,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import getChannelId from "@/utils/createChannelPlaylist";
-import { Icons } from "@/assets/Icons";
+import Loading from "@/assets/icons/Loading";
 
 export default function AddExternalItem({ searchParams }: { searchParams: { type: string; id: string } }) {
-  const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
   const router = useRouter();
 
@@ -134,7 +133,6 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
         console.log(error);
       } finally {
         router.push("/");
-        setIsLoading(false);
       }
     }
     run();
@@ -142,7 +140,7 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
   return (
     <div className="flex min-h-[10vh] w-full items-center justify-center gap-2">
       <span className="text-base tracking-wide text-indigo-100">Adding Item</span>
-      <Icons.loadingIcon className="h-6 w-6 text-indigo-500" />
+      <Loading className="h-6 w-6 text-indigo-500" />
     </div>
   );
 }

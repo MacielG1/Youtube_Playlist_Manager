@@ -3,7 +3,6 @@ import { useRef, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Items } from "@/types";
-import { Icons } from "@/assets/Icons";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 import seekTime from "@/utils/seekTime";
 import LogoButton from "./LogoButton";
@@ -16,6 +15,11 @@ import Description from "./Description";
 import Tooltip from "./ToolTip";
 import { get } from "idb-keyval";
 import Link from "next/link";
+import Spin from "@/assets/icons/Spin";
+import Rewind10 from "@/assets/icons/Rewind10";
+import Skip10 from "@/assets/icons/Skip10";
+import Youtube from "@/assets/icons/Youtube";
+import Close from "@/assets/icons/Close";
 
 type Params = {
   v: string;
@@ -158,7 +162,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
           <div className="relative w-full overflow-auto pb-[56.25%]">
             {!isLoaded && (
               <div className="fixed inset-0 -mt-16 flex items-center justify-center md:-mt-10">
-                <Icons.spinIcon className="h-7 w-7 animate-spin text-indigo-500" />
+                <Spin className="h-7 w-7 animate-spin text-indigo-500" />
                 <span className="sr-only">Loading...</span>
               </div>
             )}
@@ -186,7 +190,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                   onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}
                 >
-                  <Icons.rewind10 className="h-8 w-8" />
+                  <Rewind10 className="h-8 w-8" />
                 </span>
               </Tooltip>
               <Tooltip text="Skip 10s">
@@ -194,12 +198,12 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                   onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, 10)}
                 >
-                  <Icons.skip10 className="h-8 w-8" />
+                  <Skip10 className="h-8 w-8" />
                 </span>
               </Tooltip>
               <Tooltip text="Open on Youtube">
                 <Link href={`https://www.youtube.com/watch?v=${videoId}&t=${Math.floor(currentTime)}`} target="_blank" rel="noopener noreferrer">
-                  <Icons.youtubeOpen className="ml-[0.15rem] h-8 w-8 fill-neutral-200 px-[0.075rem] text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
+                  <Youtube className="ml-[0.15rem] h-8 w-8 fill-neutral-200 px-[0.075rem] text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
                 </Link>
               </Tooltip>
               <Tooltip text="Delete Video">
@@ -207,7 +211,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
                   onClick={openModal}
                 >
-                  <Icons.closeIcon className="h-8 w-8 " />
+                  <Close className="h-8 w-8 " />
                 </span>
               </Tooltip>
             </div>

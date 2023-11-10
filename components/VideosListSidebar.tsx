@@ -1,4 +1,4 @@
-import { Icons } from "@/assets/Icons";
+import ArrowRight from "@/assets/icons/ArrowRight";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { Items } from "@/types";
 import { cn } from "@/utils/cn";
@@ -73,7 +73,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
             <div className="relative flex cursor-default flex-col items-center justify-center text-center first:pt-3 last:pb-3" key={video.id}>
               <div className="group flex aspect-video items-center justify-center gap-2 rounded-xl">
                 {currentVideoIndex && currentVideoIndex - 1 === i ? (
-                  <Icons.arrowRight className="h-2 w-2 text-indigo-500" />
+                  <ArrowRight className="h-2 w-2 text-indigo-500" />
                 ) : (
                   <span className="text-center text-xs">{i + 1}</span>
                 )}

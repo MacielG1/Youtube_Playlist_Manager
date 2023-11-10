@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Icons } from "@/assets/Icons";
 import type { Items } from "@/types";
 import { toastError } from "@/utils/toastStyles";
 import getChannelId from "@/utils/createChannelPlaylist";
@@ -10,6 +9,8 @@ import getVideosData from "@/utils/getVideosData";
 import getPlaylistsData from "@/utils/getPlaylistsData";
 import fetchVideosIds from "@/utils/fetchVideosIds";
 import { set } from "idb-keyval";
+import Search from "@/assets/icons/Search";
+import Spin from "@/assets/icons/Spin";
 
 export default function Input() {
   const [addedURL, setAddedURL] = useState("");
@@ -207,12 +208,12 @@ export default function Input() {
              disabled:bg-neutral-700 dark:border-blue-800 dark:bg-blue-800 dark:hover:border-blue-900 dark:hover:bg-blue-900
              dark:hover:text-gray-200 dark:disabled:border-neutral-600 dark:disabled:bg-neutral-900`}
           >
-            <Icons.searchIcon className="h-4 w-4 sm:h-7 sm:w-7" />
+            <Search className="h-4 w-4 sm:h-7 sm:w-7" />
           </button>
         </form>
         {isLoading && (
           <div className="absolute -bottom-1 left-1/2 flex items-center justify-center sm:-bottom-[0.35rem]">
-            <Icons.spinIcon className="h-3 w-3 animate-spin text-indigo-500 sm:h-4 sm:w-4 " />
+            <Spin className="h-3 w-3 animate-spin text-indigo-500 sm:h-4 sm:w-4 " />
           </div>
         )}
       </nav>

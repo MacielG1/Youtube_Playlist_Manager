@@ -1,6 +1,6 @@
 "use client";
 
-import { Icons } from "@/assets/Icons";
+import ArrowTop from "@/assets/icons/ArrowTop";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 
@@ -34,7 +34,7 @@ export default function ScrollToTop() {
       } fixed bottom-12 right-14 z-50 rounded-full bg-indigo-900 p-2 text-white transition-opacity duration-300 ease-in-out focus:outline-none focus:ring-1 focus:ring-indigo-700`}
       onClick={handleClick}
     >
-      <Icons.arrowTop className="h-4 w-4" />
+      <ArrowTop className="h-4 w-4" />
     </button>
   );
 }

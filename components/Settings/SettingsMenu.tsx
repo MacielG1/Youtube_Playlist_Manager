@@ -1,7 +1,5 @@
 "use client";
 import { useState } from "react";
-import { Icons } from "@/assets/Icons";
-
 import ModalSettings from "../modals/ModalSettings";
 import ImportExportTimers from "./ImportExportTimers";
 import ThemeToggler from "./ThemeToggler";
@@ -10,6 +8,7 @@ import HowItWorks from "./HowItWorks";
 import ModalDelete from "../modals/ModalDelete";
 import DeleteAllBtn from "./DeleteAllBtn";
 import { usePathname } from "next/navigation";
+import Settings from "@/assets/icons/Settings";
 
 export default function SettingsMenu() {
   let [isOpen, setIsOpen] = useState(false);
@@ -44,7 +43,7 @@ export default function SettingsMenu() {
   return (
     <div className={`absolute right-2 top-0 z-30 p-1 px-5 pt-2 sm:px-6 ${isPlaylist ? "xl:px-0" : "xl:px-7"}`}>
       <button onClick={ToggleModal}>
-        <Icons.settingIcon className="h-8 w-8 cursor-pointer" />
+        <Settings className="h-8 w-8 cursor-pointer" />
       </button>
 
       {isOpen && <ModalSettings onClose={ToggleModal} content={content} />}

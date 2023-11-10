@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import aboutIMG from "@/assets/aboutIMG.webp";
-import { Icons } from "@/assets/Icons";
+import CheckMark from "@/assets/icons/CheckMark";
 
-let texts = [
+const texts = [
   { id: 1, text: "This app makes it simple to organize and manage your playlists" },
   { id: 2, text: "You can add either public or unlisted YouTube playlists, or enter a channel name to create a playlist with all the videos from it" },
   { id: 3, text: "You can also drag and drop the items to reorder them as you like" },
@@ -27,7 +27,7 @@ export default function About() {
             <div className="flex flex-col  gap-3 text-lg">
               {texts.map((i) => (
                 <div key={i.id} className="flex items-center justify-start gap-2">
-                  <Icons.checkMark className="h-5 w-5 min-w-[2rem]" />
+                  <CheckMark className="h-5 w-5 min-w-[2rem]" />
                   <p className="relative leading-8 text-neutral-600 dark:text-neutral-300 sm:max-w-md lg:max-w-none">{i.text}</p>
                 </div>
               ))}

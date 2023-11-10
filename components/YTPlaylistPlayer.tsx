@@ -4,7 +4,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 import type { Items, PlVideos, PlaylistAPI } from "@/types";
-import { Icons } from "@/assets/Icons";
 
 import fetchVideosIds from "@/utils/fetchVideosIds";
 import getVideosSlice from "@/utils/getVideosSlice";
@@ -22,6 +21,14 @@ import { del, get, set } from "idb-keyval";
 import VideosListSidebar from "./VideosListSidebar";
 import Link from "next/link";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import Spin from "@/assets/icons/Spin";
+import Reset from "@/assets/icons/Reset";
+import Rewind10 from "@/assets/icons/Rewind10";
+import PointerLeft from "@/assets/icons/PointerLeft";
+import PointerRight from "@/assets/icons/PointerRight";
+import Skip10 from "@/assets/icons/Skip10";
+import Youtube from "@/assets/icons/Youtube";
+import Close from "@/assets/icons/Close";
 
 type Params = {
   list: string;
@@ -306,7 +313,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
           <div className=" relative w-full overflow-auto pb-[56.25%]">
             {!isLoaded && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
-                <Icons.spinIcon className="h-7 w-7 animate-spin text-indigo-500" />
+                <Spin className="h-7 w-7 animate-spin text-indigo-500" />
                 <span className="sr-only">Loading...</span>
               </div>
             )}
@@ -334,7 +341,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                   onClick={resetPlaylist}
                 >
-                  <Icons.resetIcon className="h-8 w-8" />
+                  <Reset className="h-8 w-8" />
                 </button>
               </Tooltip>
               <Tooltip text="Rewind 10s">
@@ -342,7 +349,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   className=" cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                   onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, -10)}
                 >
-                  <Icons.rewind10 className="h-8 w-8" />
+                  <Rewind10 className="h-8 w-8" />
                 </button>
               </Tooltip>
               <Tooltip text="Previous Video">
@@ -350,7 +357,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                   onClick={previousVideo}
                 >
-                  <Icons.pointerLeft className="h-8 w-8" />
+                  <PointerLeft className="h-8 w-8" />
                 </button>
               </Tooltip>
               <Tooltip text="Next Video">
@@ -358,7 +365,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                   onClick={nextVideo}
                 >
-                  <Icons.pointerRight className="h-8 w-8" />
+                  <PointerRight className="h-8 w-8" />
                 </button>
               </Tooltip>
               <Tooltip text="Skip 10s">
@@ -366,7 +373,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                   onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, 10)}
                 >
-                  <Icons.skip10 className="h-8 w-8" />
+                  <Skip10 className="h-8 w-8" />
                 </button>
               </Tooltip>
               <Tooltip text="Open on Youtube">
@@ -375,7 +382,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Icons.youtubeOpen className="ml-[0.15rem] h-8 w-8 fill-neutral-200 px-[0.075rem]  text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
+                  <Youtube className="ml-[0.15rem] h-8 w-8 fill-neutral-200 px-[0.075rem]  text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
                 </Link>
               </Tooltip>
               <span className="min-w-[3.5rem] whitespace-nowrap px-1 pt-[0.15rem] text-xl text-neutral-600 dark:text-[#818386]">
@@ -386,7 +393,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
                   onClick={openModal}
                 >
-                  <Icons.closeIcon className="h-8 w-8 " />
+                  <Close className="h-8 w-8 " />
                 </button>
               </Tooltip>
             </div>

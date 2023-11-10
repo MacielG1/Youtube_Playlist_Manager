@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
-import { Icons } from "@/assets/Icons";
 import { cn } from "@/utils/cn";
+import ArrowUp from "@/assets/icons/ArrowUp";
+import ArrowDown from "@/assets/icons/ArrowDown";
 
 type Props = {
   description: string;
@@ -34,9 +35,9 @@ export default function Description({ description, className }: Props) {
         >
           Description
           {isAccordionOpen ? (
-            <Icons.arrowUp className="ml-1 h-4 w-4 fill-neutral-200 text-neutral-800   dark:fill-neutral-800 dark:text-white " />
+            <ArrowUp className="ml-1 h-4 w-4 fill-neutral-200 text-neutral-800   dark:fill-neutral-800 dark:text-white " />
           ) : (
-            <Icons.arrowDown className="ml-1 h-4 w-4 fill-neutral-200 text-neutral-800   dark:fill-neutral-800 dark:text-white " />
+            <ArrowDown className="ml-1 h-4 w-4 fill-neutral-200 text-neutral-800   dark:fill-neutral-800 dark:text-white " />
           )}
         </button>
       </div>

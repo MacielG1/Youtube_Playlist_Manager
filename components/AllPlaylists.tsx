@@ -2,12 +2,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import type { Playlist } from "@/types";
-import { Icons } from "@/assets/Icons";
 import getPlaylistsData from "@/utils/getPlaylistsData";
 import getVideosData from "@/utils/getVideosData";
 import Link from "next/link";
 import ItemsList from "./ItemsList";
-import { set } from "idb-keyval";
+import Spin from "@/assets/icons/Spin";
+import Empty from "@/assets/icons/Empty";
 
 export default function AllPlaylists() {
   const [playlistItems, setPlaylistItems] = useState<Playlist[]>([]);
@@ -55,7 +55,7 @@ export default function AllPlaylists() {
   if ((isPlFetching || isVidFetching) && !isPlFetched) {
     return (
       <div className="mx-auto flex justify-center pt-2">
-        <Icons.spinIcon className="mt-5 h-7 w-7 animate-spin text-indigo-500" />
+        <Spin className="mt-5 h-7 w-7 animate-spin text-indigo-500" />
       </div>
     );
   }
@@ -66,7 +66,7 @@ export default function AllPlaylists() {
       {!vidData?.items?.length && !plData?.items?.length && isPlFetched && isVidFetched && (
         <div className="flex flex-col items-center gap-3 pt-10">
           <h3 className=" text-lg font-semibold tracking-wide text-neutral-500 dark:text-neutral-400">No Items Added</h3>
-          <Icons.emptyBox className="h-12 w-12 text-neutral-400 dark:text-neutral-500" />
+          <Empty className="h-12 w-12 text-neutral-400 dark:text-neutral-500" />
           <Link
             href="/about"
             className="focus-visible:ring-ring my-5 inline-flex items-center justify-center rounded-md

@@ -6,13 +6,13 @@ import { CSS } from "@dnd-kit/utilities";
 import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
 import type { Items, Thumbnails } from "@/types";
-import { Icons } from "@/assets/Icons";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import LinkWrapper from "./LinkWrapper";
 import { getThumbnailInfo } from "@/utils/getThumbnailInfo";
 import { del } from "idb-keyval";
 import { Roboto } from "next/font/google";
+import Delete from "@/assets/icons/Delete";
 const font = Roboto({ subsets: ["latin"], weight: ["400", "700"] });
 
 type Params = {
@@ -99,7 +99,7 @@ export default function Item({ title, thumbnails, id, type, duration }: Params) 
             }}`}
             aria-label="Delete Button"
           >
-            <Icons.deleteIcon className="h-4 w-4" />
+            <Delete className="h-4 w-4" />
           </button>
           <div className="transition duration-300 hover:scale-105 peer-hover:scale-105" {...attributes} {...listeners}>
             <LinkWrapper href={url} className="w-full cursor-pointer ">
