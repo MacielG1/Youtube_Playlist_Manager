@@ -11,22 +11,22 @@
   "dependencies": {
     "@dnd-kit/core": "^6.1.0",
     "@dnd-kit/sortable": "^8.0.0",
-    "@tanstack/react-query": "^5.7.2",
-    "@tanstack/react-query-devtools": "^5.7.2",
-    "@tanstack/react-query-persist-client": "^5.7.2",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.36",
-    "@types/react-dom": "^18.2.14",
+    "@tanstack/react-query": "^5.8.1",
+    "@tanstack/react-query-devtools": "^5.8.1",
+    "@tanstack/react-query-persist-client": "^5.8.1",
+    "@types/node": "^20.9.0",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
     "@upstash/ratelimit": "^0.4.4",
-    "@upstash/redis": "^1.24.3",
+    "@upstash/redis": "^1.25.1",
     "@vercel/analytics": "^1.1.1",
     "autoprefixer": "^10.4.16",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "eslint": "^8.53.0",
-    "eslint-config-next": "^14.0.1",
+    "eslint-config-next": "^14.0.2",
     "idb-keyval": "^6.2.1",
-    "next": "^14.0.1",
+    "next": "^14.0.2",
     "next-themes": "^0.2.1",
     "postcss": "^8.4.30",
     "react": "^18.2.0",
@@ -38,6 +38,6 @@
     "tailwindcss": "^3.3.5"
   },
   "devDependencies": {
-    "prettier-plugin-tailwindcss": "^0.5.6"
+    "prettier-plugin-tailwindcss": "^0.5.7"
   }
 }
