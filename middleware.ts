@@ -28,12 +28,14 @@ export default async function middleware(request: NextRequest, event: NextFetchE
   const shortRangeResult = await shortRangeLimiter.limit(ip);
   const longRangeResult = await longRangeLimiter.limit(ip);
 
+  const isDev = process.env.NODE_ENV === "development";
+
   // console.log(`Short range attempts left: ${shortRangeResult.remaining}`);
   // console.log(`Long range attempts left: ${longRangeResult.remaining}`);
 
   // If either of the limiters is exceeded, return a redirect response
-  if (!shortRangeResult.success || !longRangeResult.success) {
-    // return new NextResponse("Error", { status: 429 });
+  if (!isDev && (!shortRangeResult.success || !longRangeResult.success)) {
+    return new NextResponse("Error", { status: 429 });
   }
 
   // Otherwise, proceed with the request

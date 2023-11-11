@@ -44,6 +44,9 @@ export default function Input() {
         videoId = url.searchParams.get("v");
         isChannelUrl = url.pathname.includes("channel");
         isChannelNameUrl = url.pathname.startsWith("/@");
+        if (url.hostname === "youtu.be") {
+          videoId = url.pathname.split("/").pop();
+        }
       }
 
       // Video
