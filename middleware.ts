@@ -21,14 +21,14 @@ const longRangeLimiter = new Ratelimit({
   prefix: "ratelimit:long",
 });
 
+const isDev = process.env.NODE_ENV === "development";
+
 export default async function middleware(request: NextRequest, event: NextFetchEvent): Promise<Response | undefined> {
   const ip = request.ip ?? "127.0.0.1";
 
   // Check both limiters for the same identifier
   const shortRangeResult = await shortRangeLimiter.limit(ip);
   const longRangeResult = await longRangeLimiter.limit(ip);
-
-  const isDev = process.env.NODE_ENV === "development";
 
   // console.log(`Short range attempts left: ${shortRangeResult.remaining}`);
   // console.log(`Long range attempts left: ${longRangeResult.remaining}`);
