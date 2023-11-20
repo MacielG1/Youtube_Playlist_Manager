@@ -46,7 +46,6 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
       });
     }
   }
-  console.log("items", items);
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, setItems)}>
       {items?.length > 0 && (
@@ -54,12 +53,12 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
           <>
             {/* if the other type of item doesnt have any items, dont show the title at all */}
             {otherTypeVideos?.length > 0 && (
-              <h2 className="text-center font-semibold tracking-wide text-neutral-700 dark:text-zinc-300/90  md:pl-16 md:text-left lg:pl-[5rem] 2xl:pl-[7.5rem]">
+              <h2 className="${ text-center font-semibold tracking-wide text-neutral-700 dark:text-zinc-300/90 md:pl-16 md:text-left lg:pl-[5rem] 2xl:pl-[7.5rem]">
                 {title}s
               </h2>
             )}
             <div
-              className={` mx-auto grid grid-cols-1 place-items-center gap-x-7 gap-y-2 px-12 pt-1 xs:grid-cols-2 md:grid-cols-3 lg:mx-6 lg:grid-cols-4 2xl:mx-14 2xl:grid-cols-5 ${
+              className={`mx-auto grid grid-cols-1 place-items-center gap-x-7 gap-y-2 px-12 pt-1 xs:grid-cols-2 md:grid-cols-3 lg:mx-6 lg:grid-cols-4 2xl:mx-14 2xl:grid-cols-5 ${
                 title === "Video" && "pb-3"
               }`}
             >

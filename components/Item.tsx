@@ -133,7 +133,7 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
           )}
         </div>
       </div>
-      <h2 className="max-h-[3.8rem] max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-sm font-medium text-black dark:text-white xs:max-w-[12rem] sm:max-w-[14rem] md:max-w-[19.5rem]">
+      <h2 className="max-h-[2.8rem] min-h-[2.8rem]   max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-sm font-medium text-black dark:text-white xs:max-w-[12rem] sm:max-w-[14rem] md:max-w-[19.5rem]">
         <Link className="cursor-pointer" href={url}>
           {formattedTitle}
           {type === "Video" && ` - ${channel}`}
