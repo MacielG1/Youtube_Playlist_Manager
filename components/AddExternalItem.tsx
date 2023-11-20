@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import getVideosData from "@/utils/getVideosData";
 import getPlaylistsData from "@/utils/getPlaylistsData";
 import fetchVideosIds from "@/utils/fetchVideosIds";
-import { set } from "idb-keyval";
+import { get, set } from "idb-keyval";
 import { Items } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -27,7 +27,9 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
         if (searchParams.type === "video") {
           let videoKey = "v=" + id;
 
-          if (localStorage.getItem(videoKey)) {
+          let isVideoSaved = await get(id);
+          if (isVideoSaved) {
+            console.log("Video Already Added!");
             toast.error("Video Already Added!", toastError);
             return;
           }
@@ -60,7 +62,10 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
         if (searchParams.type === "playlist") {
           let playlistKey = "pl=" + id;
 
-          if (localStorage.getItem(playlistKey)) {
+          let isPlSaved = await get(`pl=${id}`);
+
+          if (isPlSaved) {
+            console.log("Playlist Already Added!");
             toast.error("Playlist Already Added!", toastError);
             return null;
           }

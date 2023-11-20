@@ -74,6 +74,8 @@ export default function Item({ title, thumbnails, id, type, duration }: Params) 
         const newVideos = { ...prev, items: newVideosData };
         return newVideos;
       });
+
+      await del(id);
     }
     setIsModalOpen(false);
     mutate();

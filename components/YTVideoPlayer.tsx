@@ -13,7 +13,7 @@ import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Description from "./Description";
 import Tooltip from "./ToolTip";
-import { get } from "idb-keyval";
+import { del, get } from "idb-keyval";
 import Link from "next/link";
 import Spin from "@/assets/icons/Spin";
 import Rewind10 from "@/assets/icons/Rewind10";
@@ -103,7 +103,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   // function onEnd(e: YouTubeEvent) {}
 
-  function onDelete() {
+  async function onDelete() {
     isPlayingVideoRef.current = null;
     router.replace("/");
 
@@ -117,6 +117,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         };
       }
     });
+    await del(`v=${videoId}`);
   }
 
   async function openModal() {
