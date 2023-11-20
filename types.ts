@@ -19,6 +19,7 @@ export type VideoAPI = {
     title: string;
     thumbnails?: Thumbnails;
     description?: string;
+    channelTitle: string;
   };
   contentDetails: {
     duration: string;
@@ -32,6 +33,7 @@ export type Playlist = {
   description?: string;
   videosData?: Video[];
   duration?: string;
+  channel?: string;
 };
 export type Video = {
   id: string;

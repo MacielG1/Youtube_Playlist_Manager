@@ -33,6 +33,7 @@ export async function POST(req: Request): Promise<NextResponse> {
           thumbnails: item.snippet.thumbnails,
           description: item.snippet.description,
           duration: convertDurationTime(item.contentDetails.duration),
+          channel: item.snippet.channelTitle,
         };
       }),
     };

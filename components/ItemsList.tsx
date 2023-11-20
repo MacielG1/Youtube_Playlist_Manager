@@ -46,7 +46,7 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
       });
     }
   }
-
+  console.log("items", items);
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, setItems)}>
       {items?.length > 0 && (
@@ -63,8 +63,8 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
                 title === "Video" && "pb-3"
               }`}
             >
-              {items?.map((playlist) => {
-                return <Item key={playlist.id} id={playlist.id} duration={playlist.duration} title={playlist.title} thumbnails={playlist.thumbnails} type={title} />;
+              {items?.map((item) => {
+                return <Item key={item.id} id={item.id} duration={item.duration} title={item.title} thumbnails={item.thumbnails} type={title} channel={item.channel} />;
               })}
             </div>
           </>

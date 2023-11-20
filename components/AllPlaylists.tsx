@@ -36,9 +36,7 @@ export default function AllPlaylists() {
   } = useQuery({
     queryKey: ["videos"],
     queryFn: async () => {
-      let data = await getVideosData();
-
-      return data;
+      return await getVideosData();
     },
     refetchOnWindowFocus: false,
     refetchOnMount: false,

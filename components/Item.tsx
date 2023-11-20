@@ -13,6 +13,8 @@ import { getThumbnailInfo } from "@/utils/getThumbnailInfo";
 import { del } from "idb-keyval";
 import { Roboto } from "next/font/google";
 import Delete from "@/assets/icons/Delete";
+import reduceStringLength from "@/utils/reduceStringLength";
+
 const font = Roboto({ subsets: ["latin"], weight: ["400", "700"] });
 
 type Params = {
@@ -21,9 +23,10 @@ type Params = {
   id: string;
   type: string;
   duration?: string;
+  channel?: string;
 };
 
-export default function Item({ title, thumbnails, id, type, duration }: Params) {
+export default function Item({ title, thumbnails, id, type, duration, channel }: Params) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging, isSorting } = useSortable({ id, disabled: isModalOpen });
@@ -90,6 +93,7 @@ export default function Item({ title, thumbnails, id, type, duration }: Params) 
   let decodedTitled = encodeURIComponent(title);
   let url = !isDragging && !isSorting ? (type === "Playlist" ? `/playlist?list=${id}&title=${decodedTitled}` : `/video?v=${id}&title=${decodedTitled}`) : "#";
 
+  let formattedTitle = reduceStringLength(title, 65);
   return (
     <div className={`mt-2 flex  flex-col items-center outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
       <div className="relative flex  cursor-default flex-col items-center justify-center ">
@@ -129,9 +133,10 @@ export default function Item({ title, thumbnails, id, type, duration }: Params) 
           )}
         </div>
       </div>
-      <h2 className="h-11 max-w-[10rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-sm font-medium text-black dark:text-white xs:max-w-[12rem] sm:max-w-[14rem] md:max-w-[17.5rem]">
+      <h2 className="max-h-[3.8rem] max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-sm font-medium text-black dark:text-white xs:max-w-[12rem] sm:max-w-[14rem] md:max-w-[19.5rem]">
         <Link className="cursor-pointer" href={url}>
-          {title}
+          {formattedTitle}
+          {type === "Video" && ` - ${channel}`}
         </Link>
       </h2>
 
