@@ -58,8 +58,8 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
               </h2>
             )}
             <div
-              className={`mx-auto grid grid-cols-1 place-items-center gap-x-7 gap-y-2 px-12 pt-1 xs:grid-cols-2 md:grid-cols-3 lg:mx-6 lg:grid-cols-4 2xl:mx-14 2xl:grid-cols-5 ${
-                title === "Video" && "pb-5"
+              className={`mx-auto grid grid-cols-1 place-items-center gap-x-7 gap-y-3 px-12 pt-1 xs:grid-cols-2 md:grid-cols-3 lg:mx-6 lg:grid-cols-4 2xl:mx-14 2xl:grid-cols-5 ${
+                title === "Video" && "pb-12"
               }`}
             >
               {items?.map((item) => {
