@@ -37,7 +37,7 @@ export default async function getVideoData(newVideoId?: string) {
       return {};
     }
     data.items.map(async (item: VideoAPI) => {
-      await set(item.id, item);
+      await set(`v=${item.id}`, item);
       return item;
     });
 
