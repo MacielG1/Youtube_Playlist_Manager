@@ -106,7 +106,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       if (isPlayingVideoRef.current) {
         savePlaylistsProgress(player, playlistId, pageRef.current);
       }
-    }, 30000);
+    }, 15000);
 
     return () => {
       clearInterval(timer);
@@ -137,6 +137,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }
 
   function onPlay(e: YouTubeEvent) {
+    setIsLoaded(true);
+
     isPlayingVideoRef.current = true;
     savePlaylistsProgress(e.target, playlistId, pageRef.current);
   }
@@ -145,9 +147,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     savePlaylistsProgress(e.target, playlistId, pageRef.current);
   }
   async function onError(e: YouTubeEvent) {
-    if (e.data === 150) {
-      // go to next video
-      e.target.nextVideo();
+    if (e.data === "150") {
+      setIsLoaded(false);
     }
 
     pageRef.current = 1;
@@ -167,7 +168,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       } else {
         e.target.playVideo();
       }
-    }, 1000);
+    }, 600);
   }
 
   async function onStateChange(e: YouTubeEvent) {
@@ -305,13 +306,14 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   let playlistTitle = reduceStringSize(params.title, 100);
 
   const isSmaller = useMediaQuery("(max-width: 1280px)");
+
   return (
     <>
       <LogoButton />
       <div className="flex flex-col items-center justify-center pt-12">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:max-w-[62vw] xl:pt-0 2xl:max-w-[70vw]">
           <div className=" relative w-full overflow-auto pb-[56.25%]">
-            {!isLoaded && (
+            {(!isLoaded || !plLengthRef.current) && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
                 <Spin className="h-7 w-7 animate-spin text-indigo-500" />
                 <span className="sr-only">Loading...</span>
@@ -327,13 +329,13 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               onError={onError}
               onStateChange={onStateChange}
               onPlaybackRateChange={onSpeedChange}
-              className={`${isLoaded ? "visible" : "hidden"} absolute left-0 right-0 top-0 h-full w-full border-none`}
+              className={`absolute left-0 right-0 top-0 h-full w-full border-none ${(!isLoaded || !plLengthRef.current) && "invisible"}`}
             />
           </div>
 
           {!isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className="xl:absolute" />}
         </div>
-        {isLoaded && (
+        {isLoaded && !!plLengthRef.current && (
           <div className="flex max-w-[80vw] flex-col  pt-1 md:max-w-[60vw] 2xl:max-w-[65vw] 2xl:pt-2">
             <div className="flex justify-center gap-1 py-2 xs:gap-3 sm:py-0">
               <Tooltip text="Restart Playlist">
