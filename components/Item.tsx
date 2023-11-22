@@ -97,7 +97,7 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
   return (
     <div className={`mt-2 flex  flex-col items-center outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
       <div className="relative flex  cursor-default flex-col items-center justify-center ">
-        <div className="group flex aspect-video w-full select-none items-center justify-center overflow-hidden rounded-xl ">
+        <div className="group flex aspect-video w-[50vw] select-none items-center justify-center  overflow-hidden rounded-xl xs:w-[35vw] md:w-[26vw] lg:w-[20vw] 2xl:w-[16.5vw] ">
           <button
             onClick={openModal}
             className={`peer absolute right-0 top-0 z-10 rounded-bl-md rounded-tr-[0.50rem] bg-neutral-800 p-1 text-neutral-400 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-500 ${
@@ -107,15 +107,15 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
           >
             <Delete className="h-4 w-4" />
           </button>
-          <div className="transition duration-300 hover:scale-105 peer-hover:scale-105" {...attributes} {...listeners}>
-            <LinkWrapper href={url} className="w-full cursor-pointer ">
+          <div className=" transition duration-300 hover:scale-105 peer-hover:scale-105" {...attributes} {...listeners}>
+            <LinkWrapper href={url} className="cursor-pointer ">
               <Image
                 src={thumbnailURL}
                 alt={title}
                 width={350}
                 height={350}
-                style={{ width: "100%", height: "100%" }}
-                className={` ${isDragging ? "cursor-grabbing" : "cursor-pointer"}`}
+                style={{ width: "100%", height: "auto" }}
+                className={` ${isDragging ? "cursor-grabbing" : "cursor-pointer"} aspect-video`}
                 priority
                 unoptimized
                 placeholder="blur"
@@ -133,7 +133,7 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
           )}
         </div>
       </div>
-      <h2 className="max-h-[2.8rem] min-h-[2.8rem]   max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-sm font-medium text-black dark:text-white xs:max-w-[12rem] sm:max-w-[14rem] md:max-w-[19.5rem]">
+      <h2 className="max-h-[2.8rem] min-h-[2.8rem] max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-sm font-medium text-black dark:text-white xs:max-w-[12rem] sm:max-w-[14rem] md:max-w-[19.5rem]">
         <Link className="cursor-pointer" href={url}>
           {formattedTitle}
           {type === "Video" && channel && ` - ${channel}`}
