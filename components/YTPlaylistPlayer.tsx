@@ -336,8 +336,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
           {!isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className="xl:absolute" />}
         </div>
         {isLoaded && !!plLengthRef.current && (
-          <div className="flex max-w-[80vw] flex-col  pt-1 md:max-w-[60vw] 2xl:max-w-[65vw] 2xl:pt-2">
-            <div className="flex justify-center gap-1 py-2 xs:gap-3 sm:py-0">
+          <div className="flex max-w-[80vw] flex-col pt-1 md:max-w-[60vw] 2xl:max-w-[65vw] 2xl:pt-2">
+            <div className="flex justify-center gap-1 py-2 max-md:flex-wrap xs:gap-3 sm:py-0">
               <Tooltip text="Restart Playlist">
                 <button
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"

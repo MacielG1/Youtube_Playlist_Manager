@@ -28,10 +28,16 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
       const item = sidebarRef.current.children[currentVideoIndex - 1] as HTMLElement;
       if (item) {
         let scrollAmount;
-        if (window.innerWidth > 1280) {
-          scrollAmount = item.offsetTop - 10;
-        } else {
+        if (window.innerWidth < 500) {
+          scrollAmount = item.offsetTop - 500;
+        } else if (window.innerWidth < 700) {
+          scrollAmount = item.offsetTop - 610;
+        } else if (window.innerWidth < 900) {
           scrollAmount = item.offsetTop - 700;
+        } else if (window.innerWidth < 1280) {
+          scrollAmount = item.offsetTop - 850;
+        } else {
+          scrollAmount = item.offsetTop - 10;
         }
 
         if (isInitialMount.current) {
@@ -51,6 +57,10 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
     if (e.button === 0) {
       e.preventDefault(); // prevent left click default behavior
       playVideoAt(index);
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
     }
   }
 
@@ -61,7 +71,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
       <div
         ref={sidebarRef}
         className={cn(
-          "custom-scrollbar right-1 top-0 mt-4 flex max-h-[90vh] flex-col gap-3 overflow-y-auto overflow-x-hidden rounded-md border border-neutral-400 p-1 px-2 pr-[1.05rem] dark:border-neutral-700 lg:mt-12  1.5xl:right-7 2xl:right-3 3xl:right-11",
+          "custom-scrollbar right-1 top-0 mx-auto mt-4 flex max-h-[90vh] max-w-fit flex-col gap-3 overflow-y-auto overflow-x-hidden rounded-md border border-neutral-400 p-1 px-2 pr-[1.05rem] dark:border-neutral-700 lg:mt-12  1.5xl:right-7 2xl:right-3 3xl:right-11",
           className,
         )}
       >
@@ -71,7 +81,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
           const url = `/video/v?v=${video.id}&title=${encodeURIComponent(video.title)}`;
           return (
             <div className="relative flex cursor-default flex-col items-center justify-center text-center first:pt-3 last:pb-3" key={video.id}>
-              <div className="group flex aspect-video items-center justify-center gap-2 rounded-xl">
+              <div className="group flex aspect-video items-center justify-center gap-2 rounded-xl ">
                 {currentVideoIndex && currentVideoIndex - 1 === i ? (
                   <ArrowRight className="h-2 w-2 text-indigo-500" />
                 ) : (
@@ -85,7 +95,6 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                       alt={video.title}
                       width={is700 ? 150 : is1280 ? 240 : is1500 ? 130 : 150}
                       height={is700 ? 84 : is1280 ? 135 : is1500 ? 73 : 84}
-                      // style={{ width: is700 ? "40vw" : is1280 ? "25vw" : is1500 ? "130px" : "150px", height: "auto" }}
                       className={`rounded-xl transition duration-300 hover:scale-[1.03] ${noBlackBars ? "-my-[1px]" : "-my-[14px]"} `}
                       priority
                       unoptimized
