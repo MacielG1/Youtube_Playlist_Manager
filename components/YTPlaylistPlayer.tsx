@@ -148,27 +148,28 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }
   async function onError(e: YouTubeEvent) {
     if (e.data === "150") {
+      // video still unavailable
       setIsLoaded(false);
     }
 
     pageRef.current = 1;
-    let data = {
-      playlistId,
-      currentItem: 0,
-      initialTime: 1,
-      currentPage: 1,
-      playbackSpeed: 1,
-    };
+    // let data = {
+    //   playlistId,
+    //   currentItem: 0,
+    //   initialTime: 1,
+    //   currentPage: 1,
+    //   playbackSpeed: 1,
+    // };
     setTimeout(async () => {
       let state = e.target?.getPlayerState();
       if (state == -1) {
-        localStorage.setItem(`pl=${playlistId}`, JSON.stringify(data));
-        await resetPlaylist();
+        // localStorage.setItem(`pl=${playlistId}`, JSON.stringify(data));
+        // await resetPlaylist();
         await PlaylistPlayerRef.current?.resetPlayer();
       } else {
-        e.target.playVideo();
+        await e.target.playVideo();
       }
-    }, 600);
+    }, 800);
   }
 
   async function onStateChange(e: YouTubeEvent) {
