@@ -9,6 +9,7 @@ import ModalDelete from "../modals/ModalDelete";
 import DeleteAllBtn from "./DeleteAllBtn";
 import { usePathname } from "next/navigation";
 import Settings from "@/assets/icons/Settings";
+import ToggleMute from "./ToggleMute";
 
 export default function SettingsMenu() {
   let [isOpen, setIsOpen] = useState(false);
@@ -36,6 +37,7 @@ export default function SettingsMenu() {
       <ImportExportTimers setModalOpen={setIsOpen} />
       <HowItWorks setModalOpen={setIsOpen} />
       <DeleteAllBtn openDeleteModal={openDeleteModal} />
+      <ToggleMute />
     </div>
   );
   const isPlaylist = pathname.includes("/playlist");

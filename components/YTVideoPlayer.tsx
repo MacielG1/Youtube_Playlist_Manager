@@ -44,6 +44,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   const [currentTime, setCurrentTime] = useState(0);
 
   let isBrowser = typeof window !== "undefined";
+
   useEffect(() => {
     const player = videoPlayerRef?.current?.getInternalPlayer(); // returns the iframe video  player
 
@@ -149,6 +150,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         autoplay: 1,
         start: Math.floor(initialTime),
         origin: isBrowser ? window.location.origin : "http://localhost:3000",
+        mute: true,
       },
     };
   }, []);
