@@ -95,8 +95,8 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
 
   let formattedTitle = reduceStringLength(title, 65);
   return (
-    <div className={`mt-2 flex  flex-col items-center outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
-      <div className="relative flex  cursor-default flex-col items-center justify-center ">
+    <div className={`mt-2 flex flex-col items-center outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
+      <div className="relative flex cursor-default flex-col items-center justify-center">
         <div className="group flex aspect-video w-[50vw] select-none items-center justify-center  overflow-hidden rounded-xl xs:w-[35vw] md:w-[26vw] lg:w-[20vw] 2xl:w-[16.5vw] ">
           <button
             onClick={openModal}
@@ -133,7 +133,8 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
           )}
         </div>
       </div>
-      <h2 className="md:max-w-30rem] max-h-[2.8rem] min-h-[2.8rem] max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-[0.85rem] font-medium text-black dark:text-white xs:max-w-[12rem] sm:max-w-[20rem]">
+
+      <h2 className="max-h-[2.8rem] min-h-[2.8rem] max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-[0.875rem] font-medium text-black dark:text-white xs:max-w-[12rem] sm:max-w-[20rem] ">
         <Link className="cursor-pointer" href={url}>
           {formattedTitle}
           {type === "Video" && channel && ` - ${channel}`}
