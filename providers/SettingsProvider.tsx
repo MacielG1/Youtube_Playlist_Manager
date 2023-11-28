@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext } from "react";
 import { useLocalStorage } from "usehooks-ts";
 type SettingsContextProps = {
   isAudioMuted: boolean;
