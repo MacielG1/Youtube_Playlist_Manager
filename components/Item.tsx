@@ -88,7 +88,7 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
     e.stopPropagation();
     setIsModalOpen(!isModalOpen);
   }
-  const { thumbnailURL = "" } = useMemo(() => getThumbnailInfo(thumbnails), [thumbnails]);
+  const { thumbnailURL = "", hasBlackBars } = useMemo(() => getThumbnailInfo(thumbnails), [thumbnails]);
 
   let decodedTitled = encodeURIComponent(title);
   let url = !isDragging && !isSorting ? (type === "Playlist" ? `/playlist?list=${id}&title=${decodedTitled}` : `/video?v=${id}&title=${decodedTitled}`) : "#";
@@ -115,7 +115,7 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
                 width={350}
                 height={350}
                 style={{ width: "100%", height: "auto" }}
-                className={` ${isDragging ? "cursor-grabbing" : "cursor-pointer"} aspect-video`}
+                className={` ${isDragging ? "cursor-grabbing" : "cursor-pointer"} aspect-video ${hasBlackBars && "object-cover"}`}
                 priority
                 unoptimized
                 placeholder="blur"
@@ -133,7 +133,7 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
           )}
         </div>
       </div>
-      <h2 className="max-h-[2.8rem] min-h-[2.8rem] max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-sm font-medium text-black dark:text-white xs:max-w-[12rem] sm:max-w-[14rem] md:max-w-[19.5rem]">
+      <h2 className="md:max-w-30rem] max-h-[2.8rem] min-h-[2.8rem] max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-[0.85rem] font-medium text-black dark:text-white xs:max-w-[12rem] sm:max-w-[20rem]">
         <Link className="cursor-pointer" href={url}>
           {formattedTitle}
           {type === "Video" && channel && ` - ${channel}`}
