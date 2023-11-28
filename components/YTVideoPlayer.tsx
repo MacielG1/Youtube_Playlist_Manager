@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState, useMemo, use } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Items } from "@/types";
@@ -20,6 +20,7 @@ import Rewind10 from "@/assets/icons/Rewind10";
 import Skip10 from "@/assets/icons/Skip10";
 import Youtube from "@/assets/icons/Youtube";
 import Close from "@/assets/icons/Close";
+import { useAudioToggle } from "@/providers/SettingsProvider";
 
 type Params = {
   v: string;
@@ -30,6 +31,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [description, setDescription] = useState<string | null>(null);
+  const { isAudioMuted } = useAudioToggle();
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -58,6 +60,12 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
       clearInterval(timer);
     };
   }, []);
+
+  useEffect(() => {
+    if (videoPlayerRef?.current) {
+      isAudioMuted ? videoPlayerRef.current.internalPlayer.mute() : videoPlayerRef.current.internalPlayer.unMute();
+    }
+  }, [isAudioMuted]);
 
   async function onReady(e: YouTubeEvent) {
     setIsLoaded(true);
@@ -150,7 +158,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         autoplay: 1,
         start: Math.floor(initialTime),
         origin: isBrowser ? window.location.origin : "http://localhost:3000",
-        mute: true,
+        mute: isAudioMuted || false,
       },
     };
   }, []);

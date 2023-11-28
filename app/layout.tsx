@@ -7,6 +7,7 @@ import ThemeProvider from "@/providers/ThemeProvider";
 import SettingsMenu from "@/components/Settings/SettingsMenu";
 import { Analytics } from "@vercel/analytics/react";
 import ScrollToTop from "@/components/ScrollToTop";
+import SettingsProvider from "@/providers/SettingsProvider";
 
 const font = Open_Sans({ subsets: ["latin"] });
 
@@ -20,13 +21,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={`${font.className} bg-background`}>
         <QueryProvider>
-          <ThemeProvider attribute="class" defaultTheme="system">
-            <SettingsMenu />
-            <ToastProvider />
-            <Analytics />
-            <ScrollToTop />
-            {children}
-          </ThemeProvider>
+          <SettingsProvider>
+            <ThemeProvider attribute="class" defaultTheme="system">
+              <SettingsMenu />
+              <ToastProvider />
+              <Analytics />
+              <ScrollToTop />
+              {children}
+            </ThemeProvider>
+          </SettingsProvider>
         </QueryProvider>
         <div id="modal-delete" />
         <div id="modal-settings" />

@@ -20,7 +20,7 @@ import Tooltip from "./ToolTip";
 import { del, get, set } from "idb-keyval";
 import VideosListSidebar from "./VideosListSidebar";
 import Link from "next/link";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useMediaQuery } from "usehooks-ts";
 import Spin from "@/assets/icons/Spin";
 import Reset from "@/assets/icons/Reset";
 import Rewind10 from "@/assets/icons/Rewind10";
@@ -29,6 +29,7 @@ import PointerRight from "@/assets/icons/PointerRight";
 import Skip10 from "@/assets/icons/Skip10";
 import Youtube from "@/assets/icons/Youtube";
 import Close from "@/assets/icons/Close";
+import { useAudioToggle } from "@/providers/SettingsProvider";
 
 type Params = {
   list: string;
@@ -44,6 +45,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
   const [currentTime, setCurrentTime] = useState(0);
+  const { isAudioMuted } = useAudioToggle();
 
   const isPaused = useRef(false); // used to resume video if it was playing when delete modal was opened
   const pageRef = useRef(1);
@@ -98,6 +100,12 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     }
     run();
   }, []);
+
+  useEffect(() => {
+    if (PlaylistPlayerRef?.current) {
+      isAudioMuted ? PlaylistPlayerRef.current.internalPlayer.mute() : PlaylistPlayerRef.current.internalPlayer.unMute();
+    }
+  }, [isAudioMuted]);
 
   useEffect(() => {
     const player = PlaylistPlayerRef.current?.internalPlayer; // returns the iframe video player
@@ -299,6 +307,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         index: currentItem + 1,
         start: Math.floor(initialTime) || 0 || 1,
         origin: isBrowser ? window.location?.origin : "https://localhost:3000",
+        mute: isAudioMuted,
       },
     };
   }, []);

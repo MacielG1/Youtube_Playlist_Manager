@@ -1,5 +1,5 @@
 import ArrowRight from "@/assets/icons/ArrowRight";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useMediaQuery } from "usehooks-ts";
 import { Items } from "@/types";
 import { cn } from "@/utils/cn";
 import { getThumbnailInfo } from "@/utils/getThumbnailInfo";
