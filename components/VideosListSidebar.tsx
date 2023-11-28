@@ -76,7 +76,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
         )}
       >
         {videosList.map((video, i) => {
-          const { thumbnailURL = "", noBlackBars = false } = getThumbnailInfo(video.thumbnails);
+          const { thumbnailURL = "", hasBlackBars = false } = getThumbnailInfo(video.thumbnails);
           const title = reduceStringSize(video.title, 60);
           const url = `/video/v?v=${video.id}&title=${encodeURIComponent(video.title)}`;
           return (
@@ -95,7 +95,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                       alt={video.title}
                       width={is700 ? 150 : is1280 ? 240 : is1500 ? 130 : 150}
                       height={is700 ? 84 : is1280 ? 135 : is1500 ? 73 : 84}
-                      className={`rounded-xl transition duration-300 hover:scale-[1.03] ${noBlackBars ? "-my-[1px]" : "-my-[14px]"} `}
+                      className={`rounded-xl transition duration-300 hover:scale-[1.03] ${hasBlackBars ? "-my-[14px]" : "-my-[1px]"} `}
                       priority
                       unoptimized
                     />
