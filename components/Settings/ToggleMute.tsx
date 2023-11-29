@@ -1,5 +1,5 @@
-import { Switch } from "../UI/Switch";
 import { useAudioToggle } from "@/providers/SettingsProvider";
+import { Switch } from "../Switch";
 
 export default function ToggleMute() {
   const { isAudioMuted, setIsAudioMuted } = useAudioToggle();
