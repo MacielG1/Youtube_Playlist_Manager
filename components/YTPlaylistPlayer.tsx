@@ -394,10 +394,10 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Youtube className="ml-[0.15rem] h-8 w-8 fill-neutral-200 px-[0.075rem]  text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
+                  <Youtube className="mx-[0.3rem] h-8 w-8 fill-neutral-200  pb-[0.05rem] text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
                 </Link>
               </Tooltip>
-              <span className="min-w-[3.5rem] whitespace-nowrap px-1 pt-[0.15rem] text-xl text-neutral-600 dark:text-[#818386]">
+              <span className="min-w-[3.5rem] whitespace-nowrap px-1 text-[1.35rem] text-neutral-600 dark:text-[#818386]">
                 {currentVideoIndex} / {plLengthRef.current}
               </span>
               <Tooltip text="Delete Playlist">
