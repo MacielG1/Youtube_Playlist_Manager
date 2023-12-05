@@ -8,7 +8,7 @@ import { get, set } from "idb-keyval";
 import { Items } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import getChannelId from "@/utils/createChannelPlaylist";
 import Loading from "@/assets/icons/Loading";
 
@@ -38,10 +38,14 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
 
           await set(videoKey, { id: id, description: data.items[0].description });
 
+          let state = queryClient.getQueryState(["videos"]);
+          console.log("getQueryState", state);
+
           if (data?.items?.length) {
             queryClient.setQueryData<Items>(["videos"], (prev) => {
-              if (!prev || !prev?.items?.length) return data;
+              console.log("prev", prev);
 
+              if (!prev || !prev?.items?.length) return data;
               return {
                 ...data,
                 items: [...prev.items, ...data.items],
@@ -77,6 +81,7 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
 
           if (playlistData?.items?.length) {
             queryClient.setQueryData<Items>(["playlists"], (prev) => {
+              console.log("prev", prev);
               if (!prev || !prev?.items?.length) return playlistData;
 
               return {
@@ -116,6 +121,7 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
 
           if (playlistData?.items?.length) {
             queryClient.setQueryData<Items>(["playlists"], (prev) => {
+              console.log("prev", prev);
               // if no playlists saved, return the new one
               if (!prev || !prev?.items?.length) return playlistData;
 
