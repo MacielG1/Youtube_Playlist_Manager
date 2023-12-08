@@ -39,6 +39,13 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
           await set(videoKey, { id: id, description: data.items[0].description });
 
           let state = queryClient.getQueryState(["videos"]);
+
+          if (!state) {
+            await queryClient.refetchQueries();
+            const data2 = queryClient.getQueryData<Items>(["videos"]);
+            console.log("data2", data2);
+            router.refresh();
+          }
           console.log("getQueryState", state);
 
           if (data?.items?.length) {
