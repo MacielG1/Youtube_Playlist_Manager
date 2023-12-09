@@ -11,6 +11,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import getChannelId from "@/utils/createChannelPlaylist";
 import Loading from "@/assets/icons/Loading";
+import { revalidatePath } from "next/cache";
 
 export default function AddExternalItem({ searchParams }: { searchParams: { type: string; id: string } }) {
   const queryClient = useQueryClient();
@@ -38,30 +39,35 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
 
           await set(videoKey, { id: id, description: data.items[0].description });
 
-          let state = queryClient.getQueryState(["videos"]);
-
-          if (!state) {
-            await queryClient.refetchQueries();
-            const data2 = queryClient.getQueryData<Items>(["videos"]);
-            console.log("data2", data2);
-            router.refresh();
-          }
-          console.log("getQueryState", state);
+          let queryData = queryClient.getQueryData<Items>(["videos"]);
 
           if (data?.items?.length) {
+            localStorage.setItem(videoKey, JSON.stringify({ initialTime: 0 }));
+            const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
+            localStorage.setItem("videos", JSON.stringify([...allVideos, id]));
+
+            // queryClient.prefetchQuery({
+            //   queryKey: ["videos"],
+            // });
+            await queryClient.ensureQueryData({
+              queryKey: ["videos"],
+            });
+
+            if (!queryData) {
+              console.log("no query data");
+            } else {
+              console.log("has query data", queryData);
+            }
             queryClient.setQueryData<Items>(["videos"], (prev) => {
               console.log("prev", prev);
-
               if (!prev || !prev?.items?.length) return data;
               return {
                 ...data,
                 items: [...prev.items, ...data.items],
               };
             });
+            // }
 
-            localStorage.setItem(videoKey, JSON.stringify({ initialTime: 0 }));
-            const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
-            localStorage.setItem("videos", JSON.stringify([...allVideos, id]));
             return toast.success("Video Added!", toastSuccess);
           } else {
             toast.error("Video is Invalid or Private!", toastError);
