@@ -39,25 +39,15 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
 
           await set(videoKey, { id: id, description: data.items[0].description });
 
-          let queryData = queryClient.getQueryData<Items>(["videos"]);
-
           if (data?.items?.length) {
             localStorage.setItem(videoKey, JSON.stringify({ initialTime: 0 }));
             const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
             localStorage.setItem("videos", JSON.stringify([...allVideos, id]));
 
-            // queryClient.prefetchQuery({
-            //   queryKey: ["videos"],
-            // });
             await queryClient.ensureQueryData({
               queryKey: ["videos"],
             });
 
-            if (!queryData) {
-              console.log("no query data");
-            } else {
-              console.log("has query data", queryData);
-            }
             queryClient.setQueryData<Items>(["videos"], (prev) => {
               console.log("prev", prev);
               if (!prev || !prev?.items?.length) return data;
@@ -93,6 +83,14 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
           await set(playlistKey, videosData);
 
           if (playlistData?.items?.length) {
+            localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0 }));
+            const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
+            localStorage.setItem("playlists", JSON.stringify([...allPlaylists, id]));
+
+            await queryClient.ensureQueryData({
+              queryKey: ["playlists"],
+            });
+
             queryClient.setQueryData<Items>(["playlists"], (prev) => {
               console.log("prev", prev);
               if (!prev || !prev?.items?.length) return playlistData;
@@ -103,9 +101,6 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
               };
             });
 
-            localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0 }));
-            const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-            localStorage.setItem("playlists", JSON.stringify([...allPlaylists, id]));
             return toast.success("Playlist Added!", toastSuccess);
           } else {
             toast.error("Playlist is Invalid or Private!", toastError);
@@ -133,6 +128,14 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
           await set(playlistKey, videosData);
 
           if (playlistData?.items?.length) {
+            localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0, isChannel: true }));
+            const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
+            localStorage.setItem("playlists", JSON.stringify([...allPlaylists, channelId]));
+
+            await queryClient.ensureQueryData({
+              queryKey: ["playlists"],
+            });
+
             queryClient.setQueryData<Items>(["playlists"], (prev) => {
               console.log("prev", prev);
               // if no playlists saved, return the new one
@@ -144,9 +147,6 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
               };
             });
 
-            localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0, isChannel: true }));
-            const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-            localStorage.setItem("playlists", JSON.stringify([...allPlaylists, channelId]));
             return toast.success("Channel Added!", toastSuccess);
           } else {
             toast.error("Playlist is Invalid or Private!", toastError);
