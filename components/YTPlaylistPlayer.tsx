@@ -132,7 +132,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     const index = (await PlaylistPlayerRef.current?.internalPlayer?.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
     setCurrentVideoIndex(index);
 
-    let vidsData = await get(`pl=${playlistId}`);
+    const vidsData = await get(`pl=${playlistId}`);
+
     if (vidsData) setVideosList(vidsData);
 
     const intervalId = setInterval(() => {

@@ -25,12 +25,15 @@ import { useAudioToggle } from "@/providers/SettingsProvider";
 type Params = {
   v: string;
   title: string;
+  ch: string;
 };
 
 export default function YTVideoPlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [description, setDescription] = useState<string | null>(null);
+  const [title, setTitle] = useState<string>("");
+  const [channel, setChannel] = useState<string>("");
   const { isAudioMuted } = useAudioToggle();
 
   const queryClient = useQueryClient();
@@ -41,6 +44,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   const videoPlayerRef = useRef<YouTube | null>(null);
   const isPlayingVideoRef = useRef<boolean | null>(false);
 
+  // const channel = params.ch;
   const videoId = params.v;
   const item = `v=${videoId}`;
   const [currentTime, setCurrentTime] = useState(0);
@@ -75,6 +79,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
     let data = await get(`v=${videoId}`);
     setDescription(data?.description);
+    setTitle(data?.title);
+    setChannel(data?.channel);
 
     const intervalId = setInterval(() => {
       if (isPlayingVideoRef.current) {
@@ -163,7 +169,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     };
   }, []);
 
-  let videoTitle = reduceStringSize(params.title, 100);
+  let videoTitle = reduceStringSize(title, 100);
 
   return (
     <>
@@ -227,16 +233,15 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               </Tooltip>
             </div>
             {/* Title */}
-            <span className="text-balance break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200 ">{videoTitle}</span>
+            <span className="text-balance break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200 ">
+              {videoTitle} {channel && `- ${channel}`}
+            </span>
 
             {description && <Description description={description} className="pb-2 pt-5 2xl:pt-3" />}
           </div>
         )}
         {isModalOpen && (
-          <ModalDelete
-            onClose={onCancel}
-            content={<DeleteModalContent type="Video" id={videoId} title={params.title} openModal={onCancel} onDelete={onDelete} />}
-          />
+          <ModalDelete onClose={onCancel} content={<DeleteModalContent type="Video" id={videoId} title={title} openModal={onCancel} onDelete={onDelete} />} />
         )}
       </div>
     </>

@@ -4,6 +4,7 @@ export const runtime = "edge";
 type searchParams = {
   v: string;
   title: string;
+  ch: string;
 };
 
 export default function page({ searchParams }: { searchParams: searchParams }) {

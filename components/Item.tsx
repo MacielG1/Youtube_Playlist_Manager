@@ -91,9 +91,17 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
   const { thumbnailURL = "", hasBlackBars } = useMemo(() => getThumbnailInfo(thumbnails), [thumbnails]);
 
   let decodedTitled = encodeURIComponent(title);
-  let url = !isDragging && !isSorting ? (type === "Playlist" ? `/playlist?list=${id}&title=${decodedTitled}` : `/video?v=${id}&title=${decodedTitled}`) : "#";
+  // let url =
+  //   !isDragging && !isSorting
+  //     ? type === "Playlist"
+  //       ? `/playlist?list=${id}&title=${decodedTitled}`
+  //       : `/video?v=${id}&title=${decodedTitled}&ch=${channel}`
+  //     : "#";
+
+  let url = !isDragging && !isSorting ? (type === "Playlist" ? `/playlist?list=${id}&title=${decodedTitled}` : `/video?v=${id}`) : "#";
 
   let formattedTitle = reduceStringLength(title, 65);
+
   return (
     <div className={`mt-2 flex flex-col items-center outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
       <div className="relative flex cursor-default flex-col items-center justify-center">
