@@ -13,7 +13,7 @@ import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Description from "./Description";
 import Tooltip from "./ToolTip";
-import { del, get } from "idb-keyval";
+import { del, get, set } from "idb-keyval";
 import Link from "next/link";
 import Spin from "@/assets/icons/Spin";
 import Rewind10 from "@/assets/icons/Rewind10";
@@ -113,6 +113,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   function onStateChange(e: YouTubeEvent) {
     if (e.target) {
       setCurrentTime(e.target.getCurrentTime());
+      console.log("curr", e.target.getCurrentTime());
+      console.log("dur", e.target.getDuration());
     }
   }
 

@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -14,6 +14,7 @@ import { del } from "idb-keyval";
 import { Roboto } from "next/font/google";
 import Delete from "@/assets/icons/Delete";
 import reduceStringLength from "@/utils/reduceStringLength";
+import convertTimeToSeconds from "@/utils/convertTimeToSeconds";
 
 const font = Roboto({ subsets: ["latin"], weight: ["400", "700"] });
 
@@ -40,6 +41,8 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
   const { mutate, isPending } = useMutation({
     mutationFn: async () => onDelete,
   });
+  const storedItem = localStorage.getItem(`v=${id}`);
+  const currentTime = useRef(storedItem ? JSON.parse(storedItem) : null);
 
   async function onDelete(id: string) {
     if (type === "Playlist") {
@@ -102,13 +105,14 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
 
   let formattedTitle = reduceStringLength(title, 65);
 
+  const width = currentTime.current?.initialTime && duration ? `${(currentTime.current?.initialTime / convertTimeToSeconds(duration)) * 100}%` : "0%";
   return (
-    <div className={`mt-2 flex flex-col items-center outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
-      <div className="relative flex cursor-default flex-col items-center justify-center">
-        <div className="group flex aspect-video w-[50vw] select-none items-center justify-center  overflow-hidden rounded-xl xs:w-[35vw] md:w-[26vw] lg:w-[20vw] 2xl:w-[16.5vw] ">
+    <div className={`mt-2 flex flex-col items-center  outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
+      <div className="relative flex cursor-default flex-col items-center justify-center overflow-hidden rounded-md rounded-tr-[0.2rem]  md:rounded-[0.6rem] ">
+        <div className="group flex aspect-video w-[50vw] select-none items-center justify-center overflow-hidden rounded-md rounded-tr-[0.2rem] xs:w-[35vw] md:w-[26vw] md:rounded-[0.8rem] lg:w-[20vw] 2xl:w-[16.5vw] ">
           <button
             onClick={openModal}
-            className={`peer absolute right-0 top-0 z-10 rounded-bl-md rounded-tr-[0.50rem] bg-neutral-800 p-1 text-neutral-400 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-500 ${
+            className={`peer absolute right-0 top-0 z-10  rounded-bl-md  bg-neutral-800 p-1  text-neutral-400 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-100  ${
               (isDragging || isSorting) && "hidden opacity-0"
             }}`}
             aria-label="Delete Button"
@@ -131,13 +135,18 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
               />
             </LinkWrapper>
           </div>
+
           {type === "Video" && (
-            <span
-              className={`${font.className} absolute bottom-0 right-0 z-10 rounded-tl-lg
-             bg-black px-1 text-[0.8rem]  tracking-wide text-white`}
-            >
-              {duration}
-            </span>
+            <>
+              <span
+                className={`${font.className} absolute bottom-[0.25rem] right-[0.15rem] z-10 rounded-lg  
+             bg-black px-1 text-[0.65rem] tracking-wide text-white sm:text-[0.8rem]`}
+              >
+                {duration}
+              </span>
+
+              <div className="absolute bottom-0 left-0 z-[500]  h-[0.17rem]  bg-red-500" style={{ width: width }}></div>
+            </>
           )}
         </div>
       </div>

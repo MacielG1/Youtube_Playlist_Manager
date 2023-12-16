@@ -58,7 +58,6 @@ export default function Input() {
         }
 
         const data = await getVideosData(videoId);
-        await set(videoKey, { id: videoId, description: data.items[0].description });
 
         // Updating the query data with the new playlist
         if (data?.items?.length) {
