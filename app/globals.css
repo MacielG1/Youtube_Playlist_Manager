@@ -60,7 +60,12 @@ body,
 }
 @media (max-height : 600px) {
     .videoPlayer {
-        max-width: 500px;
+        max-width: 770px;
+    }
+}
+@media (max-height : 500px) {
+    .videoPlayer {
+        max-width: 600px;
     }
 }
 @media (max-height : 400px) {
