@@ -94,14 +94,9 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
   const { thumbnailURL = "", hasBlackBars } = useMemo(() => getThumbnailInfo(thumbnails), [thumbnails]);
 
   let decodedTitled = encodeURIComponent(title);
-  // let url =
-  //   !isDragging && !isSorting
-  //     ? type === "Playlist"
-  //       ? `/playlist?list=${id}&title=${decodedTitled}`
-  //       : `/video?v=${id}&title=${decodedTitled}&ch=${channel}`
-  //     : "#";
+  let url = !isDragging && !isSorting ? (type === "Playlist" ? `/playlist?list=${id}&title=${decodedTitled}` : `/video?v=${id}&title=${decodedTitled}`) : "#";
 
-  let url = !isDragging && !isSorting ? (type === "Playlist" ? `/playlist?list=${id}&title=${decodedTitled}` : `/video?v=${id}`) : "#";
+  // let url = !isDragging && !isSorting ? (type === "Playlist" ? `/playlist?list=${id}&title=${decodedTitled}` : `/video?v=${id}`) : "#";
 
   let formattedTitle = reduceStringLength(title, 65);
 
@@ -151,7 +146,7 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
         </div>
       </div>
 
-      <h2 className="max-h-[2.8rem] min-h-[2.8rem] max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-[0.875rem] font-medium text-black dark:text-white xs:max-w-[12rem] sm:max-w-[20rem] ">
+      <h2 className="max-h-[2.8rem] min-h-[2.8rem] max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-[0.875rem] font-medium text-black xs:max-w-[12rem] sm:max-w-[20rem] dark:text-white ">
         <Link className="cursor-pointer" href={url}>
           {formattedTitle}
           {type === "Video" && channel && ` - ${channel}`}

@@ -4,7 +4,6 @@ export const runtime = "edge";
 type searchParams = {
   v: string;
   title: string;
-  ch: string;
 };
 
 export default function page({ searchParams }: { searchParams: searchParams }) {
@@ -13,6 +12,6 @@ export default function page({ searchParams }: { searchParams: searchParams }) {
 
 export async function generateMetadata({ searchParams }: { searchParams: searchParams }) {
   return {
-    title: searchParams.title,
+    title: decodeURIComponent(searchParams.title),
   };
 }

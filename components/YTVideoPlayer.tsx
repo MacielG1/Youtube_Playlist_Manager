@@ -25,7 +25,6 @@ import { useAudioToggle } from "@/providers/SettingsProvider";
 type Params = {
   v: string;
   title: string;
-  ch: string;
 };
 
 export default function YTVideoPlayer({ params }: { params: Params }) {
@@ -44,7 +43,6 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   const videoPlayerRef = useRef<YouTube | null>(null);
   const isPlayingVideoRef = useRef<boolean | null>(false);
 
-  // const channel = params.ch;
   const videoId = params.v;
   const item = `v=${videoId}`;
   const [currentTime, setCurrentTime] = useState(0);
