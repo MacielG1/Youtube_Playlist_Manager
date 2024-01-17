@@ -26,8 +26,8 @@ export default function DeleteAllDataContent({ closeModals }: Props) {
     await clear();
     queryClient.clear();
     closeModals();
-    router.refresh();
     router.push("/", { scroll: false });
+    router.refresh();
   }
 
   return (

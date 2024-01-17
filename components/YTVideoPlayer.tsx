@@ -233,7 +233,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               </Tooltip>
             </div>
             {/* Title */}
-            <span className="text-balance break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200 ">
+            <span className="text-balance break-words tracking-wide text-neutral-800 dark:text-neutral-200 ">
               {videoTitle} {channel && `- ${channel}`}
             </span>
 
