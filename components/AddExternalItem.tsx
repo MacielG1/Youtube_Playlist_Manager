@@ -23,12 +23,14 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
 
       if (!searchParams.type || !searchParams.id) return null;
       const id = searchParams.id;
+
+      console.log("id", id);
       try {
         // VIDEO
         if (searchParams.type === "video") {
           let videoKey = "v=" + id;
 
-          let isVideoSaved = await get(id);
+          let isVideoSaved = await get(videoKey);
           if (isVideoSaved) {
             console.log("Video Already Added!");
             toast.error("Video Already Added!", toastError);
@@ -69,7 +71,7 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
         if (searchParams.type === "playlist") {
           let playlistKey = "pl=" + id;
 
-          let isPlSaved = await get(`pl=${id}`);
+          let isPlSaved = await get(playlistKey);
 
           if (isPlSaved) {
             console.log("Playlist Already Added!");
