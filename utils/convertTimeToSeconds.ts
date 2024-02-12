@@ -1,5 +1,5 @@
 export default function convertTimeToSeconds(timeString: string): number {
-  console.log("timeString", timeString);
+  // console.log("timeString", timeString);
   const timeRegex = /^((\d{1,2}):)?(\d{2}):(\d{2})$/;
   const match = timeString.match(timeRegex);
 
@@ -18,6 +18,5 @@ export default function convertTimeToSeconds(timeString: string): number {
   }
 
   const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-  console.log("totalSeconds", totalSeconds);
   return totalSeconds;
 }

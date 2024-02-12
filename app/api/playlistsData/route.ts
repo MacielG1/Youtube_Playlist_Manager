@@ -25,7 +25,6 @@ export async function POST(req: Request): Promise<NextResponse> {
       return new NextResponse("Error", { status: 404 });
     }
 
-    // Extract the data we need
     let newData = {
       items: data.items.map((item: PlaylistAPI) => {
         return {
