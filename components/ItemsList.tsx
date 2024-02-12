@@ -1,4 +1,4 @@
-import { DndContext, DragEndEvent, PointerSensor, TouchSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
+import { DndContext, DragEndEvent, MouseSensor, TouchSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import type { Items, Playlist } from "@/types";
 import Item from "./Item";
@@ -12,19 +12,15 @@ type Props = {
 };
 
 export default function ItemsList({ setItems, items, title, otherTypeVideos }: Props) {
-  const pointerSensor = useSensor(PointerSensor, {
+  const mouseSensor = useSensor(MouseSensor, {
     activationConstraint: {
       distance: 8,
     },
   });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 250,
-      tolerance: 5,
-    },
-  });
 
-  const sensors = useSensors(pointerSensor, touchSensor);
+  const touchSensor = useSensor(TouchSensor, {});
+
+  const sensors = useSensors(mouseSensor, touchSensor);
 
   const queryClient = useQueryClient();
   let type = title === "Playlist" ? "playlists" : "videos";
@@ -46,6 +42,7 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
       });
     }
   }
+
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, setItems)}>
       {items?.length > 0 && (
@@ -63,7 +60,17 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
               }`}
             >
               {items?.map((item) => {
-                return <Item key={item.id} id={item.id} duration={item.duration} title={item.title} thumbnails={item.thumbnails} type={title} channel={item.channel} />;
+                return (
+                  <Item
+                    key={item.id}
+                    id={item.id}
+                    duration={item.duration}
+                    title={item.title}
+                    thumbnails={item.thumbnails}
+                    type={title}
+                    channel={item.channel}
+                  />
+                );
               })}
             </div>
           </>

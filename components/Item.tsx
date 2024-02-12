@@ -102,7 +102,7 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
 
   const width = currentTime.current?.initialTime && duration ? `${(currentTime.current?.initialTime / convertTimeToSeconds(duration)) * 100}%` : "0%";
   return (
-    <div className={`mt-2 flex flex-col items-center  outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
+    <div className={`mt-2 flex flex-col items-center outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
       <div className="relative flex cursor-default flex-col items-center justify-center overflow-hidden rounded-md rounded-tr-[0.2rem]  md:rounded-[0.6rem] ">
         <div className="group flex aspect-video w-[50vw] select-none items-center justify-center overflow-hidden rounded-md rounded-tr-[0.2rem] xs:w-[35vw] md:w-[26vw] md:rounded-[0.8rem] lg:w-[20vw] 2xl:w-[16.5vw] ">
           <button
@@ -134,7 +134,7 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
           {type === "Video" && (
             <>
               <span
-                className={`${font.className} absolute bottom-[0.25rem] right-[0.15rem] z-10 rounded-lg  
+                className={`${font.className} absolute bottom-[0.25rem] right-[0.15rem] z-10 rounded-lg
              bg-black px-1 text-[0.65rem] tracking-wide text-white sm:text-[0.8rem]`}
               >
                 {duration}
