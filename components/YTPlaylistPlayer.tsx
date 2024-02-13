@@ -37,7 +37,7 @@ type Params = {
 };
 
 export default function YoutubePlayer({ params }: { params: Params }) {
-  const [isLoaded, setIsLoaded] = useState(false);
+  // const [isLoaded, setIsLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(1);
   const [currentVideoTitle, setCurrentVideoTitle] = useState("");
@@ -47,7 +47,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const [currentTime, setCurrentTime] = useState(0);
   const { isAudioMuted } = useAudioToggle();
 
-  const isPaused = useRef(false); // used to resume video if it was playing when delete modal was opened
+  const isPaused = useRef(false);
   const pageRef = useRef(1);
   const plLengthRef = useRef(0);
   const currentVideoId = useRef(0);
@@ -85,7 +85,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   videosIdsRef.current = plVideos?.videosIds || [];
   plLengthRef.current = videosIdsRef.current.length;
 
-  let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 24 * 60 * 60 * 1000;
+  let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 12 * 60 * 60 * 1000; // 12 hours
   // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // to test
 
   useEffect(() => {
@@ -93,8 +93,9 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       const shouldFetch = !videosIdsRef.current.length || olderThan1day;
 
       if (shouldFetch) {
+        console.log("fetching new videos");
         const data = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
-        plLengthRef.current = data?.length;
+        plLengthRef.current = data.length;
         await set(`pl=${playlistId}`, data);
       }
     }
@@ -122,7 +123,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }, []);
 
   async function onReady(e: YouTubeEvent) {
-    setIsLoaded(true);
+    // setIsLoaded(true);
 
     const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
     PlaylistPlayerRef.current?.internalPlayer.setPlaybackRate(plRate);
@@ -146,7 +147,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }
 
   function onPlay(e: YouTubeEvent) {
-    setIsLoaded(true);
+    // setIsLoaded(true);
 
     isPlayingVideoRef.current = true;
     savePlaylistsProgress(e.target, playlistId, pageRef.current);
@@ -156,9 +157,10 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     savePlaylistsProgress(e.target, playlistId, pageRef.current);
   }
   async function onError(e: YouTubeEvent) {
+    console.log("error", e);
     if (e.data === "150") {
       // video still unavailable
-      setIsLoaded(false);
+      // setIsLoaded(false);
     }
 
     pageRef.current = 1;
@@ -324,7 +326,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       <div className="flex flex-col items-center justify-center pt-12">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:max-w-[62vw] xl:pt-0 2xl:max-w-[70vw]">
           <div className=" relative w-full overflow-auto pb-[56.25%]">
-            {(!isLoaded || !plLengthRef.current) && (
+            {!plLengthRef.current && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
                 <Spin className="h-7 w-7 animate-spin text-indigo-500" />
                 <span className="sr-only">Loading...</span>
@@ -340,13 +342,13 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               onError={onError}
               onStateChange={onStateChange}
               onPlaybackRateChange={onSpeedChange}
-              className={`absolute left-0 right-0 top-0 h-full w-full border-none ${(!isLoaded || !plLengthRef.current) && "invisible"}`}
+              className={`absolute left-0 right-0 top-0 h-full w-full border-none ${!plLengthRef.current && "invisible"}`}
             />
           </div>
 
           {!isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className="xl:absolute" />}
         </div>
-        {isLoaded && !!plLengthRef.current && (
+        {!!plLengthRef.current && (
           <div className="flex max-w-[80vw] flex-col pt-1 md:max-w-[60vw] 2xl:max-w-[65vw] 2xl:pt-2">
             <div className="flex justify-center gap-1 py-2 max-md:flex-wrap xs:gap-3 sm:py-0">
               <Tooltip text="Restart Playlist">
