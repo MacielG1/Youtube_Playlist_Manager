@@ -159,24 +159,24 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   async function onError(e: YouTubeEvent) {
     console.log("error", e);
     if (e.data === "150") {
-      resetPlaylist();
+      console.log("here");
       // setIsLoaded(false);
     }
 
     pageRef.current = 1;
-    // let data = {
-    //   playlistId,
-    //   currentItem: 0,
-    //   initialTime: 1,
-    //   currentPage: 1,
-    //   playbackSpeed: 1,
-    // };
+
     setTimeout(async () => {
       let state = e.target?.getPlayerState();
+      console.log("state", state);
       if (state == -1) {
-        // localStorage.setItem(`pl=${playlistId}`, JSON.stringify(data));
-        // await resetPlaylist();
-        await PlaylistPlayerRef.current?.resetPlayer();
+        await nextVideo();
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        let state = e.target?.getPlayerState();
+        if (state == -1) {
+          await resetPlaylist();
+          await PlaylistPlayerRef.current?.resetPlayer();
+        }
       } else {
         await e.target.playVideo();
       }
