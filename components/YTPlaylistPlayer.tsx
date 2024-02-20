@@ -37,7 +37,6 @@ type Params = {
 };
 
 export default function YoutubePlayer({ params }: { params: Params }) {
-  // const [isLoaded, setIsLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(1);
   const [currentVideoTitle, setCurrentVideoTitle] = useState("");
@@ -123,8 +122,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }, []);
 
   async function onReady(e: YouTubeEvent) {
-    // setIsLoaded(true);
-
     const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
     PlaylistPlayerRef.current?.internalPlayer.setPlaybackRate(plRate);
 
@@ -147,8 +144,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }
 
   function onPlay(e: YouTubeEvent) {
-    // setIsLoaded(true);
-
     isPlayingVideoRef.current = true;
     savePlaylistsProgress(e.target, playlistId, pageRef.current);
   }
@@ -159,28 +154,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   async function onError(e: YouTubeEvent) {
     console.log("error", e);
     if (e.data === "150") {
-      console.log("here");
-      // setIsLoaded(false);
+      console.log("Error 150, video is private or deleted");
     }
-
-    pageRef.current = 1;
-
-    setTimeout(async () => {
-      let state = e.target?.getPlayerState();
-      console.log("state", state);
-      if (state == -1) {
-        await nextVideo();
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        let state = e.target?.getPlayerState();
-        if (state == -1) {
-          await resetPlaylist();
-          await PlaylistPlayerRef.current?.resetPlayer();
-        }
-      } else {
-        await e.target.playVideo();
-      }
-    }, 800);
   }
 
   async function onStateChange(e: YouTubeEvent) {
@@ -418,12 +393,10 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                 {currentVideoTitle} - {playlistTitle}
               </span>
             )}
-
             {description && <Description description={description} />}
             <div>{isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} />}</div>
           </div>
         )}
-
         {isModalOpen && (
           <ModalDelete
             onClose={onCancel}
