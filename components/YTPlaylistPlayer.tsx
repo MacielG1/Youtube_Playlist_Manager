@@ -20,7 +20,7 @@ import Tooltip from "./ToolTip";
 import { del, get, set } from "idb-keyval";
 import VideosListSidebar from "./VideosListSidebar";
 import Link from "next/link";
-import { useMediaQuery } from "usehooks-ts";
+import { useIsMounted, useMediaQuery } from "usehooks-ts";
 import Spin from "@/assets/icons/Spin";
 import Reset from "@/assets/icons/Reset";
 import Rewind10 from "@/assets/icons/Rewind10";
@@ -38,7 +38,7 @@ type Params = {
 
 export default function YoutubePlayer({ params }: { params: Params }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(1);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState<number | null>(null);
   const [currentVideoTitle, setCurrentVideoTitle] = useState("");
 
   const [description, setDescription] = useState<string | null>(null);
@@ -54,6 +54,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const PlaylistPlayerRef = useRef<YouTube | null>(null);
   const isPlayingVideoRef = useRef<boolean | null>(false);
   const videosIdsRef = useRef<string[]>([]);
+
+  const [isMounted, setIsMounted] = useState(false);
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -155,6 +157,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     console.log("error", e);
     if (e.data === "150") {
       console.log("Error 150, video is private or deleted");
+      // e.target.nextVideo();
     }
   }
 
@@ -208,7 +211,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     } else {
       const targetIndex = index > 0 ? index - 1 : 0;
       player.playVideoAt(targetIndex);
-      // player.seekTo(0);
     }
   }
   async function nextVideo() {
@@ -219,8 +221,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       pageRef.current += 1;
       await loadPlaylist(player, videosIdsRef.current, pageRef.current);
     } else {
-      const targetIndex = index + 1;
-      player.playVideoAt(targetIndex);
+      player.nextVideo();
       player.seekTo(0);
     }
   }
@@ -294,6 +295,14 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   let playlistTitle = reduceStringSize(params.title, 100);
 
   const isSmaller = useMediaQuery("(max-width: 1280px)");
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <>
@@ -375,9 +384,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   <Youtube className="mx-[0.3rem] h-8  w-8 fill-neutral-200 px-[0.035rem]  pb-[0.05rem] text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
                 </Link>
               </Tooltip>
-              <span className="min-w-[3.5rem] whitespace-nowrap px-1 text-[1.35rem] text-neutral-600 dark:text-[#818386]">
-                {currentVideoIndex} / {plLengthRef.current}
-              </span>
+
               <Tooltip text="Delete Playlist">
                 <button
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
@@ -386,6 +393,13 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   <Close className="h-8 w-8 " />
                 </button>
               </Tooltip>
+              <p className="min-w-[3.5rem] whitespace-nowrap px-1 text-[1.35rem] text-neutral-600 dark:text-[#818386]">
+                {currentVideoIndex && (
+                  <span>
+                    {currentVideoIndex} / {plLengthRef.current}
+                  </span>
+                )}
+              </p>
             </div>
             {/* Title */}
             {currentVideoTitle && (
