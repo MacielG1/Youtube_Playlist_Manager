@@ -173,7 +173,7 @@ export default function Input() {
       setAddedURL("");
       if (!isChannelName && !videoId && !playlistID && !isChannelUrl && !isChannelNameUrl) {
         setAddedURL("");
-        toast.error("Please Enter a Valid URL or Channel Name!", toastError);
+        toast.error("Please Enter a Valid URL or a Channel Name!", toastError);
         return;
       }
     } catch (error) {
