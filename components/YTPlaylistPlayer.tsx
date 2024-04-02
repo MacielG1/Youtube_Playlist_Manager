@@ -20,7 +20,7 @@ import Tooltip from "./ToolTip";
 import { del, get, set } from "idb-keyval";
 import VideosListSidebar from "./VideosListSidebar";
 import Link from "next/link";
-import { useIsMounted, useMediaQuery } from "usehooks-ts";
+import { useMediaQuery } from "usehooks-ts";
 import Spin from "@/assets/icons/Spin";
 import Reset from "@/assets/icons/Reset";
 import Rewind10 from "@/assets/icons/Rewind10";
@@ -87,7 +87,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   plLengthRef.current = videosIdsRef.current.length;
 
   let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 12 * 60 * 60 * 1000; // 12 hours
-  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // to test
+  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // 20ss to test
 
   useEffect(() => {
     async function run() {
