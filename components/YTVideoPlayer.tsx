@@ -21,6 +21,7 @@ import Skip10 from "@/assets/icons/Skip10";
 import Youtube from "@/assets/icons/Youtube";
 import Close from "@/assets/icons/Close";
 import { useAudioToggle } from "@/providers/SettingsProvider";
+import SkipBack from "@/assets/icons/skipBack";
 
 type Params = {
   v: string;
@@ -202,6 +203,14 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         {isLoaded && (
           <div className="flex max-w-[80vw] flex-col">
             <div className="flex justify-center gap-1 pt-1 xs:gap-3 ">
+              <Tooltip text="Restart">
+                <span
+                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  onClick={() => videoPlayerRef?.current?.internalPlayer.seekTo(0)}
+                >
+                  <SkipBack className="h-8 w-8" />
+                </span>
+              </Tooltip>
               <Tooltip text="Rewind 10s">
                 <span
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"

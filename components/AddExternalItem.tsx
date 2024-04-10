@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import getChannelId from "@/utils/createChannelPlaylist";
 import Loading from "@/assets/icons/Loading";
-import { revalidatePath } from "next/cache";
 
 export default function AddExternalItem({ searchParams }: { searchParams: { type: string; id: string } }) {
   const queryClient = useQueryClient();
