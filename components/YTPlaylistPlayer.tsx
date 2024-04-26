@@ -86,20 +86,23 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   videosIdsRef.current = plVideos?.videosIds || [];
   plLengthRef.current = videosIdsRef.current.length;
 
-  let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 12 * 60 * 60 * 1000; // 12 hours
+  let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 10 * 60 * 60 * 1000; // 10 hours
   // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 30000; // 20s to test
 
   useEffect(() => {
     async function run() {
-      const shouldFetch = !videosIdsRef.current.length || olderThan1day;
-
-      if (shouldFetch) {
-        console.log("fetching new videos");
+      const isEmpty = !videosIdsRef.current.length;
+      if (isEmpty || olderThan1day) {
+        console.log("Fetching new videos");
         const data = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
 
         plLengthRef.current = data.length;
 
         await set(`pl=${playlistId}`, data);
+
+        if (isEmpty) {
+          window.location.reload();
+        }
       }
     }
     run();
@@ -158,7 +161,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   async function onError(e: YouTubeEvent) {
     console.log("error", e);
     if (e.data === "150") {
-      console.log("Error 150, video is private or deleted");
+      console.log("Error 150, Video is private or deleted");
       // e.target.nextVideo();
     }
   }
@@ -293,8 +296,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       },
     };
   }, []);
-
-  console.log("videosIdsRef.current", videosIdsRef.current);
 
   plOptions.playerVars.playlist = getVideosSlice(videosIdsRef.current, pageRef.current).join(",");
   let playlistTitle = reduceStringSize(params.title, 100);
