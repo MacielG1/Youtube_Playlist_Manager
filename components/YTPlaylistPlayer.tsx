@@ -87,7 +87,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   plLengthRef.current = videosIdsRef.current.length;
 
   let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 12 * 60 * 60 * 1000; // 12 hours
-  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // 20s to test
+  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 30000; // 20s to test
 
   useEffect(() => {
     async function run() {
@@ -96,7 +96,9 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       if (shouldFetch) {
         console.log("fetching new videos");
         const data = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
+
         plLengthRef.current = data.length;
+
         await set(`pl=${playlistId}`, data);
       }
     }
@@ -236,6 +238,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   async function resetPlaylist() {
     pageRef.current = 1;
     await loadPlaylist(PlaylistPlayerRef.current?.getInternalPlayer(), videosIdsRef.current, pageRef.current, 0);
+    await savePlaylistsProgress(PlaylistPlayerRef.current?.getInternalPlayer(), playlistId, 1);
     setCurrentVideoIndex(1);
   }
 
@@ -290,6 +293,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       },
     };
   }, []);
+
+  console.log("videosIdsRef.current", videosIdsRef.current);
 
   plOptions.playerVars.playlist = getVideosSlice(videosIdsRef.current, pageRef.current).join(",");
   let playlistTitle = reduceStringSize(params.title, 100);

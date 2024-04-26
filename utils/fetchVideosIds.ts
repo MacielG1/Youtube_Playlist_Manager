@@ -20,11 +20,15 @@ export default async function fetchVideosIds(playlistId: string, videosIdsRef?: 
     });
 
     if (!res.ok) {
+      console.log("Error", res.statusText);
       return console.log("Error", res.statusText);
     }
+
     let data = await res.json();
 
     const allVideosIds = data.map((item: Playlist) => item.id);
+
+    console.log(allVideosIds.length, "videos fetched");
 
     if (isChannel) {
       allVideosIds.reverse();
