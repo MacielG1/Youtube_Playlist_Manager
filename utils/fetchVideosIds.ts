@@ -28,6 +28,8 @@ export default async function fetchVideosIds(playlistId: string, videosIdsRef?: 
 
     const allVideosIds = data.map((item: Playlist) => item.id);
 
+    console.log(allVideosIds.length, "videos fetched");
+
     if (isChannel) {
       allVideosIds.reverse();
       data.reverse(); // Reverse the data array
