@@ -44,6 +44,7 @@ export default function Input() {
         videoId = url.searchParams.get("v");
         isChannelUrl = url.pathname.includes("channel");
         isChannelNameUrl = url.pathname.startsWith("/@");
+
         if (url.hostname === "youtu.be") {
           videoId = url.pathname.split("/").pop();
         }
@@ -122,7 +123,7 @@ export default function Input() {
 
       // Channel Name or URL with Channel Name
       if (isChannelName || isChannelNameUrl) {
-        const name = isChannelNameUrl ? url!.pathname.split("/")[1].replace("@", "") : addedURL;
+        const name = isChannelNameUrl ? url!.pathname.split("/")[1] : addedURL;
 
         const channelId = await getChannelId(name);
         setAddedURL("");
