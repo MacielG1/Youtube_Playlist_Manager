@@ -15,7 +15,7 @@ export default async function savePlaylistsProgress(videoPlayer: YouTubePlayer, 
     playlistId,
     currentItem: index || ((await videoPlayer?.getPlaylistIndex()) as number) || 0,
     initialTime: ((await videoPlayer?.getCurrentTime()) as number) || 0,
-    currentPage: page || 1,
+    currentPage: page && page > 0 ? page : 1,
   };
 
   localStorage.setItem(item, JSON.stringify(data));

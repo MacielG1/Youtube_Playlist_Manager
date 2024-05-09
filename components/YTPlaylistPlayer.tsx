@@ -30,6 +30,7 @@ import Skip10 from "@/assets/icons/Skip10";
 import Youtube from "@/assets/icons/Youtube";
 import Close from "@/assets/icons/Close";
 import { useAudioToggle } from "@/providers/SettingsProvider";
+// import Shuffle from "@/assets/icons/Shuffle";
 
 type Params = {
   list: string;
@@ -40,6 +41,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState<number | null>(null);
   const [currentVideoTitle, setCurrentVideoTitle] = useState("");
+  // const [isShuffled, setIsShuffled] = useState(false);
 
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
@@ -87,7 +89,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   plLengthRef.current = videosIdsRef.current.length;
 
   let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 10 * 60 * 60 * 1000; // 10 hours
-  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 30000; // 20s to test
+  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // 20s to test
 
   useEffect(() => {
     async function run() {
@@ -96,13 +98,13 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         console.log("Fetching new videos");
         const data = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
 
+        // console.log("data", data);
+
+        if (!data) return;
+
         plLengthRef.current = data.length;
 
         await set(`pl=${playlistId}`, data);
-
-        if (isEmpty) {
-          window.location.reload();
-        }
       }
     }
     run();
@@ -390,7 +392,14 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   <Youtube className="mx-[0.3rem] h-8  w-8 fill-neutral-200 px-[0.035rem]  pb-[0.05rem] text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
                 </Link>
               </Tooltip>
-
+              {/* <Tooltip text={isShuffled ? "Unshuffle" : "Shuffle"}>
+                <button
+                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  onClick={isShuffled ? unShuffle : onShuffle}
+                >
+                  <Shuffle className={`h-8 w-8 py-0.5 ${isShuffled && "text-green-600"}`} />
+                </button>
+              </Tooltip> */}
               <Tooltip text="Delete Playlist">
                 <button
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
@@ -399,6 +408,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   <Close className="h-8 w-8 " />
                 </button>
               </Tooltip>
+
               <p className="min-w-[3.5rem] whitespace-nowrap px-1 text-[1.35rem] text-neutral-600 dark:text-[#818386]">
                 {currentVideoIndex && (
                   <span>
