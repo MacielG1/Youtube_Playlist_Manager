@@ -3,7 +3,7 @@ import { useRef, useEffect, useState, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
-import type { Items, PlVideos, PlaylistAPI } from "@/types";
+import type { Items, PlVideos, Playlist, PlaylistAPI } from "@/types";
 
 import fetchVideosIds from "@/utils/fetchVideosIds";
 import getVideosSlice from "@/utils/getVideosSlice";
@@ -30,7 +30,8 @@ import Skip10 from "@/assets/icons/Skip10";
 import Youtube from "@/assets/icons/Youtube";
 import Close from "@/assets/icons/Close";
 import { useAudioToggle } from "@/providers/SettingsProvider";
-// import Shuffle from "@/assets/icons/Shuffle";
+import Shuffle from "@/assets/icons/Shuffle";
+import { shuffle } from "@/utils/shuffle";
 
 type Params = {
   list: string;
@@ -41,7 +42,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState<number | null>(null);
   const [currentVideoTitle, setCurrentVideoTitle] = useState("");
-  // const [isShuffled, setIsShuffled] = useState(false);
+  const [isShuffled, setIsShuffled] = useState(false);
 
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
@@ -52,6 +53,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const pageRef = useRef(1);
   const plLengthRef = useRef(0);
   const currentVideoId = useRef(0);
+  const pageAndIndexBeforeShuffle = useRef({ page: 1, index: 0 });
 
   const PlaylistPlayerRef = useRef<YouTube | null>(null);
   const isPlayingVideoRef = useRef<boolean | null>(false);
@@ -120,7 +122,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     const player = PlaylistPlayerRef.current?.internalPlayer; // returns the iframe video player
 
     const timer = setInterval(() => {
-      if (isPlayingVideoRef.current) {
+      if (isPlayingVideoRef.current && !isShuffled) {
         savePlaylistsProgress(player, playlistId, pageRef.current);
       }
     }, 15000);
@@ -144,7 +146,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     if (vidsData) setVideosList(vidsData);
 
     const intervalId = setInterval(() => {
-      if (isPlayingVideoRef.current) {
+      if (isPlayingVideoRef.current && !isShuffled) {
         savePlaylistsProgress(e.target, playlistId, pageRef.current);
       }
     }, 15000);
@@ -154,11 +156,11 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
   function onPlay(e: YouTubeEvent) {
     isPlayingVideoRef.current = true;
-    savePlaylistsProgress(e.target, playlistId, pageRef.current);
+    if (!isShuffled) savePlaylistsProgress(e.target, playlistId, pageRef.current);
   }
 
   async function onPause(e: YouTubeEvent) {
-    savePlaylistsProgress(e.target, playlistId, pageRef.current);
+    if (!isShuffled) savePlaylistsProgress(e.target, playlistId, pageRef.current);
   }
   async function onError(e: YouTubeEvent) {
     console.log("error", e);
@@ -170,7 +172,9 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
   async function onStateChange(e: YouTubeEvent) {
     const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
-    setCurrentVideoIndex(index);
+
+    if (e.data === 1 || e.data === 2) setCurrentVideoIndex(index);
+
     setCurrentVideoTitle(e.target.getVideoData().title || "");
 
     setCurrentTime(e.target.getCurrentTime());
@@ -283,6 +287,43 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     setIsModalOpen(false);
   }
 
+  async function onShuffle() {
+    const playerState = await PlaylistPlayerRef.current?.internalPlayer.getPlayerState();
+    if ((playerState !== 1 && playerState !== 2) || !plLengthRef.current || !videosIdsRef.current.length || isShuffled) {
+      return;
+    }
+
+    setIsShuffled(true);
+
+    pageAndIndexBeforeShuffle.current = {
+      page: pageRef.current,
+      index: currentVideoIndex ? currentVideoIndex - 1 : 0,
+    };
+
+    const data = (await get(`pl=${playlistId}`)) as Playlist[];
+
+    const shuffledVideos = shuffle(data);
+    const shuffledIds = shuffledVideos.map((item) => item.id);
+
+    videosIdsRef.current = shuffledIds;
+
+    await loadPlaylist(PlaylistPlayerRef.current?.getInternalPlayer(), shuffledIds, 1, 0);
+
+    setVideosList(shuffledVideos);
+  }
+
+  async function unShuffle() {
+    setIsShuffled(false);
+
+    const { page, index } = pageAndIndexBeforeShuffle.current;
+    const data = (await get(`pl=${playlistId}`)) as Playlist[];
+
+    videosIdsRef.current = data.map((item) => item.id);
+    await loadPlaylist(PlaylistPlayerRef.current?.getInternalPlayer(), videosIdsRef.current, page, index);
+
+    setVideosList(data);
+  }
+
   const plOptions: YouTubeProps["opts"] = useMemo(() => {
     pageRef.current = currentPage || 1;
     return {
@@ -392,14 +433,16 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   <Youtube className="mx-[0.3rem] h-8  w-8 fill-neutral-200 px-[0.035rem]  pb-[0.05rem] text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
                 </Link>
               </Tooltip>
-              {/* <Tooltip text={isShuffled ? "Unshuffle" : "Shuffle"}>
+
+              <Tooltip text={isShuffled ? "Unshuffle" : "Shuffle"}>
                 <button
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                   onClick={isShuffled ? unShuffle : onShuffle}
                 >
-                  <Shuffle className={`h-8 w-8 py-0.5 ${isShuffled && "text-green-600"}`} />
+                  <Shuffle className={`h-8 w-8 py-[0.175rem] ${isShuffled && "text-indigo-500"}`} />
                 </button>
-              </Tooltip> */}
+              </Tooltip>
+
               <Tooltip text="Delete Playlist">
                 <button
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
@@ -410,7 +453,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               </Tooltip>
 
               <p className="min-w-[3.5rem] whitespace-nowrap px-1 text-[1.35rem] text-neutral-600 dark:text-[#818386]">
-                {currentVideoIndex && (
+                {currentVideoIndex && plLengthRef.current && (
                   <span>
                     {currentVideoIndex} / {plLengthRef.current}
                   </span>
