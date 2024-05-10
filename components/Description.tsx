@@ -27,7 +27,7 @@ export default function Description({ description, className }: Props) {
   }
 
   return (
-    <div className={cn(`flex w-[85vw] max-w-[85vw] flex-col justify-center px-8 py-3 text-sm text-neutral-400 sm:justify-start xl:w-[68vw] xl:max-w-[68vw]`, className)}>
+    <div className={cn(`flex w-[85vw] max-w-[85vw] flex-col justify-center text-sm text-neutral-400 sm:justify-start xl:w-[68vw] xl:max-w-[68vw]`, className)}>
       <div className="mb-2">
         <button
           onClick={toggleAccordion}

@@ -452,7 +452,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                 </button>
               </Tooltip>
 
-              <p className="min-w-[3.5rem] whitespace-nowrap px-1 text-[1.35rem] text-neutral-600 dark:text-[#818386]">
+              <p className="min-w-[4rem] whitespace-nowrap px-1 text-[1.35rem] text-neutral-600 dark:text-[#818386]">
                 {currentVideoIndex && plLengthRef.current && (
                   <span>
                     {currentVideoIndex} / {plLengthRef.current}
@@ -461,11 +461,13 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               </p>
             </div>
             {/* Title */}
-            {currentVideoTitle && (
-              <span className="flex justify-center break-words pb-5 text-center tracking-wide text-neutral-800 dark:text-neutral-200 max-2xl:-mt-1 2xl:pb-0 ">
-                {currentVideoTitle} - {playlistTitle}
-              </span>
-            )}
+            <div className="pb-5 max-2xl:-mt-1 2xl:pb-0">
+              {currentVideoTitle && (
+                <span className="flex justify-center text-balance break-words tracking-wide text-neutral-800 dark:text-neutral-200  ">
+                  {currentVideoTitle} - {playlistTitle}
+                </span>
+              )}
+            </div>
             {description && <Description description={description} />}
             <div>{isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} />}</div>
           </div>

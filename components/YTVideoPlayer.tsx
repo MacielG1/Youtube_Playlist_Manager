@@ -242,11 +242,11 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               </Tooltip>
             </div>
             {/* Title */}
-            <span className="text-balance break-words tracking-wide text-neutral-800 dark:text-neutral-200 ">
+            <span className="mx-auto my-1 text-balance break-words tracking-wide text-neutral-800 dark:text-neutral-200 ">
               {videoTitle} {channel && `- ${channel}`}
             </span>
 
-            {description && <Description description={description} className="pb-2 pt-5 2xl:pt-3" />}
+            {description && <Description description={description} className="pb-2 pt-5 2xl:pt-4" />}
           </div>
         )}
         {isModalOpen && (
