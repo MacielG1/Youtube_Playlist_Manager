@@ -8,6 +8,8 @@ import SettingsMenu from "@/components/Settings/SettingsMenu";
 import { Analytics } from "@vercel/analytics/react";
 import ScrollToTop from "@/components/ScrollToTop";
 import SettingsProvider from "@/providers/SettingsProvider";
+import Head from "next/document";
+import Script from "next/script";
 
 const font = Open_Sans({ subsets: ["latin"] });
 
@@ -19,6 +21,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <Script
+        async
+        strategy="lazyOnload"
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_PUB}`}
+        crossOrigin="anonymous"
+      />
       <body className={`${font.className} bg-background`}>
         <QueryProvider>
           <SettingsProvider>
