@@ -8,7 +8,6 @@ import SettingsMenu from "@/components/Settings/SettingsMenu";
 import { Analytics } from "@vercel/analytics/react";
 import ScrollToTop from "@/components/ScrollToTop";
 import SettingsProvider from "@/providers/SettingsProvider";
-import Head from "next/document";
 import Script from "next/script";
 
 const font = Open_Sans({ subsets: ["latin"] });
