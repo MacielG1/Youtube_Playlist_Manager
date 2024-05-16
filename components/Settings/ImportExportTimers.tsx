@@ -52,7 +52,9 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
 
     const link = document.createElement("a");
     link.href = URL.createObjectURL(fileToSave);
-    link.download = "YT-Export.json";
+
+    const date = new Date().toLocaleDateString().replaceAll("/", "-");
+    link.download = `YT-Export-${date}.json`;
     toast.success("Exporting", toastSuccess);
 
     link.click(); // Simulate a click
