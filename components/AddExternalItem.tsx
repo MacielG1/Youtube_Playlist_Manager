@@ -30,6 +30,7 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
           let videoKey = "v=" + id;
 
           let isVideoSaved = await get(videoKey);
+
           if (isVideoSaved) {
             console.log("Video Already Added!");
             toast.error("Video Already Added!", toastError);

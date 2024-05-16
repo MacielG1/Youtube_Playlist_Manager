@@ -257,6 +257,8 @@ export default function YoutubePlayer({ params }: { params: Params }) {
 
     onDeleteItems(playlistId, "playlists");
 
+    await del(item);
+
     queryClient.setQueryData<Items>(["playlists"], (oldData) => {
       if (oldData) {
         return {
@@ -266,8 +268,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       }
       return oldData;
     });
-
-    await del(item);
   }
 
   async function openModal() {

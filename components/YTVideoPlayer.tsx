@@ -125,6 +125,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
     onDeleteItems(videoId, "videos");
 
+    await del(`v=${videoId}`);
+
     queryClient.setQueryData<Items>(["videos"], (oldData) => {
       if (oldData) {
         return {
@@ -133,7 +135,6 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         };
       }
     });
-    await del(`v=${videoId}`);
   }
 
   async function openModal() {
