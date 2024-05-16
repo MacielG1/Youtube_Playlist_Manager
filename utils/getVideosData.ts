@@ -1,14 +1,16 @@
 import { VideoAPI } from "@/types";
 import { set } from "idb-keyval";
 
-export default async function getVideoData(newVideoId?: string) {
+export default async function getVideosData(newVideoId?: string) {
   let videosIds = "";
 
   if (newVideoId) {
     videosIds = newVideoId;
   } else {
     const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
-    if (!allVideos.length) return {};
+
+    // if (!allVideos.length) return {};
+    if (!allVideos.length) allVideos.push("4088CV88CdQ", "ucqReyBoEeU", "AY5qcIq5u2g", "NAVj5h0A070");
 
     videosIds = allVideos.join(",");
   }
@@ -37,7 +39,6 @@ export default async function getVideoData(newVideoId?: string) {
       return {};
     }
     data.items.map(async (item: VideoAPI) => {
-      console.log(item);
       await set(`v=${item.id}`, item);
       return item;
     });

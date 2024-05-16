@@ -39,7 +39,7 @@ export default function AllPlaylists() {
       return await getVideosData();
     },
     refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    refetchOnMount: true,
   });
 
   useEffect(() => {
