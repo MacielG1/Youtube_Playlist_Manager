@@ -2,10 +2,17 @@ import { SVGProps } from "react";
 
 export default function CheckMark(props: SVGProps<SVGSVGElement>) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" {...props}>
-      <circle cx="50" cy="50" r="45" fill="#2ecc71" />
-
-      <polyline points="25,50 40,65 75,30" fill="none" stroke="#ffffff" strokeWidth="10" />
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M20 6 9 17l-5-5" />
     </svg>
   );
 }

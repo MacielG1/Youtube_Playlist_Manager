@@ -9,8 +9,8 @@ export default async function getVideosData(newVideoId?: string) {
   } else {
     const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
 
-    // if (!allVideos.length) return {};
-    if (!allVideos.length) allVideos.push("4088CV88CdQ", "ucqReyBoEeU", "AY5qcIq5u2g", "NAVj5h0A070");
+    if (!allVideos.length) return {};
+    // if (!allVideos.length) allVideos.push("4088CV88CdQ", "ucqReyBoEeU", "AY5qcIq5u2g", "NAVj5h0A070");
 
     videosIds = allVideos.join(",");
   }
