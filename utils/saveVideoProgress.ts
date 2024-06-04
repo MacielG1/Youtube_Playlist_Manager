@@ -7,6 +7,8 @@ export default function saveVideoProgress(videoPlayer: YouTubePlayer, videoId: s
 
   if (!currentData) return;
 
+  if (!videoPlayer || !videoPlayer.getCurrentTime()) return;
+
   const data = {
     ...currentData,
     videoId,

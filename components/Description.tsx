@@ -35,14 +35,14 @@ export default function Description({ description, className }: Props) {
         >
           Description
           {isAccordionOpen ? (
-            <ArrowUp className="ml-1 h-4 w-4 fill-neutral-200 text-neutral-800   dark:fill-neutral-800 dark:text-white " />
+            <ArrowUp className="ml-1 h-4 w-4 fill-neutral-200 text-neutral-800 dark:fill-neutral-800 dark:text-white" />
           ) : (
-            <ArrowDown className="ml-1 h-4 w-4 fill-neutral-200 text-neutral-800   dark:fill-neutral-800 dark:text-white " />
+            <ArrowDown className="ml-1 h-4 w-4 fill-neutral-200 text-neutral-800 dark:fill-neutral-800 dark:text-white" />
           )}
         </button>
       </div>
       {isAccordionOpen && (
-        <div className="flex flex-col gap-1 pb-10 pt-2 ">
+        <div className="flex flex-col gap-1 pb-10 pt-2">
           {lines.map((line, index) => (
             <span key={index} className="text-sm md:text-base">
               {line.split(urlRegex).map((part, i) =>
@@ -51,7 +51,7 @@ export default function Description({ description, className }: Props) {
                     {part}
                   </Link>
                 ) : (
-                  <span key={i} className=" text-neutral-900 dark:text-neutral-200">
+                  <span key={i} className="text-neutral-900 dark:text-neutral-200">
                     {part}
                   </span>
                 ),

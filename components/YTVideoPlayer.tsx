@@ -176,7 +176,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   return (
     <>
       <LogoButton />
-      <div className="flex min-h-screen flex-col items-center justify-center pt-12  ">
+      <div className="flex min-h-screen flex-col items-center justify-center pt-12">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center pt-2 max-xl:p-[0.15rem] 2xl:max-w-[71vw]">
           <div className="relative w-full overflow-auto pb-[56.25%]">
             {!isLoaded && (
@@ -203,7 +203,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         </div>
         {isLoaded && (
           <div className="flex max-w-[80vw] flex-col">
-            <div className="flex justify-center gap-1 pt-1 xs:gap-3 ">
+            <div className="flex justify-center gap-1 pt-1 xs:gap-3">
               <Tooltip text="Restart">
                 <span
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
@@ -230,7 +230,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               </Tooltip>
               <Tooltip text="Open on Youtube">
                 <Link href={`https://www.youtube.com/watch?v=${videoId}&t=${Math.floor(currentTime)}`} target="_blank" rel="noopener noreferrer">
-                  <Youtube className="mx-[0.15rem] h-8 w-8 fill-neutral-200 px-[0.035rem] pb-[0.05rem] text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
+                  <Youtube className="mx-[0.15rem] h-8 w-8 fill-neutral-200 px-[0.035rem] pb-[0.05rem] text-neutral-600 transition duration-300 hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
                 </Link>
               </Tooltip>
               <Tooltip text="Delete Video">
@@ -238,12 +238,12 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
                   onClick={openModal}
                 >
-                  <Close className="h-8 w-8 " />
+                  <Close className="h-8 w-8" />
                 </span>
               </Tooltip>
             </div>
             {/* Title */}
-            <span className="mx-auto my-1 text-balance break-words tracking-wide text-neutral-800 dark:text-neutral-200 ">
+            <span className="mx-auto my-1 text-balance break-words tracking-wide text-neutral-800 dark:text-neutral-200">
               {videoTitle} {channel && `- ${channel}`}
             </span>
 

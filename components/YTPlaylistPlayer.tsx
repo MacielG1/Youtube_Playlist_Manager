@@ -1,10 +1,13 @@
 "use client";
+import type { Items, PlVideos, Playlist, PlaylistAPI } from "@/types";
 import { useRef, useEffect, useState, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
-import type { Items, PlVideos, Playlist, PlaylistAPI } from "@/types";
-
+import YouTube, { type YouTubeEvent, type YouTubeProps } from "react-youtube";
+import { useAudioToggle } from "@/providers/SettingsProvider";
+import { shuffle } from "@/utils/shuffle";
+import { del, get, set } from "idb-keyval";
+import { useMediaQuery } from "usehooks-ts";
 import fetchVideosIds from "@/utils/fetchVideosIds";
 import getVideosSlice from "@/utils/getVideosSlice";
 import seekTime from "@/utils/seekTime";
@@ -17,10 +20,8 @@ import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Description from "./Description";
 import Tooltip from "./ToolTip";
-import { del, get, set } from "idb-keyval";
 import VideosListSidebar from "./VideosListSidebar";
 import Link from "next/link";
-import { useMediaQuery } from "usehooks-ts";
 import Spin from "@/assets/icons/Spin";
 import Reset from "@/assets/icons/Reset";
 import Rewind10 from "@/assets/icons/Rewind10";
@@ -29,16 +30,9 @@ import PointerRight from "@/assets/icons/PointerRight";
 import Skip10 from "@/assets/icons/Skip10";
 import Youtube from "@/assets/icons/Youtube";
 import Close from "@/assets/icons/Close";
-import { useAudioToggle } from "@/providers/SettingsProvider";
 import Shuffle from "@/assets/icons/Shuffle";
-import { shuffle } from "@/utils/shuffle";
 
-type Params = {
-  list: string;
-  title: string;
-};
-
-export default function YoutubePlayer({ params }: { params: Params }) {
+export default function YoutubePlayer({ params }: { params: { list: string; title: string } }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState<number | null>(null);
   const [currentVideoTitle, setCurrentVideoTitle] = useState("");
@@ -47,8 +41,9 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
   const [currentTime, setCurrentTime] = useState(0);
-  const { isAudioMuted } = useAudioToggle();
+  const [isMounted, setIsMounted] = useState(false);
 
+  const { isAudioMuted } = useAudioToggle();
   const isPaused = useRef(false);
   const pageRef = useRef(1);
   const plLengthRef = useRef(0);
@@ -58,8 +53,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   const PlaylistPlayerRef = useRef<YouTube | null>(null);
   const isPlayingVideoRef = useRef<boolean | null>(false);
   const videosIdsRef = useRef<string[]>([]);
-
-  const [isMounted, setIsMounted] = useState(false);
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -101,11 +94,9 @@ export default function YoutubePlayer({ params }: { params: Params }) {
         const data = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
 
         // console.log("data", data);
-
         if (!data) return;
 
         plLengthRef.current = data.length;
-
         await set(`pl=${playlistId}`, data);
       }
     }
@@ -142,7 +133,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     setCurrentVideoIndex(index);
 
     const vidsData = await get(`pl=${playlistId}`);
-
     if (vidsData) setVideosList(vidsData);
 
     const intervalId = setInterval(() => {
@@ -164,9 +154,17 @@ export default function YoutubePlayer({ params }: { params: Params }) {
   }
   async function onError(e: YouTubeEvent) {
     console.log("error", e);
+
     if (e.data === "150") {
-      console.log("Error 150, Video is private or deleted");
-      // e.target.nextVideo();
+      console.log("Error 150");
+
+      const savedData = JSON.parse(localStorage.getItem(item) || "[]");
+      const index = savedData?.currentItem + 1 + (savedData.currentPage - 1) * 200;
+      if (index > plLengthRef.current) {
+        return resetPlaylist();
+      } else if (e.target.playerInfo?.playerState < 0) {
+        window.location.reload();
+      }
     }
   }
 
@@ -176,7 +174,6 @@ export default function YoutubePlayer({ params }: { params: Params }) {
     if (e.data === 1 || e.data === 2) setCurrentVideoIndex(index);
 
     setCurrentVideoTitle(e.target.getVideoData().title || "");
-
     setCurrentTime(e.target.getCurrentTime());
 
     let videoId = e.target.getVideoData().video_id;
@@ -358,7 +355,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
       <LogoButton />
       <div className="flex flex-col items-center justify-center pt-12">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:max-w-[62vw] xl:pt-0 2xl:max-w-[70vw]">
-          <div className=" relative w-full overflow-auto pb-[56.25%]">
+          <div className="relative w-full overflow-auto pb-[56.25%]">
             {!plLengthRef.current && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
                 <Spin className="h-7 w-7 animate-spin text-indigo-500" />
@@ -394,7 +391,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
               </Tooltip>
               <Tooltip text="Rewind 10s">
                 <button
-                  className=" cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                   onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, -10)}
                 >
                   <Rewind10 className="h-8 w-8" />
@@ -430,7 +427,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <Youtube className="mx-[0.3rem] h-8  w-8 fill-neutral-200 px-[0.035rem]  pb-[0.05rem] text-neutral-600 transition duration-300  hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
+                  <Youtube className="mx-[0.3rem] h-8 w-8 fill-neutral-200 px-[0.035rem] pb-[0.05rem] text-neutral-600 transition duration-300 hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
                 </Link>
               </Tooltip>
 
@@ -448,7 +445,7 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
                   onClick={openModal}
                 >
-                  <Close className="h-8 w-8 " />
+                  <Close className="h-8 w-8" />
                 </button>
               </Tooltip>
 
@@ -460,15 +457,17 @@ export default function YoutubePlayer({ params }: { params: Params }) {
                 )}
               </p>
             </div>
-            {/* Title */}
+
             <div className="pb-5 max-2xl:-mt-1 2xl:pb-0">
               {currentVideoTitle && (
-                <span className="flex justify-center text-balance break-words tracking-wide text-neutral-800 dark:text-neutral-200  ">
+                <span className="flex justify-center text-balance break-words tracking-wide text-neutral-800 dark:text-neutral-200">
                   {currentVideoTitle} - {playlistTitle}
                 </span>
               )}
             </div>
+
             {description && <Description description={description} />}
+
             <div>{isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} />}</div>
           </div>
         )}

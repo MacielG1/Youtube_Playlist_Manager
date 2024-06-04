@@ -16,10 +16,10 @@ const texts = [
 
 export default function About({ button }: { button?: React.ReactNode }) {
   return (
-    <div className="pt-25 relative isolate z-10 flex items-center overflow-hidden lg:h-screen ">
+    <div className="pt-25 relative isolate z-10 flex items-center overflow-hidden lg:h-screen">
       <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div
-          className=" first-line: absolute bottom-1 right-[calc(50%-4rem)] -z-10 transform-gpu blur-3xl sm:right-[calc(50%-18rem)]  xl:bottom-[calc(50%-30rem)] xl:right-[calc(65%-24rem)]"
+          className="first-line: absolute bottom-1 right-[calc(50%-4rem)] -z-10 transform-gpu blur-3xl sm:right-[calc(50%-18rem)] xl:bottom-[calc(50%-30rem)] xl:right-[calc(65%-24rem)]"
           aria-hidden="true"
         >
           <div
@@ -39,9 +39,9 @@ export default function About({ button }: { button?: React.ReactNode }) {
             placeholder="blur"
             priority
           />
-          <div className="w-full flex-auto max-sm:pt-10 ">
+          <div className="w-full flex-auto max-sm:pt-10">
             <h2 className="mb-8 text-center text-3xl font-bold tracking-wide text-black dark:text-neutral-200 sm:text-4xl">How It Works!</h2>
-            <div className="flex flex-col  gap-3 text-lg">
+            <div className="flex flex-col gap-3 text-lg">
               {texts.map((i) => (
                 <div key={i.id} className="flex items-center justify-start gap-2">
                   <CheckMark className="h-5 w-5 min-w-[2rem] text-green-500" />

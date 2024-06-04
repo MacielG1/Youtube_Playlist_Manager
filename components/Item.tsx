@@ -103,19 +103,19 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
   const width = currentTime.current?.initialTime && duration ? `${(currentTime.current?.initialTime / convertTimeToSeconds(duration)) * 100}%` : "0%";
   return (
     <div className={`mt-2 flex flex-col items-center outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
-      <div className="relative flex cursor-default flex-col items-center justify-center overflow-hidden rounded-md rounded-tr-[0.2rem]  md:rounded-[0.6rem] ">
-        <div className="group flex aspect-video w-[50vw] select-none items-center justify-center overflow-hidden rounded-md rounded-tr-[0.2rem] xs:w-[35vw] md:w-[26vw] md:rounded-[0.8rem] lg:w-[20vw] 2xl:w-[16.5vw] ">
+      <div className="relative flex cursor-default flex-col items-center justify-center overflow-hidden rounded-md rounded-tr-[0.2rem] md:rounded-[0.6rem]">
+        <div className="group flex aspect-video w-[50vw] select-none items-center justify-center overflow-hidden rounded-md rounded-tr-[0.2rem] xs:w-[35vw] md:w-[26vw] md:rounded-[0.8rem] lg:w-[20vw] 2xl:w-[16.5vw]">
           <button
             onClick={openModal}
-            className={`peer absolute right-0 top-0 z-10  rounded-bl-md  bg-neutral-800 p-1  text-neutral-400 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-100  ${
+            className={`peer absolute right-0 top-0 z-10 rounded-bl-md bg-neutral-800 p-1 text-neutral-400 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-100 ${
               (isDragging || isSorting) && "hidden opacity-0"
             }}`}
             aria-label="Delete Button"
           >
             <Delete className="h-4 w-4" />
           </button>
-          <div className=" transition duration-300 hover:scale-105 peer-hover:scale-105" {...attributes} {...listeners}>
-            <LinkWrapper href={url} className="cursor-pointer ">
+          <div className="transition duration-300 hover:scale-105 peer-hover:scale-105" {...attributes} {...listeners}>
+            <LinkWrapper href={url} className="cursor-pointer">
               <Image
                 src={thumbnailURL}
                 alt={title}
@@ -134,19 +134,18 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
           {type === "Video" && (
             <>
               <span
-                className={`${font.className} absolute bottom-[0.25rem] right-[0.15rem] z-10 rounded-lg
-             bg-black px-1 text-[0.65rem] tracking-wide text-white sm:text-[0.8rem]`}
+                className={`${font.className} absolute bottom-[0.25rem] right-[0.15rem] z-10 rounded-lg bg-black px-1 text-[0.65rem] tracking-wide text-white sm:text-[0.8rem]`}
               >
                 {duration}
               </span>
 
-              <div className="absolute bottom-0 left-0 z-[500]  h-[0.17rem]  bg-red-500" style={{ width: width }}></div>
+              <div className="absolute bottom-0 left-0 z-[500] h-[0.17rem] bg-red-500" style={{ width: width }}></div>
             </>
           )}
         </div>
       </div>
 
-      <h2 className="max-h-[2.8rem] min-h-[2.8rem] max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-[0.875rem] font-medium text-black dark:text-white xs:max-w-[12rem] sm:max-w-[20rem] ">
+      <h2 className="max-h-[2.8rem] min-h-[2.8rem] max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-[0.875rem] font-medium text-black dark:text-white xs:max-w-[12rem] sm:max-w-[20rem]">
         <Link className="cursor-pointer" href={url}>
           {formattedTitle}
           {type === "Video" && channel && ` - ${channel}`}

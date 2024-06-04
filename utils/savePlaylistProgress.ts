@@ -10,6 +10,8 @@ export default async function savePlaylistsProgress(videoPlayer: YouTubePlayer, 
 
   const currentPl = JSON.parse(localStorage.getItem(item) || "[]");
 
+  if (!videoPlayer || !videoPlayer.getCurrentTime()) return;
+
   const data = {
     ...currentPl,
     playlistId,
