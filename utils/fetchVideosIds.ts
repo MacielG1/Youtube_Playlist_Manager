@@ -44,6 +44,6 @@ export default async function fetchVideosIds(playlistId: string, videosIdsRef?: 
     return data;
   } catch (error) {
     console.error("Error fetching data in FetchVideosIds:", error);
-    return null;
+    return savedVideos || [];
   }
 }

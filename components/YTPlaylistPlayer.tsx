@@ -125,7 +125,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   async function onReady(e: YouTubeEvent) {
     const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
-    PlaylistPlayerRef.current?.internalPlayer.setPlaybackRate(plRate);
+    PlaylistPlayerRef.current?.internalPlayer?.setPlaybackRate(plRate);
 
     setCurrentVideoTitle(e.target.getVideoData().title || "");
 
