@@ -74,7 +74,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     setIsLoaded(true);
 
     const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
-    videoPlayerRef?.current?.internalPlayer.setPlaybackRate(plRate);
+    videoPlayerRef?.current?.internalPlayer?.setPlaybackRate(plRate);
 
     let data = await get(`v=${videoId}`);
     setDescription(data?.description);

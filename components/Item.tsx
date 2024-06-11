@@ -98,7 +98,7 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
 
   // let url = !isDragging && !isSorting ? (type === "Playlist" ? `/playlist?list=${id}&title=${decodedTitled}` : `/video?v=${id}`) : "#";
 
-  let formattedTitle = reduceStringLength(title, 65);
+  let formattedTitle = type === "Video" ? reduceStringLength(title, 65) : reduceStringLength(title, 90);
 
   const width = currentTime.current?.initialTime && duration ? `${(currentTime.current?.initialTime / convertTimeToSeconds(duration)) * 100}%` : "0%";
   return (
@@ -145,7 +145,7 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
         </div>
       </div>
 
-      <h2 className="max-h-[2.8rem] min-h-[2.8rem] max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-[0.875rem] font-medium text-black dark:text-white xs:max-w-[12rem] sm:max-w-[20rem]">
+      <h2 className="max-h-[2.8rem] min-h-[2.8rem] max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-[0.875rem] font-medium text-black dark:text-white max-md:w-[17rem] max-sm:w-[15rem] xs:max-w-[12rem] sm:max-w-[20rem]">
         <Link className="cursor-pointer" href={url}>
           {formattedTitle}
           {type === "Video" && channel && ` - ${channel}`}
