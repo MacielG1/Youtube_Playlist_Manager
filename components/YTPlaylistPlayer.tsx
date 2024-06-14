@@ -42,6 +42,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   const [videosList, setVideosList] = useState<Items["items"]>([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [isMounted, setIsMounted] = useState(false);
+  const [isFetching, setIsLoading] = useState(false);
 
   const { isAudioMuted } = useAudioToggle();
   const isPaused = useRef(false);
@@ -90,14 +91,18 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     async function run() {
       const isEmpty = !videosIdsRef.current.length;
       if (isEmpty || olderThan1day) {
+        setIsLoading(true);
         console.log("Fetching new videos");
         const data = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
 
-        // console.log("data", data);
-        if (!data) return;
+        if (!data) {
+          setIsLoading(false);
+          return;
+        }
 
         plLengthRef.current = data.length;
         await set(`pl=${playlistId}`, data);
+        setIsLoading(false);
       }
     }
     run();
@@ -253,7 +258,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     router.replace("/");
 
     onDeleteItems(playlistId, "playlists");
-
     await del(item);
 
     queryClient.setQueryData<Items>(["playlists"], (oldData) => {
@@ -305,7 +309,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     videosIdsRef.current = shuffledIds;
 
     await loadPlaylist(PlaylistPlayerRef.current?.getInternalPlayer(), shuffledIds, 1, 0);
-
     setVideosList(shuffledVideos);
   }
 
@@ -348,6 +351,14 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   if (!isMounted) {
     return null;
+  }
+  if (isFetching) {
+    return (
+      <div className="flex h-[90vh] items-center justify-center">
+        <Spin className="h-7 w-7 animate-spin text-indigo-500" />
+        <span className="sr-only">Loading...</span>
+      </div>
+    );
   }
 
   return (
