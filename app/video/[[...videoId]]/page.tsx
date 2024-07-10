@@ -11,7 +11,14 @@ export default function page({ searchParams }: { searchParams: searchParams }) {
 }
 
 export async function generateMetadata({ searchParams }: { searchParams: searchParams }) {
+  let decodedTitled;
+  try {
+    decodedTitled = decodeURIComponent(searchParams.title);
+  } catch {
+    decodedTitled = searchParams.title;
+  }
+
   return {
-    title: decodeURIComponent(searchParams.title),
+    title: decodedTitled,
   };
 }
