@@ -2,7 +2,7 @@
 import { useRef, useEffect, useState, useMemo, use } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import type { Items } from "@/types";
+import type { Items, Video } from "@/types";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 import seekTime from "@/utils/seekTime";
 import LogoButton from "./LogoButton";
@@ -22,6 +22,7 @@ import Youtube from "@/assets/icons/Youtube";
 import Close from "@/assets/icons/Close";
 import { useAudioToggle } from "@/providers/SettingsProvider";
 import SkipBack from "@/assets/icons/skipBack";
+import VideoDate from "./VideoDate";
 
 type Params = {
   v: string;
@@ -31,9 +32,12 @@ type Params = {
 export default function YTVideoPlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [description, setDescription] = useState<string | null>(null);
-  const [title, setTitle] = useState<string>("");
-  const [channel, setChannel] = useState<string>("");
+  // const [description, setDescription] = useState<string | null>(null);
+  // const [publishedAt, setPublishedAt] = useState<string | null>(null);
+  // const [title, setTitle] = useState<string>("");
+  // const [channel, setChannel] = useState<string>("");
+
+  const [videoData, setVideoData] = useState<Video | null>(null);
   const { isAudioMuted } = useAudioToggle();
 
   const queryClient = useQueryClient();
@@ -66,7 +70,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   useEffect(() => {
     if (videoPlayerRef?.current) {
-      isAudioMuted ? videoPlayerRef.current.internalPlayer.mute() : videoPlayerRef.current.internalPlayer.unMute();
+      isAudioMuted ? videoPlayerRef.current?.internalPlayer?.mute() : videoPlayerRef.current?.internalPlayer?.unMute();
     }
   }, [isAudioMuted]);
 
@@ -77,9 +81,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     videoPlayerRef?.current?.internalPlayer?.setPlaybackRate(plRate);
 
     let data = await get(`v=${videoId}`);
-    setDescription(data?.description);
-    setTitle(data?.title);
-    setChannel(data?.channel);
+    setVideoData(data);
 
     const intervalId = setInterval(() => {
       if (isPlayingVideoRef.current) {
@@ -112,8 +114,6 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   function onStateChange(e: YouTubeEvent) {
     if (e.target) {
       setCurrentTime(e.target.getCurrentTime());
-      console.log("curr", e.target.getCurrentTime());
-      console.log("dur", e.target.getDuration());
     }
   }
 
@@ -171,7 +171,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     };
   }, []);
 
-  let videoTitle = reduceStringSize(title, 100);
+  let videoTitle = reduceStringSize(videoData?.title, 100);
 
   return (
     <>
@@ -243,15 +243,20 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               </Tooltip>
             </div>
             {/* Title */}
-            <span className="mx-auto my-1 text-balance break-words tracking-wide text-neutral-800 dark:text-neutral-200">
-              {videoTitle} {channel && `- ${channel}`}
+            <span className="mx-auto my-1 break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">
+              {videoTitle} {videoData?.channel && `- ${videoData.channel}`}
             </span>
 
-            {description && <Description description={description} className="pb-2 pt-5 2xl:pt-4" />}
+            {videoData?.publishedAt && <VideoDate publishedAt={videoData.publishedAt} />}
+
+            {videoData?.description && <Description description={videoData?.description} className="pb-2 pt-5 2xl:pt-4" />}
           </div>
         )}
         {isModalOpen && (
-          <ModalDelete onClose={onCancel} content={<DeleteModalContent type="Video" id={videoId} title={title} openModal={onCancel} onDelete={onDelete} />} />
+          <ModalDelete
+            onClose={onCancel}
+            content={<DeleteModalContent type="Video" id={videoId} title={videoData?.title ?? ""} openModal={onCancel} onDelete={onDelete} />}
+          />
         )}
       </div>
     </>

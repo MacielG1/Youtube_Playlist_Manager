@@ -54,6 +54,7 @@ export async function POST(req: Request, { params }: { params: Params }): Promis
           title: title,
           thumbnails: item.snippet.thumbnails || {},
           description: item.snippet.description,
+          publishedAt: item.snippet.publishedAt,
         });
       }
     });

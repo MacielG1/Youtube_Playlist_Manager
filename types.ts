@@ -8,6 +8,7 @@ export type PlaylistAPI = {
       videoId: string;
     };
     description?: string;
+    publishedAt?: string;
   };
   contentDetails?: {
     itemCount?: number;
@@ -20,6 +21,8 @@ export type VideoAPI = {
     thumbnails?: Thumbnails;
     description?: string;
     channelTitle: string;
+    publishedAt: string;
+    channelId: string;
   };
   contentDetails: {
     duration: string;
@@ -34,12 +37,15 @@ export type Playlist = {
   videosData?: Video[];
   duration?: string;
   channel?: string;
+  publishedAt?: string;
 };
 export type Video = {
   id: string;
   title: string;
   thumbnails: Thumbnails;
   description: string;
+  channel: string;
+  publishedAt: string;
 };
 
 export type Items = {

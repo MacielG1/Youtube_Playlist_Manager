@@ -23,7 +23,6 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
       if (!searchParams.type || !searchParams.id) return null;
       const id = searchParams.id;
 
-      console.log("id", id);
       try {
         // VIDEO
         if (searchParams.type === "video") {
@@ -51,7 +50,6 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
             });
 
             queryClient.setQueryData<Items>(["videos"], (prev) => {
-              console.log("prev", prev);
               if (!prev || !prev?.items?.length) return data;
               return {
                 ...data,
@@ -74,7 +72,6 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
           let isPlSaved = await get(playlistKey);
 
           if (isPlSaved) {
-            console.log("Playlist Already Added!");
             toast.error("Playlist Already Added!", toastError);
             return null;
           }
@@ -94,7 +91,6 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
             });
 
             queryClient.setQueryData<Items>(["playlists"], (prev) => {
-              console.log("prev", prev);
               if (!prev || !prev?.items?.length) return playlistData;
 
               return {
@@ -139,7 +135,6 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
             });
 
             queryClient.setQueryData<Items>(["playlists"], (prev) => {
-              console.log("prev", prev);
               // if no playlists saved, return the new one
               if (!prev || !prev?.items?.length) return playlistData;
 

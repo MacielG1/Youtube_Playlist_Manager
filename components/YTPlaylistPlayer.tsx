@@ -31,6 +31,7 @@ import Skip10 from "@/assets/icons/Skip10";
 import Youtube from "@/assets/icons/Youtube";
 import Close from "@/assets/icons/Close";
 import Shuffle from "@/assets/icons/Shuffle";
+import VideoDate from "./VideoDate";
 
 export default function YoutubePlayer({ params }: { params: { list: string; title: string } }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -41,6 +42,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
   const [currentTime, setCurrentTime] = useState(0);
+  const [publishedAt, setPublishedAt] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isFetching, setIsLoading] = useState(false);
 
@@ -129,9 +131,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }, []);
 
   async function onReady(e: YouTubeEvent) {
-    const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
-    PlaylistPlayerRef.current?.internalPlayer?.setPlaybackRate(plRate);
-
     setCurrentVideoTitle(e.target.getVideoData().title || "");
 
     const index = (await PlaylistPlayerRef.current?.internalPlayer?.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
@@ -139,6 +138,9 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
     const vidsData = await get(`pl=${playlistId}`);
     if (vidsData) setVideosList(vidsData);
+
+    const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
+    await PlaylistPlayerRef.current?.internalPlayer?.setPlaybackRate(plRate);
 
     const intervalId = setInterval(() => {
       if (isPlayingVideoRef.current && !isShuffled) {
@@ -161,8 +163,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     console.log("error", e);
 
     if (e.data === "150") {
-      console.log("Error 150");
-
       const savedData = JSON.parse(localStorage.getItem(item) || "[]");
       const index = savedData?.currentItem + 1 + (savedData.currentPage - 1) * 200;
       if (index > plLengthRef.current) {
@@ -185,8 +185,10 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     currentVideoId.current = videoId;
     let pl = await get(`pl=${playlistId}`);
 
-    const desc = pl?.find((v: PlaylistAPI) => v.id === videoId)?.description;
-    setDescription(desc);
+    const video = pl?.find((v: PlaylistAPI) => v.id === videoId);
+
+    setDescription(video.description);
+    setPublishedAt(video.publishedAt);
   }
 
   async function onEnd(e: YouTubeEvent) {
@@ -469,15 +471,17 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
               </p>
             </div>
 
-            <div className="pb-5 max-2xl:-mt-1 2xl:pb-0">
+            <div className="pb-5 max-2xl:-mt-1 2xl:pb-1">
               {currentVideoTitle && (
-                <span className="flex justify-center text-balance break-words tracking-wide text-neutral-800 dark:text-neutral-200">
+                <span className="flex justify-center break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">
                   {currentVideoTitle} - {playlistTitle}
                 </span>
               )}
             </div>
 
-            {description && <Description description={description} />}
+            {publishedAt && <VideoDate publishedAt={publishedAt} />}
+
+            {description && <Description description={description} className="pb-2 pt-5 2xl:pt-4" />}
 
             <div>{isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} />}</div>
           </div>

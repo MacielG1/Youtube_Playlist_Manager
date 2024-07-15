@@ -24,7 +24,6 @@ export async function POST(req: Request): Promise<NextResponse> {
       console.log("Error", res.statusText);
       return new NextResponse("Error", { status: 404 });
     }
-
     let newData = {
       items: data.items.map((item: VideoAPI) => {
         return {
@@ -34,9 +33,12 @@ export async function POST(req: Request): Promise<NextResponse> {
           description: item.snippet.description,
           duration: convertDurationTime(item.contentDetails.duration),
           channel: item.snippet.channelTitle,
+          channelId: item.snippet.channelId,
+          publishedAt: item.snippet.publishedAt,
         };
       }),
     };
+
     return NextResponse.json(newData);
   } catch (e) {
     console.log("Error in /api/videosData");
