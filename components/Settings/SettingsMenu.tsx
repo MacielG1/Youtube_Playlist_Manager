@@ -40,7 +40,7 @@ export default function SettingsMenu() {
       <HowItWorks setModalOpen={setIsOpen} />
       <DeleteAllBtn openDeleteModal={openDeleteModal} />
       <Link target="_blank" rel="noopener noreferrer" href="https://www.buymeacoffee.com/macielg1">
-        <Button className="max-w-[9rem] whitespace-nowrap border border-neutral-950 text-sm">Support the Project</Button>
+        <Button className="max-w-[9rem] whitespace-nowrap border border-neutral-950 text-sm">Support Me</Button>
       </Link>
       <ToggleMute />
     </div>
