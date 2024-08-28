@@ -10,8 +10,7 @@ import DeleteAllBtn from "./DeleteAllBtn";
 import { usePathname } from "next/navigation";
 import Settings from "@/assets/icons/Settings";
 import ToggleMute from "./ToggleMute";
-import Link from "next/link";
-import Button from "../Button";
+import SupportButton from "./SupportButton";
 
 export default function SettingsMenu() {
   let [isOpen, setIsOpen] = useState(false);
@@ -39,9 +38,7 @@ export default function SettingsMenu() {
       <ImportExportTimers setModalOpen={setIsOpen} />
       <HowItWorks setModalOpen={setIsOpen} />
       <DeleteAllBtn openDeleteModal={openDeleteModal} />
-      <Link target="_blank" rel="noopener noreferrer" href="https://www.buymeacoffee.com/macielg1">
-        <Button className="max-w-[9rem] whitespace-nowrap border border-neutral-950 px-8 text-sm">Support Me</Button>
-      </Link>
+      <SupportButton />
       <ToggleMute />
     </div>
   );
