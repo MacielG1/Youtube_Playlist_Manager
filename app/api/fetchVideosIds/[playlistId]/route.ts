@@ -12,8 +12,6 @@ let MAX_AMOUNT_OF_PAGES = 50;
 export async function POST(req: Request, { params }: { params: Params }): Promise<NextResponse> {
   const playlistsToFetch = params.playlistId;
 
-  // const { existingVideoIds } = await req.json();
-
   if (!playlistsToFetch) return new NextResponse("No Playlist Id", { status: 404 });
 
   let pagesCounter = 0;
@@ -29,6 +27,7 @@ export async function POST(req: Request, { params }: { params: Params }): Promis
         console.log("Error in /api/fetchVideosIds/[playlistId]", res.status, res.statusText);
         throw new Error("ERROR");
       }
+
       let data = await res.json();
 
       for (let item of data.items) {

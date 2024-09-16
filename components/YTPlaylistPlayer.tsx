@@ -32,19 +32,22 @@ import Youtube from "@/assets/icons/Youtube";
 import Close from "@/assets/icons/Close";
 import Shuffle from "@/assets/icons/Shuffle";
 import VideoDate from "./VideoDate";
+import RemoveVideo from "@/assets/icons/RemoveVideo";
 
 export default function YoutubePlayer({ params }: { params: { list: string; title: string } }) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState<number | null>(null);
   const [currentVideoTitle, setCurrentVideoTitle] = useState("");
   const [isShuffled, setIsShuffled] = useState(false);
+
+  const [isDeletePlaylistModalOpen, setIsDeletePlaylistModalOpen] = useState(false);
+  const [isDeleteVideoModalOpen, setIsDeleteVideoModalOpen] = useState(false);
 
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
-  const [isFetching, setIsLoading] = useState(false);
+  const [isRemoving, setIsRemoving] = useState(false);
 
   const { isAudioMuted } = useAudioToggle();
   const isPaused = useRef(false);
@@ -93,18 +96,16 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     async function run() {
       const isEmpty = !videosIdsRef.current.length;
       if (isEmpty || olderThan1day) {
-        setIsLoading(true);
         console.log("Fetching new videos");
         const data = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
 
         if (!data) {
-          setIsLoading(false);
+          console.log("No data");
           return;
         }
 
         plLengthRef.current = data.length;
         await set(`pl=${playlistId}`, data);
-        setIsLoading(false);
       }
     }
     run();
@@ -162,23 +163,30 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   async function onError(e: YouTubeEvent) {
     console.log("error", e);
 
-    if (e.data === "150") {
+    if (e.data == 150) {
       const savedData = JSON.parse(localStorage.getItem(item) || "[]");
-      const index = savedData?.currentItem + 1 + (savedData.currentPage - 1) * 200;
+      const currentIndex = await e.target.getPlaylistIndex();
+      const index = currentIndex + 1 + (savedData.currentPage - 1) * 200;
+
+      setCurrentVideoIndex(index);
       if (index > plLengthRef.current) {
         return resetPlaylist();
       } else if (e.target.playerInfo?.playerState < 0) {
-        window.location.reload();
+        // window.location.reload();
       }
+    }
+    if (e.data === 2) {
+      // window.location.reload();
     }
   }
 
   async function onStateChange(e: YouTubeEvent) {
     const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
 
-    if (e.data === 1 || e.data === 2) setCurrentVideoIndex(index);
+    if (e.data === 1) setCurrentVideoIndex(index);
 
-    setCurrentVideoTitle(e.target.getVideoData().title || "");
+    const title = e.target.getVideoData().title;
+    if (title) setCurrentVideoTitle(title);
     setCurrentTime(e.target.getCurrentTime());
 
     let videoId = e.target.getVideoData().video_id;
@@ -186,7 +194,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     let pl = await get(`pl=${playlistId}`);
 
     const video = pl?.find((v: PlaylistAPI) => v.id === videoId);
-
+    if (!video) return;
     setDescription(video.description);
     setPublishedAt(video.publishedAt);
   }
@@ -255,12 +263,72 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     setCurrentVideoIndex(1);
   }
 
+  async function removeVideo() {
+    if (isRemoving) return;
+
+    setIsRemoving(true);
+    const player = PlaylistPlayerRef.current?.getInternalPlayer();
+
+    if (!player) return setIsRemoving(false);
+
+    const state = await player.getPlayerState();
+
+    if (state === 5 || state === 3 || state === 0) return setIsRemoving(false);
+
+    const currentIndex = await player.getPlaylistIndex();
+    const currentPlaylist = await player.getPlaylist();
+    const currentVideoId1 = currentPlaylist && currentPlaylist[currentIndex];
+
+    let currentVidId = currentVideoId.current || currentVideoId1 || new URLSearchParams((await player.getVideoUrl()).split("?")[1]).get("v");
+
+    if (!currentVidId) return setIsRemoving(false);
+
+    const [pl = [], removedVideos = []] = await Promise.all([get(`pl=${playlistId}`), get(`plRemoved=${playlistId}`)]);
+    const newPl = pl.filter((video: PlaylistAPI) => video.id !== currentVidId);
+    const updatedRemovedVideos = [...removedVideos, currentVidId];
+
+    await Promise.all([set(`pl=${playlistId}`, newPl), set(`plRemoved=${playlistId}`, updatedRemovedVideos)]);
+
+    videosIdsRef.current = newPl.map((video: PlaylistAPI) => video.id);
+    plLengthRef.current = videosIdsRef.current.length;
+    currentVideoId.current = newPl[currentIndex ? currentIndex - 1 : 0].id;
+    currentVidId = currentVideoId.current;
+
+    const plVideos = JSON.parse(localStorage.getItem(`plVideos=${playlistId}`) || "{}");
+    plVideos.videosIds = videosIdsRef.current;
+    localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify(plVideos));
+
+    if (plLengthRef.current === 0) await onDelete();
+    else {
+      await loadPlaylist(player, videosIdsRef.current, pageRef.current, currentIndex ? currentIndex - 1 : 0);
+
+      setTimeout(async () => {
+        const currentVideoIndex = newPl.findIndex((video: PlaylistAPI) => video.id === currentVidId);
+        const currentVideo = newPl[currentVideoIndex !== -1 ? currentVideoIndex : 0];
+
+        const url = await player.getVideoUrl();
+        if (!url) return setIsRemoving(false);
+
+        if (currentVideo.id !== currentVidId) {
+          await loadPlaylist(player, videosIdsRef.current, pageRef.current, currentIndex ? currentIndex - 1 : 0);
+        }
+      }, 2000);
+    }
+    setVideosList(newPl);
+    onCancel("Video");
+
+    setTimeout(() => {
+      setIsRemoving(false);
+    }, 1000);
+  }
+
   async function onDelete() {
     isPlayingVideoRef.current = null;
     router.replace("/");
 
     onDeleteItems(playlistId, "playlists");
     await del(item);
+    await del(`plRemoved=${playlistId}`);
 
     queryClient.setQueryData<Items>(["playlists"], (oldData) => {
       if (oldData) {
@@ -273,21 +341,23 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     });
   }
 
-  async function openModal() {
-    PlaylistPlayerRef.current?.internalPlayer.pauseVideo();
+  async function openModal(type: "Playlist" | "Video") {
+    PlaylistPlayerRef.current?.internalPlayer?.pauseVideo();
     isPaused.current = (await PlaylistPlayerRef?.current?.internalPlayer.getPlayerState()) === 2;
 
-    setIsModalOpen(!isModalOpen);
+    if (type === "Playlist") setIsDeletePlaylistModalOpen(!isDeletePlaylistModalOpen);
+    else setIsDeleteVideoModalOpen(!isDeleteVideoModalOpen);
   }
 
   // called when cancel or backdrop is clicked
-  function onCancel() {
+  function onCancel(type: "Playlist" | "Video") {
     if (!isPaused.current) {
       PlaylistPlayerRef.current?.internalPlayer.playVideo();
       isPaused.current = false;
     }
 
-    setIsModalOpen(false);
+    if (type === "Playlist") setIsDeletePlaylistModalOpen(false);
+    else setIsDeleteVideoModalOpen(false);
   }
 
   async function onShuffle() {
@@ -351,17 +421,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     setIsMounted(true);
   }, []);
 
-  if (!isMounted) {
-    return null;
-  }
-  if (isFetching) {
-    return (
-      <div className="flex h-[90vh] items-center justify-center">
-        <Spin className="h-7 w-7 animate-spin text-indigo-500" />
-        <span className="sr-only">Loading...</span>
-      </div>
-    );
-  }
+  if (!isMounted) return null;
 
   return (
     <>
@@ -443,6 +503,15 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                   <Youtube className="mx-[0.3rem] h-8 w-8 fill-neutral-200 px-[0.035rem] pb-[0.05rem] text-neutral-600 transition duration-300 hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
                 </Link>
               </Tooltip>
+              <Tooltip text="Remove Video from Playlist">
+                <button
+                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                  onClick={() => openModal("Video")}
+                  // onClick={removeVideo}
+                >
+                  <RemoveVideo className={`h-8 w-8 py-[0.175rem]`} />
+                </button>
+              </Tooltip>
 
               <Tooltip text={isShuffled ? "Unshuffle" : "Shuffle"}>
                 <button
@@ -456,7 +525,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
               <Tooltip text="Delete Playlist">
                 <button
                   className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
-                  onClick={openModal}
+                  onClick={() => openModal("Playlist")}
                 >
                   <Close className="h-8 w-8" />
                 </button>
@@ -486,10 +555,35 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
             <div>{isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} />}</div>
           </div>
         )}
-        {isModalOpen && (
+        {isDeletePlaylistModalOpen && (
           <ModalDelete
-            onClose={onCancel}
-            content={<DeleteModalContent type="Playlist" id={playlistId} title={params.title} openModal={onCancel} onDelete={onDelete} />}
+            onClose={() => onCancel("Playlist")}
+            content={
+              <DeleteModalContent
+                deleteText="Delete"
+                type="Playlist"
+                id={playlistId}
+                title={params.title}
+                openModal={() => onCancel("Playlist")}
+                onDelete={onDelete}
+              />
+            }
+          />
+        )}
+
+        {isDeleteVideoModalOpen && (
+          <ModalDelete
+            onClose={() => {}}
+            content={
+              <DeleteModalContent
+                deleteText="Remove"
+                type="Video"
+                id={currentVideoId?.current.toString() || ""}
+                title={currentVideoTitle}
+                openModal={() => onCancel("Video")}
+                onDelete={removeVideo}
+              />
+            }
           />
         )}
       </div>

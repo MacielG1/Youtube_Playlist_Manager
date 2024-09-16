@@ -22,7 +22,7 @@ type Params = {
   title: string;
   thumbnails: Thumbnails | undefined;
   id: string;
-  type: string;
+  type: "Playlist" | "Video";
   duration?: string;
   channel?: string;
 };
@@ -158,7 +158,7 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
             e.stopPropagation();
             setIsModalOpen(false);
           }}
-          content={<DeleteModalContent type={type} id={id} title={title} isLoading={isPending} openModal={openModal} onDelete={onDelete} />}
+          content={<DeleteModalContent deleteText="Delete" type={type} id={id} title={title} isLoading={isPending} openModal={openModal} onDelete={onDelete} />}
         />
       )}
     </div>

@@ -1,49 +1,42 @@
 import { Playlist } from "@/types";
-import getPlaylistSize from "./getPlaylistSize";
 import { get } from "idb-keyval";
 
 export default async function fetchVideosIds(playlistId: string, videosIdsRef?: React.MutableRefObject<string[]>, isChannel?: boolean) {
-  const currentPlaylistSize = await getPlaylistSize(playlistId);
-  let savedVideos = await get(`pl=${playlistId}`);
-
-  if (savedVideos && savedVideos.length === currentPlaylistSize) {
-    return savedVideos;
-  }
-
   try {
+    const [savedVideos = [], removedVideos = []] = await Promise.all([get(`pl=${playlistId}`), get(`plRemoved=${playlistId}`)]);
+
     const res = await fetch(`/api/fetchVideosIds/${playlistId}`, {
       headers: {
         "Content-Type": "application/json",
       },
       method: "POST",
-      // body: JSON.stringify({ existingVideoIds }),
     });
 
     if (!res.ok) {
-      console.log("Error", res.statusText);
-      return console.log("Error", res.statusText);
+      console.error("Error", res.statusText);
+      return savedVideos;
     }
 
     let data = await res.json();
 
-    const allVideosIds = data.map((item: Playlist) => item.id);
+    if (isChannel) data.reverse(); // Reverse if it's a channel
 
-    console.log(allVideosIds.length, "videos fetched");
-
-    if (isChannel) {
-      allVideosIds.reverse();
-      data.reverse(); // Reverse the data array
-    }
+    const newVideos = data.filter((video: Playlist) => {
+      return !removedVideos.includes(video.id) && !savedVideos.some((savedVideo: Playlist) => savedVideo.id === video.id);
+    });
 
     if (videosIdsRef) {
-      videosIdsRef.current = allVideosIds;
+      videosIdsRef.current = data.map((item: Playlist) => item.id);
     }
+
+    const allVideos = [...newVideos, ...savedVideos];
+    const allVideosIds = allVideos.map((item: Playlist) => item.id);
 
     localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ videosIds: allVideosIds, updatedTime: Date.now() }));
 
-    return data;
+    return allVideos;
   } catch (error) {
-    console.error("Error fetching data in FetchVideosIds:", error);
-    return savedVideos || [];
+    console.error("Error fetching data in fetchVideosIds:", error);
+    return (await get(`pl=${playlistId}`)) || [];
   }
 }

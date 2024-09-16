@@ -11,11 +11,15 @@ export default async function loadPlaylist(Player: YouTubePlayer, videoIds: stri
       const state = await Player.getPlayerState();
 
       if (state === 5) {
-        await Player.loadPlaylist(videosArr, index, 0.1);
+        await Player.loadPlaylist(videosArr, index);
       } else {
-        setTimeout(loadPlaylist, 500); // Retry loading after a delay
+        setTimeout(() => {
+          loadPlaylist();
+        }, 1000);
       }
     };
     await loadPlaylist();
+
+    return true;
   }, 500);
 }

@@ -13,7 +13,7 @@ export default function ModalDelete({ onClose, content }: ModalSettingsProps) {
       <>
         {/* Modal */}
         <div className="fixed inset-0 z-50 mx-auto flex w-[50%] items-center justify-center">
-          <div className="flex flex-col gap-2 rounded-lg border-2 border-neutral-700 bg-zinc-300 p-4 py-7 shadow-lg dark:border-neutral-700 dark:bg-black">
+          <div className="flex flex-col gap-2 rounded-lg border border-neutral-700 bg-zinc-300 p-4 py-7 shadow-lg dark:border-neutral-700 dark:bg-black">
             {content}
           </div>
         </div>
