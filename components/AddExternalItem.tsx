@@ -76,8 +76,7 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
             return null;
           }
 
-          const playlistData = await getPlaylistsData(id);
-          const videosData = await fetchVideosIds(id);
+          const [playlistData, videosData] = await Promise.all([getPlaylistsData(id), fetchVideosIds(id)]);
 
           await set(playlistKey, videosData);
 
@@ -120,8 +119,7 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
             return null;
           }
 
-          const playlistData = await getPlaylistsData(channelId);
-          const videosData = await fetchVideosIds(channelId, undefined, true);
+          const [playlistData, videosData] = await Promise.all([getPlaylistsData(channelId), fetchVideosIds(channelId, undefined, true)]);
 
           await set(playlistKey, videosData);
 

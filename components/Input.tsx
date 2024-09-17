@@ -3,12 +3,12 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Items } from "@/types";
 import { toastError } from "@/utils/toastStyles";
+import { set } from "idb-keyval";
 import getChannelId from "@/utils/createChannelPlaylist";
 import toast from "react-hot-toast";
 import getVideosData from "@/utils/getVideosData";
 import getPlaylistsData from "@/utils/getPlaylistsData";
 import fetchVideosIds from "@/utils/fetchVideosIds";
-import { set } from "idb-keyval";
 import Search from "@/assets/icons/Search";
 import Spin from "@/assets/icons/Spin";
 
@@ -94,8 +94,7 @@ export default function Input() {
           return;
         }
 
-        const playlistData = await getPlaylistsData(id);
-        const videosData = await fetchVideosIds(id);
+        const [playlistData, videosData] = await Promise.all([getPlaylistsData(id), fetchVideosIds(id)]);
 
         await set(playlistKey, videosData);
 
@@ -138,8 +137,7 @@ export default function Input() {
           return null;
         }
 
-        const playlistData = await getPlaylistsData(channelId);
-        const videosData = await fetchVideosIds(channelId, undefined, true);
+        const [playlistData, videosData] = await Promise.all([getPlaylistsData(channelId), fetchVideosIds(channelId, undefined, true)]);
 
         await set(playlistKey, videosData);
         if (playlistData?.items?.length) {
