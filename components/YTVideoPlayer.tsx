@@ -7,13 +7,12 @@ import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 import seekTime from "@/utils/seekTime";
 import LogoButton from "./LogoButton";
 import saveVideoProgress from "@/utils/saveVideoProgress";
-import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
 import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Description from "./Description";
 import Tooltip from "./ToolTip";
-import { del, get, set } from "idb-keyval";
+import { del, get } from "idb-keyval";
 import Link from "next/link";
 import Spin from "@/assets/icons/Spin";
 import Rewind10 from "@/assets/icons/Rewind10";
@@ -137,19 +136,21 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     });
   }
 
-  async function openModal() {
-    videoPlayerRef?.current?.internalPlayer.pauseVideo();
-    isPaused.current = (await videoPlayerRef?.current?.internalPlayer.getPlayerState()) === 2;
-    setIsModalOpen(!isModalOpen);
+  async function isVideoPaused() {
+    const playerState = await videoPlayerRef.current?.internalPlayer.getPlayerState();
+    return playerState === 2;
   }
 
-  // called when cancel or backdrop is clicked
-  function onCancel() {
-    if (!isPaused.current) {
-      videoPlayerRef?.current?.internalPlayer.playVideo();
+  async function handleVideoPlayback(mode: "play" | "pause") {
+    const playerState = await videoPlayerRef.current?.internalPlayer.getPlayerState();
+
+    if (mode === "play" && playerState === 2) {
+      videoPlayerRef.current?.internalPlayer.playVideo();
       isPaused.current = false;
+    } else if (mode === "pause" && playerState === 1) {
+      videoPlayerRef.current?.internalPlayer.pauseVideo();
+      isPaused.current = true;
     }
-    setIsModalOpen(false);
   }
 
   let initialTime = 0;
@@ -234,12 +235,17 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                 </Link>
               </Tooltip>
               <Tooltip text="Delete Video">
-                <span
-                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
-                  onClick={openModal}
-                >
-                  <Close className="h-8 w-8" />
-                </span>
+                <ModalDelete
+                  icon={<Close className="h-8 w-8" />}
+                  deleteText="Delete"
+                  type="Video"
+                  id={videoId}
+                  title={videoData?.title ?? ""}
+                  onDelete={onDelete}
+                  isLoading={isModalOpen}
+                  handleVideoPlayback={handleVideoPlayback}
+                  isVideoPaused={isVideoPaused}
+                />
               </Tooltip>
             </div>
             {/* Title */}
@@ -251,14 +257,6 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
             {videoData?.description && <Description description={videoData?.description} className="pb-2 pt-5 2xl:pt-4" />}
           </div>
-        )}
-        {isModalOpen && (
-          <ModalDelete
-            onClose={onCancel}
-            content={
-              <DeleteModalContent deleteText="Delete" type="Video" id={videoId} title={videoData?.title ?? ""} openModal={onCancel} onDelete={onDelete} />
-            }
-          />
         )}
       </div>
     </>

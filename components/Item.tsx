@@ -3,8 +3,6 @@ import { useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import DeleteModalContent from "./modals/DeleteModalContent";
-import ModalDelete from "./modals/ModalDelete";
 import type { Items, Thumbnails } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -15,6 +13,7 @@ import { Roboto } from "next/font/google";
 import Delete from "@/assets/icons/Delete";
 import reduceStringLength from "@/utils/reduceStringLength";
 import convertTimeToSeconds from "@/utils/convertTimeToSeconds";
+import ItemModalDelete from "./modals/ItemModalDelete";
 
 const font = Roboto({ subsets: ["latin"], weight: ["400", "700"] });
 
@@ -44,7 +43,9 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
   const storedItem = localStorage.getItem(`v=${id}`);
   const currentTime = useRef(storedItem ? JSON.parse(storedItem) : null);
 
-  async function onDelete(id: string) {
+  async function onDelete(id?: string) {
+    if (!id) return;
+
     if (type === "Playlist") {
       localStorage.removeItem(`pl=${id}`);
       localStorage.removeItem(`plVideos=${id}`);
@@ -105,15 +106,25 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
     <div className={`mt-2 flex flex-col items-center outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
       <div className="relative flex cursor-default flex-col items-center justify-center overflow-hidden rounded-md rounded-tr-[0.2rem] md:rounded-[0.6rem]">
         <div className="group flex aspect-video w-[50vw] select-none items-center justify-center overflow-hidden rounded-md rounded-tr-[0.2rem] xs:w-[35vw] md:w-[26vw] md:rounded-[0.8rem] lg:w-[20vw] 2xl:w-[16.5vw]">
-          <button
-            onClick={openModal}
-            className={`peer absolute right-0 top-0 z-10 rounded-bl-md bg-neutral-800 p-1 text-neutral-400 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-100 ${
-              (isDragging || isSorting) && "hidden opacity-0"
-            }}`}
-            aria-label="Delete Button"
-          >
-            <Delete className="h-4 w-4" />
-          </button>
+          <ItemModalDelete
+            button={
+              <button
+                onClick={openModal}
+                className={`peer absolute right-0 top-0 z-10 rounded-bl-md bg-neutral-800 p-1 text-neutral-400 opacity-0 hover:bg-neutral-900 hover:text-red-500 group-hover:opacity-100 group-hover:transition-opacity group-hover:duration-100 ${
+                  (isDragging || isSorting) && "hidden opacity-0"
+                }}`}
+                aria-label="Delete Button"
+              >
+                <Delete className="h-4 w-4" />
+              </button>
+            }
+            deleteText="Delete"
+            type={type}
+            id={id}
+            title={title}
+            isLoading={isPending}
+            onDelete={onDelete}
+          />
           <div className="transition duration-300 hover:scale-105 peer-hover:scale-105" {...attributes} {...listeners}>
             <LinkWrapper href={url} className="cursor-pointer">
               <Image
@@ -151,16 +162,6 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
           {type === "Video" && channel && ` - ${channel}`}
         </Link>
       </h2>
-
-      {isModalOpen && (
-        <ModalDelete
-          onClose={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-            e.stopPropagation();
-            setIsModalOpen(false);
-          }}
-          content={<DeleteModalContent deleteText="Delete" type={type} id={id} title={title} isLoading={isPending} openModal={openModal} onDelete={onDelete} />}
-        />
-      )}
     </div>
   );
 }

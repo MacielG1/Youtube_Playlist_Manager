@@ -14,7 +14,6 @@ import seekTime from "@/utils/seekTime";
 import LogoButton from "./LogoButton";
 import savePlaylistsProgress from "@/utils/savePlaylistProgress";
 import loadPlaylist from "@/utils/loadPlaylist";
-import DeleteModalContent from "./modals/DeleteModalContent";
 import ModalDelete from "./modals/ModalDelete";
 import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
@@ -23,7 +22,6 @@ import Tooltip from "./ToolTip";
 import VideosListSidebar from "./VideosListSidebar";
 import Link from "next/link";
 import Spin from "@/assets/icons/Spin";
-import Reset from "@/assets/icons/Reset";
 import Rewind10 from "@/assets/icons/Rewind10";
 import PointerLeft from "@/assets/icons/PointerLeft";
 import PointerRight from "@/assets/icons/PointerRight";
@@ -33,14 +31,13 @@ import Close from "@/assets/icons/Close";
 import Shuffle from "@/assets/icons/Shuffle";
 import VideoDate from "./VideoDate";
 import RemoveVideo from "@/assets/icons/RemoveVideo";
+import ResetPlaylistModal from "./modals/ResetPlaylistModal";
 
 export default function YoutubePlayer({ params }: { params: { list: string; title: string } }) {
   const [currentVideoIndex, setCurrentVideoIndex] = useState<number | null>(null);
   const [currentVideoTitle, setCurrentVideoTitle] = useState("");
   const [isShuffled, setIsShuffled] = useState(false);
-
-  const [isDeletePlaylistModalOpen, setIsDeletePlaylistModalOpen] = useState(false);
-  const [isDeleteVideoModalOpen, setIsDeleteVideoModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
@@ -74,9 +71,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     isChannel = JSON.parse(localStorage.getItem(item) || "[]")?.isChannel || false;
     const savedData = localStorage.getItem(`plVideos=${playlistId}`);
 
-    if (savedData) {
-      plVideos = JSON.parse(savedData);
-    }
+    if (savedData) plVideos = JSON.parse(savedData);
   }
 
   let playlistInfo = { currentItem: 0, initialTime: 0, currentPage: 0, isChannel: false };
@@ -90,7 +85,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   plLengthRef.current = videosIdsRef.current.length;
 
   let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 10 * 60 * 60 * 1000; // 10 hours
-  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // 20s to test
+  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 30000; // 30s to test
 
   useEffect(() => {
     async function run() {
@@ -99,10 +94,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
         console.log("Fetching new videos");
         const data = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
 
-        if (!data) {
-          console.log("No data");
-          return;
-        }
+        if (!data) return console.log("No data");
 
         plLengthRef.current = data.length;
         await set(`pl=${playlistId}`, data);
@@ -166,6 +158,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     if (e.data == 150) {
       const savedData = JSON.parse(localStorage.getItem(item) || "[]");
       const currentIndex = await e.target.getPlaylistIndex();
+
       const index = currentIndex + 1 + (savedData.currentPage - 1) * 200;
 
       setCurrentVideoIndex(index);
@@ -175,9 +168,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
         // window.location.reload();
       }
     }
-    if (e.data === 2) {
-      // window.location.reload();
-    }
+    // if (e.data === 2) window.location.reload();
   }
 
   async function onStateChange(e: YouTubeEvent) {
@@ -256,11 +247,40 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     await loadPlaylist(player, videosIdsRef.current, pageRef.current, paginatedIndex);
   }
 
-  async function resetPlaylist() {
-    pageRef.current = 1;
-    await loadPlaylist(PlaylistPlayerRef.current?.getInternalPlayer(), videosIdsRef.current, pageRef.current, 0);
-    await savePlaylistsProgress(PlaylistPlayerRef.current?.getInternalPlayer(), playlistId, 1);
-    setCurrentVideoIndex(1);
+  async function resetPlaylist(includeRemovedVideos = false) {
+    try {
+      pageRef.current = 1;
+
+      if (includeRemovedVideos) {
+        handleVideoPlayback("pause");
+        setIsLoading(true);
+        await del(`plRemoved=${playlistId}`);
+
+        const newlyFetchedData = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
+
+        const videosIds = newlyFetchedData.map((video: PlaylistAPI) => video.id);
+        plLengthRef.current = newlyFetchedData.length;
+        videosIdsRef.current = videosIds;
+
+        await set(`pl=${playlistId}`, newlyFetchedData);
+
+        localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ videosIds, updatedTime: Date.now() }));
+      } else {
+        const pl = await get(`pl=${playlistId}`);
+        if (!pl) return;
+
+        videosIdsRef.current = pl.map((video: PlaylistAPI) => video.id);
+        plLengthRef.current = videosIdsRef.current.length;
+      }
+
+      await loadPlaylist(PlaylistPlayerRef.current?.getInternalPlayer(), videosIdsRef.current, pageRef.current, 0);
+      await savePlaylistsProgress(PlaylistPlayerRef.current?.getInternalPlayer(), playlistId, 1);
+      setCurrentVideoIndex(1);
+    } catch (e) {
+      console.log("error", e);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   async function removeVideo() {
@@ -315,7 +335,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       }, 2000);
     }
     setVideosList(newPl);
-    onCancel("Video");
+    handleVideoPlayback("pause");
 
     setTimeout(() => {
       setIsRemoving(false);
@@ -341,23 +361,21 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     });
   }
 
-  async function openModal(type: "Playlist" | "Video") {
-    PlaylistPlayerRef.current?.internalPlayer?.pauseVideo();
-    isPaused.current = (await PlaylistPlayerRef?.current?.internalPlayer.getPlayerState()) === 2;
-
-    if (type === "Playlist") setIsDeletePlaylistModalOpen(!isDeletePlaylistModalOpen);
-    else setIsDeleteVideoModalOpen(!isDeleteVideoModalOpen);
+  async function isVideoPaused() {
+    const playerState = await PlaylistPlayerRef.current?.internalPlayer.getPlayerState();
+    return playerState === 2;
   }
 
-  // called when cancel or backdrop is clicked
-  function onCancel(type: "Playlist" | "Video") {
-    if (!isPaused.current) {
+  async function handleVideoPlayback(mode: "play" | "pause") {
+    const playerState = await PlaylistPlayerRef.current?.internalPlayer.getPlayerState();
+
+    if (mode === "play" && playerState === 2) {
       PlaylistPlayerRef.current?.internalPlayer.playVideo();
       isPaused.current = false;
+    } else if (mode === "pause" && playerState === 1) {
+      PlaylistPlayerRef.current?.internalPlayer.pauseVideo();
+      isPaused.current = true;
     }
-
-    if (type === "Playlist") setIsDeletePlaylistModalOpen(false);
-    else setIsDeleteVideoModalOpen(false);
   }
 
   async function onShuffle() {
@@ -413,6 +431,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }, []);
 
   plOptions.playerVars.playlist = getVideosSlice(videosIdsRef.current, pageRef.current).join(",");
+
   let playlistTitle = reduceStringSize(params.title, 100);
 
   const isSmaller = useMediaQuery("(max-width: 1280px)");
@@ -429,7 +448,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       <div className="flex flex-col items-center justify-center pt-12">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:max-w-[62vw] xl:pt-0 2xl:max-w-[70vw]">
           <div className="relative w-full overflow-auto pb-[56.25%]">
-            {!plLengthRef.current && (
+            {(!plLengthRef.current || isLoading) && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
                 <Spin className="h-7 w-7 animate-spin text-indigo-500" />
                 <span className="sr-only">Loading...</span>
@@ -445,7 +464,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
               onError={onError}
               onStateChange={onStateChange}
               onPlaybackRateChange={onSpeedChange}
-              className={`absolute left-0 right-0 top-0 h-full w-full border-none ${!plLengthRef.current && "invisible"}`}
+              className={`absolute left-0 right-0 top-0 h-full w-full border-none ${(!plLengthRef.current || isLoading) && "invisible"}`}
             />
           </div>
 
@@ -455,12 +474,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
           <div className="flex max-w-[80vw] flex-col pt-1 md:max-w-[60vw] 2xl:max-w-[65vw] 2xl:pt-2">
             <div className="flex justify-center gap-1 py-2 max-md:flex-wrap xs:gap-3 sm:py-0">
               <Tooltip text="Restart Playlist">
-                <button
-                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                  onClick={resetPlaylist}
-                >
-                  <Reset className="h-8 w-8" />
-                </button>
+                <ResetPlaylistModal resetPlaylist={resetPlaylist} isVideoPaused={isVideoPaused} handleVideoPlayback={handleVideoPlayback} />
               </Tooltip>
               <Tooltip text="Rewind 10s">
                 <button
@@ -504,13 +518,15 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                 </Link>
               </Tooltip>
               <Tooltip text="Remove Video from Playlist">
-                <button
-                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                  onClick={() => openModal("Video")}
-                  // onClick={removeVideo}
-                >
-                  <RemoveVideo className={`h-8 w-8 py-[0.175rem]`} />
-                </button>
+                <ModalDelete
+                  icon={<RemoveVideo className={`h-8 w-8 py-[0.175rem]`} />}
+                  deleteText="Remove"
+                  type="Video"
+                  title={currentVideoTitle}
+                  onDelete={removeVideo}
+                  handleVideoPlayback={handleVideoPlayback}
+                  isVideoPaused={isVideoPaused}
+                />
               </Tooltip>
 
               <Tooltip text={isShuffled ? "Unshuffle" : "Shuffle"}>
@@ -523,20 +539,23 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
               </Tooltip>
 
               <Tooltip text="Delete Playlist">
-                <button
-                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-red-500 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-red-500"
-                  onClick={() => openModal("Playlist")}
-                >
-                  <Close className="h-8 w-8" />
-                </button>
+                <ModalDelete
+                  icon={<Close className="h-8 w-8" />}
+                  deleteText="Remove"
+                  type="Playlist"
+                  title={currentVideoTitle}
+                  onDelete={onDelete}
+                  handleVideoPlayback={handleVideoPlayback}
+                  isVideoPaused={isVideoPaused}
+                />
               </Tooltip>
 
               <p className="min-w-[4rem] whitespace-nowrap px-1 text-[1.35rem] text-neutral-600 dark:text-[#818386]">
-                {currentVideoIndex && plLengthRef.current && (
+                {currentVideoIndex && plLengthRef.current && !isNaN(plLengthRef.current) ? (
                   <span>
                     {currentVideoIndex} / {plLengthRef.current}
                   </span>
-                )}
+                ) : null}
               </p>
             </div>
 
@@ -554,37 +573,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
             <div>{isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} />}</div>
           </div>
-        )}
-        {isDeletePlaylistModalOpen && (
-          <ModalDelete
-            onClose={() => onCancel("Playlist")}
-            content={
-              <DeleteModalContent
-                deleteText="Delete"
-                type="Playlist"
-                id={playlistId}
-                title={params.title}
-                openModal={() => onCancel("Playlist")}
-                onDelete={onDelete}
-              />
-            }
-          />
-        )}
-
-        {isDeleteVideoModalOpen && (
-          <ModalDelete
-            onClose={() => {}}
-            content={
-              <DeleteModalContent
-                deleteText="Remove"
-                type="Video"
-                id={currentVideoId?.current.toString() || ""}
-                title={currentVideoTitle}
-                openModal={() => onCancel("Video")}
-                onDelete={removeVideo}
-              />
-            }
-          />
         )}
       </div>
     </>
