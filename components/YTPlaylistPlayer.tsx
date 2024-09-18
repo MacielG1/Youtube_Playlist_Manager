@@ -18,7 +18,6 @@ import ModalDelete from "./modals/ModalDelete";
 import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Description from "./Description";
-import Tooltip from "./ToolTip";
 import VideosListSidebar from "./VideosListSidebar";
 import Link from "next/link";
 import Spin from "@/assets/icons/Spin";
@@ -27,11 +26,12 @@ import PointerLeft from "@/assets/icons/PointerLeft";
 import PointerRight from "@/assets/icons/PointerRight";
 import Skip10 from "@/assets/icons/Skip10";
 import Youtube from "@/assets/icons/Youtube";
-import Close from "@/assets/icons/Close";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "./ToolTip";
 import Shuffle from "@/assets/icons/Shuffle";
 import VideoDate from "./VideoDate";
 import RemoveVideo from "@/assets/icons/RemoveVideo";
 import ResetPlaylistModal from "./modals/ResetPlaylistModal";
+import Close from "@/assets/icons/Close";
 
 export default function YoutubePlayer({ params }: { params: { list: string; title: string } }) {
   const [currentVideoIndex, setCurrentVideoIndex] = useState<number | null>(null);
@@ -85,11 +85,12 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   plLengthRef.current = videosIdsRef.current.length;
 
   let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 10 * 60 * 60 * 1000; // 10 hours
-  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 30000; // 30s to test
+  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // 30s to test
 
   useEffect(() => {
     async function run() {
       const isEmpty = !videosIdsRef.current.length;
+
       if (isEmpty || olderThan1day) {
         console.log("Fetching new videos");
         const data = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
@@ -261,6 +262,8 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
         const videosIds = newlyFetchedData.map((video: PlaylistAPI) => video.id);
         plLengthRef.current = newlyFetchedData.length;
         videosIdsRef.current = videosIds;
+
+        setVideosList(newlyFetchedData);
 
         await set(`pl=${playlistId}`, newlyFetchedData);
 
@@ -473,83 +476,115 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
         {!!plLengthRef.current && (
           <div className="flex max-w-[80vw] flex-col pt-1 md:max-w-[60vw] 2xl:max-w-[65vw] 2xl:pt-2">
             <div className="flex justify-center gap-1 py-2 max-md:flex-wrap xs:gap-3 sm:py-0">
-              <Tooltip text="Restart Playlist">
-                <ResetPlaylistModal resetPlaylist={resetPlaylist} isVideoPaused={isVideoPaused} handleVideoPlayback={handleVideoPlayback} />
-              </Tooltip>
-              <Tooltip text="Rewind 10s">
-                <button
-                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                  onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, -10)}
-                >
-                  <Rewind10 className="h-8 w-8" />
-                </button>
-              </Tooltip>
-              <Tooltip text="Previous Video">
-                <button
-                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                  onClick={previousVideo}
-                >
-                  <PointerLeft className="h-8 w-8" />
-                </button>
-              </Tooltip>
-              <Tooltip text="Next Video">
-                <button
-                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                  onClick={nextVideo}
-                >
-                  <PointerRight className="h-8 w-8" />
-                </button>
-              </Tooltip>
-              <Tooltip text="Skip 10s">
-                <button
-                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                  onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, 10)}
-                >
-                  <Skip10 className="h-8 w-8" />
-                </button>
-              </Tooltip>
-              <Tooltip text="Open on Youtube">
-                <Link
-                  href={`https://www.youtube.com/watch?v=${currentVideoId.current}&list=${playlistId}&t=${Math.floor(currentTime)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Youtube className="mx-[0.3rem] h-8 w-8 fill-neutral-200 px-[0.035rem] pb-[0.05rem] text-neutral-600 transition duration-300 hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
-                </Link>
-              </Tooltip>
-              <Tooltip text="Remove Video from Playlist">
-                <ModalDelete
-                  icon={<RemoveVideo className={`h-8 w-8 py-[0.175rem]`} />}
-                  deleteText="Remove"
-                  type="Video"
-                  title={currentVideoTitle}
-                  onDelete={removeVideo}
-                  handleVideoPlayback={handleVideoPlayback}
-                  isVideoPaused={isVideoPaused}
-                />
-              </Tooltip>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <ResetPlaylistModal resetPlaylist={resetPlaylist} isVideoPaused={isVideoPaused} handleVideoPlayback={handleVideoPlayback} />
+                  </TooltipTrigger>
+                  <TooltipContent>Restart Playlist</TooltipContent>
+                </Tooltip>
 
-              <Tooltip text={isShuffled ? "Unshuffle" : "Shuffle"}>
-                <button
-                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                  onClick={isShuffled ? unShuffle : onShuffle}
-                >
-                  <Shuffle className={`h-8 w-8 py-[0.175rem] ${isShuffled && "text-indigo-500"}`} />
-                </button>
-              </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <button
+                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, -10)}
+                    >
+                      <Rewind10 className="h-8 w-8" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Rewind 10s</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <button
+                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      onClick={previousVideo}
+                    >
+                      <PointerLeft className="h-8 w-8" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Previous Video</TooltipContent>
+                </Tooltip>
 
-              <Tooltip text="Delete Playlist">
-                <ModalDelete
-                  icon={<Close className="h-8 w-8" />}
-                  deleteText="Remove"
-                  type="Playlist"
-                  title={currentVideoTitle}
-                  onDelete={onDelete}
-                  handleVideoPlayback={handleVideoPlayback}
-                  isVideoPaused={isVideoPaused}
-                />
-              </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <button
+                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      onClick={nextVideo}
+                    >
+                      <PointerRight className="h-8 w-8" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Next Video</TooltipContent>
+                </Tooltip>
 
+                <Tooltip>
+                  <TooltipTrigger>
+                    <button
+                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, 10)}
+                    >
+                      <Skip10 className="h-8 w-8" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Skip 10s</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Link
+                      href={`https://www.youtube.com/watch?v=${currentVideoId.current}&list=${playlistId}&t=${Math.floor(currentTime)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Youtube className="mx-[0.3rem] mb-[0.4rem] h-8 w-8 fill-neutral-200 px-[0.038rem] text-neutral-600 transition duration-300 hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>Open on Youtube</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger>
+                    <ModalDelete
+                      icon={<RemoveVideo className={`h-8 w-8 py-[0.175rem]`} />}
+                      deleteText="Remove"
+                      type="Video"
+                      title={currentVideoTitle}
+                      onDelete={removeVideo}
+                      handleVideoPlayback={handleVideoPlayback}
+                      isVideoPaused={isVideoPaused}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>Remove Video from Playlist</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <button
+                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      onClick={isShuffled ? unShuffle : onShuffle}
+                    >
+                      <Shuffle className={`h-8 w-8 py-[0.175rem] ${isShuffled && "text-indigo-500"}`} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>{isShuffled ? "Unshuffle" : "Shuffle"}</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger>
+                    <ModalDelete
+                      icon={<Close className="h-8 w-8" />}
+                      deleteText="Remove"
+                      type="Playlist"
+                      title={currentVideoTitle}
+                      onDelete={onDelete}
+                      handleVideoPlayback={handleVideoPlayback}
+                      isVideoPaused={isVideoPaused}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>Delete Playlist</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
               <p className="min-w-[4rem] whitespace-nowrap px-1 text-[1.35rem] text-neutral-600 dark:text-[#818386]">
                 {currentVideoIndex && plLengthRef.current && !isNaN(plLengthRef.current) ? (
                   <span>

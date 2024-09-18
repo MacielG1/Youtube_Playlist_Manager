@@ -11,7 +11,6 @@ import ModalDelete from "./modals/ModalDelete";
 import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Description from "./Description";
-import Tooltip from "./ToolTip";
 import { del, get } from "idb-keyval";
 import Link from "next/link";
 import Spin from "@/assets/icons/Spin";
@@ -22,6 +21,7 @@ import Close from "@/assets/icons/Close";
 import { useAudioToggle } from "@/providers/SettingsProvider";
 import SkipBack from "@/assets/icons/skipBack";
 import VideoDate from "./VideoDate";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "./ToolTip";
 
 type Params = {
   v: string;
@@ -205,48 +205,69 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         {isLoaded && (
           <div className="flex max-w-[80vw] flex-col">
             <div className="flex justify-center gap-1 pt-1 xs:gap-3">
-              <Tooltip text="Restart">
-                <span
-                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                  onClick={() => videoPlayerRef?.current?.internalPlayer.seekTo(0)}
-                >
-                  <SkipBack className="h-8 w-8" />
-                </span>
-              </Tooltip>
-              <Tooltip text="Rewind 10s">
-                <span
-                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                  onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}
-                >
-                  <Rewind10 className="h-8 w-8" />
-                </span>
-              </Tooltip>
-              <Tooltip text="Skip 10s">
-                <span
-                  className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-                  onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, 10)}
-                >
-                  <Skip10 className="h-8 w-8" />
-                </span>
-              </Tooltip>
-              <Tooltip text="Open on Youtube">
-                <Link href={`https://www.youtube.com/watch?v=${videoId}&t=${Math.floor(currentTime)}`} target="_blank" rel="noopener noreferrer">
-                  <Youtube className="mx-[0.15rem] h-8 w-8 fill-neutral-200 px-[0.035rem] pb-[0.05rem] text-neutral-600 transition duration-300 hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
-                </Link>
-              </Tooltip>
-              <Tooltip text="Delete Video">
-                <ModalDelete
-                  icon={<Close className="h-8 w-8" />}
-                  deleteText="Delete"
-                  type="Video"
-                  id={videoId}
-                  title={videoData?.title ?? ""}
-                  onDelete={onDelete}
-                  isLoading={isModalOpen}
-                  handleVideoPlayback={handleVideoPlayback}
-                  isVideoPaused={isVideoPaused}
-                />
-              </Tooltip>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <span
+                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      onClick={() => videoPlayerRef?.current?.internalPlayer.seekTo(0)}
+                    >
+                      <SkipBack className="h-8 w-8" />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>Restart</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger>
+                    <span
+                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}
+                    >
+                      <Rewind10 className="h-8 w-8" />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>Rewind 10s</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger>
+                    <span
+                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, 10)}
+                    >
+                      <Skip10 className="h-8 w-8" />
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent>Skip 10s</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Link href={`https://www.youtube.com/watch?v=${videoId}&t=${Math.floor(currentTime)}`} target="_blank" rel="noopener noreferrer">
+                      <Youtube className="mx-[0.15rem] h-8 w-8 fill-neutral-200 px-[0.035rem] pb-[0.05rem] text-neutral-600 transition duration-300 hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>Open on Youtube</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger>
+                    <ModalDelete
+                      icon={<Close className="h-8 w-8" />}
+                      deleteText="Delete"
+                      type="Video"
+                      id={videoId}
+                      title={videoData?.title ?? ""}
+                      onDelete={onDelete}
+                      isLoading={isModalOpen}
+                      handleVideoPlayback={handleVideoPlayback}
+                      isVideoPaused={isVideoPaused}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>Delete Video</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
             {/* Title */}
             <span className="mx-auto my-1 break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">
