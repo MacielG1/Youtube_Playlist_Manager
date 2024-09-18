@@ -7,7 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 type Props = {
   setItems: React.Dispatch<React.SetStateAction<Playlist[]>>;
   items: Playlist[];
-  title: string;
+  title: "Playlist" | "Video";
   otherTypeVideos: Playlist[];
 };
 

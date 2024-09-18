@@ -1,5 +1,7 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/utils/cn";
+import { Slot } from "@radix-ui/react-slot";
+import { forwardRef } from "react";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center rounded-md font-medium ring-offset-neutral-300 dark:ring-offset-neutral-600 transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
@@ -26,17 +28,14 @@ const buttonVariants = cva(
   },
 );
 
-export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  ref?: React.ForwardedRef<HTMLButtonElement>;
-  children: React.ReactNode;
-  variant?: VariantProps<typeof buttonVariants>["variant"];
-  size?: VariantProps<typeof buttonVariants>["size"];
-};
-
-export default function Button({ variant, size, className, ref, children, ...props }: ButtonProps) {
-  return (
-    <button className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props}>
-      {children}
-    </button>
-  );
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>, VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
 }
+
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(({ className, variant, size, asChild = false, ...props }, ref) => {
+  const Comp = asChild ? Slot : "button";
+  return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
+});
+Button.displayName = "Button";
+
+export default Button;

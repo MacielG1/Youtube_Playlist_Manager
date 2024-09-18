@@ -3,28 +3,19 @@ import { useState } from "react";
 import ModalSettings from "../modals/ModalSettings";
 import ImportExportTimers from "./ImportExportTimers";
 import ThemeToggler from "./ThemeToggler";
-import DeleteAllDataContent from "../modals/DeleteAllDataContent";
 import HowItWorks from "./HowItWorks";
-import ModalDelete from "../modals/ModalDelete";
-import DeleteAllBtn from "./DeleteAllBtn";
 import { usePathname } from "next/navigation";
 import Settings from "@/assets/icons/Settings";
 import ToggleMute from "./ToggleMute";
 import SupportButton from "./SupportButton";
+import DeleteAllDataModal from "../modals/DeleteAllDataModal";
 
 export default function SettingsMenu() {
   let [isOpen, setIsOpen] = useState(false);
-  let [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const pathname = usePathname();
 
-  function openDeleteModal() {
-    setIsDeleteModalOpen(true);
-    setIsOpen(false);
-  }
-
-  function closeModals() {
-    setIsDeleteModalOpen(false);
+  function closeSettingsModal() {
     setIsOpen(false);
   }
 
@@ -37,7 +28,9 @@ export default function SettingsMenu() {
       <ThemeToggler />
       <ImportExportTimers setModalOpen={setIsOpen} />
       <HowItWorks setModalOpen={setIsOpen} />
-      <DeleteAllBtn openDeleteModal={openDeleteModal} />
+      {/* <DeleteAllBtn openDeleteModal={openDeleteModal} /> */}
+
+      <DeleteAllDataModal closeSettingsModal={closeSettingsModal} />
       <SupportButton />
       <ToggleMute />
     </div>
@@ -51,7 +44,7 @@ export default function SettingsMenu() {
       </button>
 
       {isOpen && <ModalSettings onClose={ToggleModal} content={content} />}
-      {isDeleteModalOpen && <ModalDelete onClose={closeModals} content={<DeleteAllDataContent closeModals={closeModals} />} />}
+      {/* {isDeleteModalOpen && <ModalDelete onClose={closeModals} content={<DeleteAllDataContent closeModals={closeModals} />} />} */}
     </div>
   );
 }
