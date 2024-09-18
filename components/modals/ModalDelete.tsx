@@ -4,6 +4,7 @@ import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "
 type ModalSettingsProps = {
   icon: React.ReactNode;
   deleteText: string;
+  extraText?: string;
   type: "Playlist" | "Video";
   title: string;
   id?: string;
@@ -19,6 +20,7 @@ export default function ModalDelete({
   type,
   title,
   id,
+  extraText,
   handleVideoPlayback,
   isVideoPaused,
   onDelete,
@@ -58,7 +60,7 @@ export default function ModalDelete({
       <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
         <div className="mx-auto flex max-w-[18rem] flex-col items-center justify-center gap-4 px-8 pb-6 pt-2 xs:max-w-sm sm:max-w-lg md:min-w-[18rem] lg:min-w-[25rem]">
           <DialogTitle className="text-lg font-semibold tracking-wide text-red-600 dark:text-red-500 sm:text-2xl">
-            {deleteText} {type}
+            {deleteText} {type} {extraText}
           </DialogTitle>
           <h3 className="max-h-[50vh] max-w-full overflow-auto break-words pt-2 text-center text-sm font-semibold text-neutral-800 dark:text-neutral-400 sm:text-lg">
             {title}

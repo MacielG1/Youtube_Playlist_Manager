@@ -550,6 +550,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                       icon={<RemoveVideo className={`h-8 w-8 py-[0.175rem]`} />}
                       deleteText="Remove"
                       type="Video"
+                      extraText="From Playlist"
                       title={currentVideoTitle}
                       onDelete={removeVideo}
                       handleVideoPlayback={handleVideoPlayback}
