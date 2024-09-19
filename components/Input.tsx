@@ -93,7 +93,6 @@ export default function Input() {
           setAddedURL("");
           return;
         }
-
         const [playlistData, videosData] = await Promise.all([getPlaylistsData(id), fetchVideosIds(id)]);
 
         await set(playlistKey, videosData);

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-export const runtime = "edge";
+
 const API_KEY = process.env.YOUTUBE_API;
 
 type Params = {

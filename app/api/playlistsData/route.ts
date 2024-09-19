@@ -3,8 +3,6 @@ import { NextResponse } from "next/server";
 
 const API_KEY = process.env.YOUTUBE_API;
 
-export const runtime = "edge";
-
 export async function POST(req: Request): Promise<NextResponse> {
   const { playlistsIds } = await req.json();
 

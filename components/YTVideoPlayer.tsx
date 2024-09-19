@@ -31,10 +31,6 @@ type Params = {
 export default function YTVideoPlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [description, setDescription] = useState<string | null>(null);
-  // const [publishedAt, setPublishedAt] = useState<string | null>(null);
-  // const [title, setTitle] = useState<string>("");
-  // const [channel, setChannel] = useState<string>("");
 
   const [videoData, setVideoData] = useState<Video | null>(null);
   const { isAudioMuted } = useAudioToggle();
@@ -42,8 +38,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const isPaused = useRef(false); // used to resume video if it was playing when delete modal was opened
-
+  const isPaused = useRef(false);
   const videoPlayerRef = useRef<YouTube | null>(null);
   const isPlayingVideoRef = useRef<boolean | null>(false);
 
@@ -54,7 +49,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   let isBrowser = typeof window !== "undefined";
 
   useEffect(() => {
-    const player = videoPlayerRef?.current?.getInternalPlayer(); // returns the iframe video  player
+    const player = videoPlayerRef?.current?.getInternalPlayer();
 
     const timer = setInterval(() => {
       if (isPlayingVideoRef.current) {
@@ -254,7 +249,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                 <Tooltip>
                   <TooltipTrigger>
                     <ModalDelete
-                      icon={<Close className="h-8 w-8" />}
+                      icon={<Close className="mt-1.5 h-8 w-8" />}
                       deleteText="Delete"
                       type="Video"
                       id={videoId}
