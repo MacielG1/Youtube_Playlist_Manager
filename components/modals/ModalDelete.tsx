@@ -47,6 +47,12 @@ export default function ModalDelete({
     }
   }, [isOpen]);
 
+  async function handleDelete() {
+    setWasPausedByModal(false);
+    await onDelete(id);
+    setIsOpen(false);
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenModal}>
       <DialogTrigger asChild>
@@ -69,7 +75,12 @@ export default function ModalDelete({
           <div className="flex gap-3 pt-3 text-lg">
             <DialogClose asChild>
               <button
-                onClick={() => handleVideoPlayback("play")}
+                onClick={() => {
+                  if (wasPausedByModal) {
+                    handleVideoPlayback("play");
+                    setWasPausedByModal(false);
+                  }
+                }}
                 disabled={isLoading}
                 className="shadow-xs cursor-pointer rounded-xl bg-neutral-700 px-4 py-2.5 text-center text-sm font-semibold text-white ring-offset-2 ring-offset-background transition-all duration-300 hover:bg-neutral-600 hover:ring-2 hover:ring-neutral-700"
               >
@@ -78,7 +89,7 @@ export default function ModalDelete({
             </DialogClose>
             <DialogClose asChild>
               <button
-                onClick={() => onDelete(id)}
+                onClick={handleDelete}
                 disabled={isLoading}
                 className="shadow-xs cursor-pointer rounded-xl bg-red-700 px-4 py-2.5 text-center text-sm font-semibold text-white ring-offset-2 ring-offset-background transition-all duration-300 hover:bg-red-600 hover:ring-2 hover:ring-red-700"
               >

@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useEffect, useState, useMemo, use } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Items, Video } from "@/types";
@@ -30,7 +30,6 @@ type Params = {
 
 export default function YTVideoPlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [videoData, setVideoData] = useState<Video | null>(null);
   const { isAudioMuted } = useAudioToggle();
@@ -115,6 +114,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   async function onDelete() {
     isPlayingVideoRef.current = null;
+
     router.replace("/");
 
     onDeleteItems(videoId, "videos");
@@ -255,7 +255,6 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                       id={videoId}
                       title={videoData?.title ?? ""}
                       onDelete={onDelete}
-                      isLoading={isModalOpen}
                       handleVideoPlayback={handleVideoPlayback}
                       isVideoPaused={isVideoPaused}
                     />
