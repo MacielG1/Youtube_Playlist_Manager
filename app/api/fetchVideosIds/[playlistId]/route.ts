@@ -2,50 +2,45 @@ import { Playlist, PlaylistAPI } from "@/types";
 import { NextResponse } from "next/server";
 
 const API_KEY = process.env.YOUTUBE_API;
+export const runtime = "edge";
 
 type Params = {
   playlistId: string;
 };
 
 let MAX_AMOUNT_OF_PAGES = 50;
-
 export async function POST(req: Request, { params }: { params: Params }): Promise<NextResponse> {
   const playlistsToFetch = params.playlistId;
 
   if (!playlistsToFetch) return new NextResponse("No Playlist Id", { status: 404 });
 
+  let pagesCounter = 0;
   let nextPageToken = "";
-  const allVideos = [];
 
+  const allVideos = [];
   try {
-    const fetchPage = async (pageToken: string) => {
+    do {
       const res = await fetch(
-        `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistsToFetch}&maxResults=50&pageToken=${pageToken}&key=${API_KEY}`,
+        `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistsToFetch}&maxResults=50&pageToken=${nextPageToken}&key=${API_KEY}`,
       );
       if (!res.ok) {
         console.log("Error in /api/fetchVideosIds/[playlistId]", res.status, res.statusText);
         throw new Error("ERROR");
       }
-      return res.json();
-    };
 
-    let data = await fetchPage(nextPageToken);
-    allVideos.push(...data.items);
-    nextPageToken = data.nextPageToken;
+      let data = await res.json();
 
-    const fetchPromises = [];
-    let pagesCounter = 1;
+      for (let item of data.items) {
+        allVideos.push(item);
+      }
 
-    while (nextPageToken && pagesCounter < MAX_AMOUNT_OF_PAGES) {
-      fetchPromises.push(fetchPage(nextPageToken));
-      pagesCounter++;
       nextPageToken = data.nextPageToken;
-    }
+      pagesCounter++;
 
-    const results = await Promise.all(fetchPromises);
-    results.forEach((result) => {
-      allVideos.push(...result.items);
-    });
+      if (pagesCounter > MAX_AMOUNT_OF_PAGES) {
+        break;
+      }
+    } while (nextPageToken);
 
     let newData: Playlist[] = [];
 
