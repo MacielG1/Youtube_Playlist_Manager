@@ -62,8 +62,9 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   }, []);
 
   useEffect(() => {
-    if (videoPlayerRef?.current) {
-      isAudioMuted ? videoPlayerRef.current?.internalPlayer?.mute() : videoPlayerRef.current?.internalPlayer?.unMute();
+    const player = videoPlayerRef?.current?.internalPlayer;
+    if (player) {
+      isAudioMuted ? player.mute() : player.unMute();
     }
   }, [isAudioMuted]);
 

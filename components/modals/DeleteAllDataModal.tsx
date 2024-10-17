@@ -55,21 +55,17 @@ export default function DeleteAllDataModal({ closeSettingsModal }: Props) {
           </h3>
 
           <div className="flex gap-3 pt-3 text-lg">
-            <DialogClose asChild>
-              <button
-                onClick={closeSettingsModal}
-                className="shadow-xs cursor-pointer rounded-xl bg-neutral-700 px-4 py-2.5 text-center text-sm font-semibold text-white ring-offset-2 ring-offset-background transition-all duration-300 hover:bg-neutral-600 hover:ring-2 hover:ring-neutral-700"
-              >
-                Cancel
-              </button>
+            <DialogClose
+              onClick={closeSettingsModal}
+              className="shadow-xs cursor-pointer rounded-xl bg-neutral-700 px-4 py-2.5 text-center text-sm font-semibold text-white ring-offset-2 ring-offset-background transition-all duration-300 hover:bg-neutral-600 hover:ring-2 hover:ring-neutral-700"
+            >
+              Cancel
             </DialogClose>
-            <DialogClose asChild>
-              <button
-                onClick={deleteAllData}
-                className="shadow-xs cursor-pointer rounded-xl bg-red-700 px-4 py-2.5 text-center text-sm font-semibold text-white ring-offset-2 ring-offset-background transition-all duration-300 hover:bg-red-600 hover:ring-2 hover:ring-red-700"
-              >
-                Delete All
-              </button>
+            <DialogClose
+              onClick={deleteAllData}
+              className="shadow-xs cursor-pointer rounded-xl bg-red-700 px-4 py-2.5 text-center text-sm font-semibold text-white ring-offset-2 ring-offset-background transition-all duration-300 hover:bg-red-600 hover:ring-2 hover:ring-red-700"
+            >
+              Delete All
             </DialogClose>
           </div>
         </div>

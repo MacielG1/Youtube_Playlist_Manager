@@ -56,12 +56,13 @@ export default function ModalDelete({
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenModal}>
       <DialogTrigger asChild>
-        <button
+        <span
           onClick={handlePauseVideo}
           className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+          role="button"
         >
           {icon}
-        </button>
+        </span>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
         <div className="mx-auto flex max-w-[18rem] flex-col items-center justify-center gap-4 px-8 pb-6 pt-2 xs:max-w-sm sm:max-w-lg md:min-w-[18rem] lg:min-w-[25rem]">
@@ -73,28 +74,24 @@ export default function ModalDelete({
           </h3>
 
           <div className="flex gap-3 pt-3 text-lg">
-            <DialogClose asChild>
-              <button
-                onClick={() => {
-                  if (wasPausedByModal) {
-                    handleVideoPlayback("play");
-                    setWasPausedByModal(false);
-                  }
-                }}
-                disabled={isLoading}
-                className="shadow-xs cursor-pointer rounded-xl bg-neutral-700 px-4 py-2.5 text-center text-sm font-semibold text-white ring-offset-2 ring-offset-background transition-all duration-300 hover:bg-neutral-600 hover:ring-2 hover:ring-neutral-700"
-              >
-                Cancel
-              </button>
+            <DialogClose
+              onClick={() => {
+                if (wasPausedByModal) {
+                  handleVideoPlayback("play");
+                  setWasPausedByModal(false);
+                }
+              }}
+              disabled={isLoading}
+              className="shadow-xs cursor-pointer rounded-xl bg-neutral-700 px-4 py-2.5 text-center text-sm font-semibold text-white ring-offset-2 ring-offset-background transition-all duration-300 hover:bg-neutral-600 hover:ring-2 hover:ring-neutral-700"
+            >
+              Cancel
             </DialogClose>
-            <DialogClose asChild>
-              <button
-                onClick={handleDelete}
-                disabled={isLoading}
-                className="shadow-xs cursor-pointer rounded-xl bg-red-700 px-4 py-2.5 text-center text-sm font-semibold text-white ring-offset-2 ring-offset-background transition-all duration-300 hover:bg-red-600 hover:ring-2 hover:ring-red-700"
-              >
-                {deleteText}
-              </button>
+            <DialogClose
+              onClick={handleDelete}
+              disabled={isLoading}
+              className="shadow-xs cursor-pointer rounded-xl bg-red-700 px-4 py-2.5 text-center text-sm font-semibold text-white ring-offset-2 ring-offset-background transition-all duration-300 hover:bg-red-600 hover:ring-2 hover:ring-red-700"
+            >
+              {deleteText}
             </DialogClose>
           </div>
         </div>

@@ -32,22 +32,18 @@ export default function ItemModalDelete({ button, deleteText, type, title, id, o
           </h3>
 
           <div className="flex gap-3 pt-3 text-lg">
-            <DialogClose asChild>
-              <button
-                disabled={isLoading}
-                className="shadow-xs cursor-pointer rounded-xl bg-neutral-700 px-4 py-2.5 text-center text-sm font-semibold text-white ring-offset-2 ring-offset-background transition-all duration-300 hover:bg-neutral-600 hover:ring-2 hover:ring-neutral-700"
-              >
-                Cancel
-              </button>
+            <DialogClose
+              disabled={isLoading}
+              className="shadow-xs cursor-pointer rounded-xl bg-neutral-700 px-4 py-2.5 text-center text-sm font-semibold text-white ring-offset-2 ring-offset-background transition-all duration-300 hover:bg-neutral-600 hover:ring-2 hover:ring-neutral-700"
+            >
+              Cancel
             </DialogClose>
-            <DialogClose asChild>
-              <button
-                onClick={() => onDelete(id)}
-                disabled={isLoading}
-                className="shadow-xs cursor-pointer rounded-xl bg-red-700 px-4 py-2.5 text-center text-sm font-semibold text-white ring-offset-2 ring-offset-background transition-all duration-300 hover:bg-red-600 hover:ring-2 hover:ring-red-700"
-              >
-                {deleteText}
-              </button>
+            <DialogClose
+              onClick={() => onDelete(id)}
+              disabled={isLoading}
+              className="shadow-xs cursor-pointer rounded-xl bg-red-700 px-4 py-2.5 text-center text-sm font-semibold text-white ring-offset-2 ring-offset-background transition-all duration-300 hover:bg-red-600 hover:ring-2 hover:ring-red-700"
+            >
+              {deleteText}
             </DialogClose>
           </div>
         </div>
