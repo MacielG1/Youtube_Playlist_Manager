@@ -32,6 +32,7 @@ import VideoDate from "./VideoDate";
 import RemoveVideo from "@/assets/icons/RemoveVideo";
 import ResetPlaylistModal from "./modals/ResetPlaylistModal";
 import Close from "@/assets/icons/Close";
+import toast from "react-hot-toast";
 
 export default function YoutubePlayer({ params }: { params: { list: string; title: string } }) {
   const [currentVideoIndex, setCurrentVideoIndex] = useState<number | null>(null);
@@ -85,7 +86,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   plLengthRef.current = videosIdsRef.current.length;
 
   let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 10 * 60 * 60 * 1000; // 10 hours
-  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // 30s to test
+  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // 20s to test
 
   useEffect(() => {
     async function run() {
@@ -166,7 +167,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       if (index > plLengthRef.current) {
         return resetPlaylist();
       } else if (e.target.playerInfo?.playerState < 0) {
-        // window.location.reload();
+        toast.error("Error! Please refresh the page");
       }
     }
     // if (e.data === 2) window.location.reload();
