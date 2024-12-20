@@ -6,11 +6,13 @@ type searchParams = {
   title: string;
 };
 
-export default function page({ searchParams }: { searchParams: searchParams }) {
+export default async function page(props: { searchParams: Promise<searchParams> }) {
+  const searchParams = await props.searchParams;
   return <YTVideoPlayer params={searchParams} />;
 }
 
-export async function generateMetadata({ searchParams }: { searchParams: searchParams }) {
+export async function generateMetadata(props: { searchParams: Promise<searchParams> }) {
+  const searchParams = await props.searchParams;
   let decodedTitled;
   try {
     decodedTitled = decodeURIComponent(searchParams.title);

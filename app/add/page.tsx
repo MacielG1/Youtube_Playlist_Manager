@@ -5,6 +5,7 @@ type searchParams = {
   id: string;
 };
 
-export default async function page({ searchParams }: { searchParams: searchParams }) {
+export default async function page(props: { searchParams: Promise<searchParams> }) {
+  const searchParams = await props.searchParams;
   return <AddExternalItem searchParams={searchParams} />;
 }

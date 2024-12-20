@@ -6,7 +6,8 @@ type Params = {
   playlistId: string;
 };
 
-export async function GET(req: Request, { params }: { params: Params }): Promise<NextResponse> {
+export async function GET(req: Request, props: { params: Promise<Params> }): Promise<NextResponse> {
+  const params = await props.params;
   const playlistId = params.playlistId;
 
   try {

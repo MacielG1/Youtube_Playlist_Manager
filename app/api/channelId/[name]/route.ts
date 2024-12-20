@@ -5,7 +5,8 @@ type Params = {
   name: string;
 };
 
-export async function GET(req: Request, { params }: { params: Params }): Promise<NextResponse> {
+export async function GET(req: Request, props: { params: Promise<Params> }): Promise<NextResponse> {
+  const params = await props.params;
   const name = params.name;
 
   if (!name) return new NextResponse("No Channel Name", { status: 404 });

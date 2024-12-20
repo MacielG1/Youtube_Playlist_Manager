@@ -9,7 +9,8 @@ type Params = {
 };
 
 let MAX_AMOUNT_OF_PAGES = 50;
-export async function POST(req: Request, { params }: { params: Params }): Promise<NextResponse> {
+export async function POST(req: Request, props: { params: Promise<Params> }): Promise<NextResponse> {
+  const params = await props.params;
   const playlistsToFetch = params.playlistId;
 
   if (!playlistsToFetch) return new NextResponse("No Playlist Id", { status: 404 });
