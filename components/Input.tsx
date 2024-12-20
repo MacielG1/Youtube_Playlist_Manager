@@ -193,7 +193,7 @@ export default function Input() {
             id="input"
             onChange={handleInputChange}
             placeholder="Enter a Video or Playlist URL or Channel Name"
-            className="min-w[1rem] w-[65vw] rounded-md border-2 border-neutral-600 bg-neutral-300 px-3 text-neutral-900 placeholder-neutral-700 caret-neutral-800 transition-colors duration-300 placeholder:text-sm hover:bg-neutral-200 focus:border-gray-600 focus:placeholder-neutral-500 focus-visible:border-neutral-900 focus-visible:bg-neutral-200 focus-visible:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300 dark:placeholder-neutral-400 dark:caret-neutral-500 dark:hover:bg-black dark:focus:placeholder-neutral-500 dark:focus-visible:border-neutral-600 dark:focus-visible:bg-neutral-950 xs:placeholder:text-base sm:text-lg md:w-[30rem]"
+            className="w-[65vw] min-w-[16px] rounded-md border-2 border-neutral-600 bg-neutral-300 px-3 text-neutral-900 placeholder-neutral-700 caret-neutral-800 transition-colors duration-300 placeholder:text-sm hover:bg-neutral-200 focus:border-gray-600 focus:placeholder-neutral-500 focus-visible:border-neutral-900 focus-visible:bg-neutral-200 focus-visible:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300 dark:placeholder-neutral-400 dark:caret-neutral-500 dark:hover:bg-black dark:focus:placeholder-neutral-500 dark:focus-visible:border-neutral-600 dark:focus-visible:bg-neutral-950 xs:placeholder:text-base sm:text-lg md:w-[480px]"
           />
           <button
             type="submit"

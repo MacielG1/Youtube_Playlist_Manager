@@ -144,7 +144,7 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
       <div className="grid max-w-sm items-center justify-center">
         <label
           htmlFor="fileInput"
-          className={`relative inline-flex items-center rounded-md border border-neutral-950 bg-neutral-200 px-[0.43rem] py-[0.43rem] text-base font-medium text-neutral-950 shadow-md ring-offset-background transition-colors duration-300 hover:cursor-pointer hover:border hover:bg-white focus-visible:outline-none dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-black ${isExportable ? "max-w-[5.2rem]" : "w-[7.2rem] max-w-[7.2rem] pl-[1.9rem]"} focus-within:ring focus-within:ring-neutral-700 focus-within:ring-offset-2`}
+          className={`relative inline-flex items-center rounded-md border border-neutral-950 bg-neutral-200 px-[6.9px] py-[6.9px] text-base font-medium text-neutral-950 shadow-md ring-offset-background transition-colors duration-300 hover:cursor-pointer hover:border hover:bg-white focus-visible:outline-none dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-black ${isExportable ? "max-w-[83px]" : "w-[115px] max-w-[115px] pl-[30.5px]"} focus-within:ring focus-within:ring-neutral-700 focus-within:ring-offset-2`}
         >
           Import
           {/* Screen Reader */}
@@ -155,7 +155,7 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
       {isExportable && (
         <button
           onClick={exportTimers}
-          className="h-10 max-w-[5.2rem] rounded-md border border-neutral-950 bg-neutral-200 px-2 py-2 text-base font-medium text-neutral-950 shadow-md ring-offset-background transition-colors duration-300 hover:cursor-pointer hover:border hover:bg-white focus-visible:outline-none focus-visible:ring focus-visible:ring-neutral-700 focus-visible:ring-offset-2 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-black"
+          className="h-10 max-w-[83px] rounded-md border border-neutral-950 bg-neutral-200 px-2 py-2 text-base font-medium text-neutral-950 shadow-md ring-offset-background transition-colors duration-300 hover:cursor-pointer hover:border hover:bg-white focus-visible:outline-none focus-visible:ring focus-visible:ring-neutral-700 focus-visible:ring-offset-2 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-black"
         >
           Export
         </button>

@@ -12,7 +12,7 @@ export default function HowItWorksButton({ setModalOpen }: Props) {
   return (
     <Link href="/about" tabIndex={-1}>
       <Button
-        className={`${isExportable ? "px-8" : "px-[0.4rem]"} max-w-[9rem] whitespace-nowrap border border-neutral-950`}
+        className={`${isExportable ? "px-8" : "px-[6.4px]"} max-w-[144px] whitespace-nowrap border border-neutral-950`}
         onClick={() => setModalOpen(false)}
       >
         How it Works

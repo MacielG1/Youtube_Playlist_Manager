@@ -104,8 +104,8 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
   const width = currentTime.current?.initialTime && duration ? `${(currentTime.current?.initialTime / convertTimeToSeconds(duration)) * 100}%` : "0%";
   return (
     <div className={`mt-2 flex flex-col items-center outline-none ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
-      <div className="relative flex cursor-default flex-col items-center justify-center overflow-hidden rounded-md rounded-tr-[0.2rem] md:rounded-[0.6rem]">
-        <div className="group flex aspect-video w-[50vw] select-none items-center justify-center overflow-hidden rounded-md rounded-tr-[0.2rem] xs:w-[35vw] md:w-[26vw] md:rounded-[0.8rem] lg:w-[20vw] 2xl:w-[16.5vw]">
+      <div className="relative flex cursor-default flex-col items-center justify-center overflow-hidden rounded-md rounded-tr-[3.2px] md:rounded-[9.6px]">
+        <div className="group flex aspect-video w-[50vw] select-none items-center justify-center overflow-hidden rounded-md rounded-tr-[3.2px] xs:w-[35vw] md:w-[26vw] md:rounded-[12.8px] lg:w-[20vw] 2xl:w-[16.5vw]">
           <ItemModalDelete
             button={
               <button
@@ -145,18 +145,18 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
           {type === "Video" && (
             <>
               <span
-                className={`${font.className} absolute bottom-[0.25rem] right-[0.15rem] z-10 rounded-lg bg-black px-1 text-[0.65rem] tracking-wide text-white sm:text-[0.8rem]`}
+                className={`${font.className} absolute bottom-[4px] right-[2.4px] z-10 rounded-lg bg-black px-1 text-[0.65rem] tracking-wide text-white sm:text-[0.8rem]`}
               >
                 {duration}
               </span>
 
-              <div className="absolute bottom-0 left-0 z-[500] h-[0.17rem] bg-red-500" style={{ width: width }}></div>
+              <div className="absolute bottom-0 left-0 z-[500] h-[2.72px] bg-red-500" style={{ width: width }}></div>
             </>
           )}
         </div>
       </div>
 
-      <h2 className="max-h-[2.8rem] min-h-[2.8rem] max-w-[15rem] overflow-hidden whitespace-normal break-words pt-1 text-center text-[0.875rem] font-medium text-black dark:text-white max-md:w-[17rem] max-sm:w-[15rem] xs:max-w-[12rem] sm:max-w-[20rem]">
+      <h2 className="min-h-[45px max-h-[50px] max-w-[240px] overflow-hidden whitespace-normal break-words pt-1 text-center text-[0.875rem] font-medium text-black dark:text-white max-md:w-[272px] max-sm:w-[240px] xs:max-w-[192px] sm:max-w-[320px]">
         <Link className="cursor-pointer" href={url}>
           {formattedTitle}
           {type === "Video" && channel && ` - ${channel}`}

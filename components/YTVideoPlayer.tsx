@@ -50,8 +50,10 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   useEffect(() => {
     const player = videoPlayerRef?.current?.getInternalPlayer();
 
+    if (!player) return;
+
     const timer = setInterval(() => {
-      if (isPlayingVideoRef.current) {
+      if (isPlayingVideoRef.current && player) {
         saveVideoProgress(player, videoId);
       }
     }, 30000);
@@ -63,35 +65,67 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   useEffect(() => {
     const player = videoPlayerRef?.current?.internalPlayer;
-    if (player) {
+    if (!player) return;
+
+    try {
       isAudioMuted ? player.mute() : player.unMute();
+    } catch (error) {
+      console.error("Error setting mute state:", error);
     }
   }, [isAudioMuted]);
 
   async function onReady(e: YouTubeEvent) {
-    setIsLoaded(true);
+    try {
+      if (!e.target) return;
 
-    const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
-    videoPlayerRef?.current?.internalPlayer?.setPlaybackRate(plRate);
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-    let data = await get(`v=${videoId}`);
-    setVideoData(data);
+      try {
+        const player = videoPlayerRef?.current?.internalPlayer;
+        if (!player) {
+          console.warn("Player not initialized in onReady");
+          return;
+        }
 
-    const intervalId = setInterval(() => {
-      if (isPlayingVideoRef.current) {
-        saveVideoProgress(e.target, videoId);
+        setIsLoaded(true);
+
+        try {
+          const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
+          await player.setPlaybackRate(plRate);
+        } catch (err) {
+          console.warn("Could not set playback rate:", err);
+        }
+
+        let data = await get(`v=${videoId}`);
+        setVideoData(data);
+
+        const intervalId = setInterval(() => {
+          if (isPlayingVideoRef.current && e.target) {
+            try {
+              saveVideoProgress(e.target, videoId);
+            } catch (error) {
+              console.error("Error saving video progress in interval:", error);
+            }
+          }
+        }, 15000);
+
+        return () => clearInterval(intervalId);
+      } catch (err) {
+        console.warn("Error initializing player:", err);
       }
-    }, 15000); // 15 seconds
-
-    return () => clearInterval(intervalId);
+    } catch (error) {
+      console.error("Error in onReady:", error);
+    }
   }
 
   function onPlay(e: YouTubeEvent) {
+    if (!e.target) return;
     isPlayingVideoRef.current = true;
     saveVideoProgress(e.target, videoId);
   }
 
   function onPause(e: YouTubeEvent) {
+    if (!e.target) return;
     isPlayingVideoRef.current = false;
     saveVideoProgress(e.target, videoId);
   }
@@ -133,19 +167,34 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   }
 
   async function isVideoPaused() {
-    const playerState = await videoPlayerRef.current?.internalPlayer.getPlayerState();
-    return playerState === 2;
+    try {
+      const player = videoPlayerRef.current?.internalPlayer;
+      if (!player) return true;
+
+      const playerState = await player.getPlayerState();
+      return playerState === 2;
+    } catch (error) {
+      console.error("Error checking video pause state:", error);
+      return true;
+    }
   }
 
   async function handleVideoPlayback(mode: "play" | "pause") {
-    const playerState = await videoPlayerRef.current?.internalPlayer.getPlayerState();
+    try {
+      const player = videoPlayerRef.current?.internalPlayer;
+      if (!player) return;
 
-    if (mode === "play" && playerState === 2) {
-      videoPlayerRef.current?.internalPlayer.playVideo();
-      isPaused.current = false;
-    } else if (mode === "pause" && playerState === 1) {
-      videoPlayerRef.current?.internalPlayer.pauseVideo();
-      isPaused.current = true;
+      const playerState = await player.getPlayerState();
+
+      if (mode === "play" && playerState === 2) {
+        player.playVideo();
+        isPaused.current = false;
+      } else if (mode === "pause" && playerState === 1) {
+        player.pauseVideo();
+        isPaused.current = true;
+      }
+    } catch (error) {
+      console.error("Error handling video playback:", error);
     }
   }
 
@@ -174,7 +223,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     <>
       <LogoButton />
       <div className="flex min-h-screen flex-col items-center justify-center pt-12">
-        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center pt-2 max-xl:p-[0.15rem] 2xl:max-w-[71vw]">
+        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center pt-2 max-xl:p-[2.4px] 2xl:max-w-[71vw]">
           <div className="relative w-full overflow-auto pb-[56.25%]">
             {!isLoaded && (
               <div className="fixed inset-0 -mt-16 flex items-center justify-center md:-mt-10">
@@ -241,7 +290,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                 <Tooltip>
                   <TooltipTrigger>
                     <Link href={`https://www.youtube.com/watch?v=${videoId}&t=${Math.floor(currentTime)}`} target="_blank" rel="noopener noreferrer">
-                      <Youtube className="mx-[0.15rem] h-8 w-8 fill-neutral-200 px-[0.035rem] pb-[0.05rem] text-neutral-600 transition duration-300 hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
+                      <Youtube className="mx-[2.4px] h-8 w-8 fill-neutral-200 px-[0.56px] pb-[0.8px] text-neutral-600 transition duration-300 hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent>Open on Youtube</TooltipContent>
@@ -250,7 +299,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                 <Tooltip>
                   <TooltipTrigger>
                     <ModalDelete
-                      icon={<Close className="mt-1.5 h-8 w-8" />}
+                      icon={<Close className="h-8 w-8" />}
                       deleteText="Delete"
                       type="Video"
                       id={videoId}

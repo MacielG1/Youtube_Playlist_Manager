@@ -32,7 +32,8 @@ import VideoDate from "./VideoDate";
 import RemoveVideo from "@/assets/icons/RemoveVideo";
 import ResetPlaylistModal from "./modals/ResetPlaylistModal";
 import Close from "@/assets/icons/Close";
-import toast from "react-hot-toast";
+import toast, { type Toast } from "react-hot-toast";
+import { toastRefresh } from "@/utils/toastStyles";
 
 export default function YoutubePlayer({ params }: { params: { list: string; title: string } }) {
   const [currentVideoIndex, setCurrentVideoIndex] = useState<number | null>(null);
@@ -107,16 +108,25 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   useEffect(() => {
     if (PlaylistPlayerRef?.current) {
-      isAudioMuted ? PlaylistPlayerRef.current.internalPlayer.mute() : PlaylistPlayerRef.current.internalPlayer.unMute();
+      try {
+        isAudioMuted ? PlaylistPlayerRef.current.internalPlayer?.mute() : PlaylistPlayerRef.current.internalPlayer?.unMute();
+      } catch (error) {
+        console.error("Error setting mute state:", error);
+      }
     }
   }, [isAudioMuted]);
 
   useEffect(() => {
-    const player = PlaylistPlayerRef.current?.internalPlayer; // returns the iframe video player
+    const player = PlaylistPlayerRef.current?.internalPlayer;
+    if (!player) return;
 
     const timer = setInterval(() => {
-      if (isPlayingVideoRef.current && !isShuffled) {
-        savePlaylistsProgress(player, playlistId, pageRef.current);
+      if (isPlayingVideoRef.current && !isShuffled && player) {
+        try {
+          savePlaylistsProgress(player, playlistId, pageRef.current);
+        } catch (error) {
+          console.error("Error saving playlist progress:", error);
+        }
       }
     }, 15000);
 
@@ -126,34 +136,81 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }, []);
 
   async function onReady(e: YouTubeEvent) {
-    setCurrentVideoTitle(e.target.getVideoData().title || "");
+    try {
+      if (!e.target) return;
 
-    const index = (await PlaylistPlayerRef.current?.internalPlayer?.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
-    setCurrentVideoIndex(index);
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-    const vidsData = await get(`pl=${playlistId}`);
-    if (vidsData) setVideosList(vidsData);
-
-    const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
-    await PlaylistPlayerRef.current?.internalPlayer?.setPlaybackRate(plRate);
-
-    const intervalId = setInterval(() => {
-      if (isPlayingVideoRef.current && !isShuffled) {
-        savePlaylistsProgress(e.target, playlistId, pageRef.current);
+      try {
+        const videoData = e.target.getVideoData();
+        if (videoData && videoData.title) {
+          setCurrentVideoTitle(videoData.title);
+        }
+      } catch (err) {
+        console.warn("Could not get video title:", err);
       }
-    }, 15000);
 
-    return () => clearInterval(intervalId);
+      const player = PlaylistPlayerRef.current?.internalPlayer;
+      if (!player) {
+        console.warn("Player not initialized in onReady");
+        return;
+      }
+
+      try {
+        const playlistIndex = await player.getPlaylistIndex();
+        if (typeof playlistIndex === "number") {
+          const index = playlistIndex + 1 + (pageRef.current - 1) * 200;
+          setCurrentVideoIndex(index);
+        }
+      } catch (err) {
+        console.warn("Could not get playlist index:", err);
+      }
+
+      const vidsData = await get(`pl=${playlistId}`);
+      if (vidsData) setVideosList(vidsData);
+
+      try {
+        const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
+        await player.setPlaybackRate(plRate);
+      } catch (err) {
+        console.warn("Could not set playback rate:", err);
+      }
+
+      const intervalId = setInterval(() => {
+        if (isPlayingVideoRef.current && !isShuffled && e.target) {
+          try {
+            savePlaylistsProgress(e.target, playlistId, pageRef.current);
+          } catch (error) {
+            console.error("Error saving playlist progress in interval:", error);
+          }
+        }
+      }, 15000);
+
+      return () => clearInterval(intervalId);
+    } catch (error) {
+      console.error("Error in onReady:", error);
+    }
   }
 
-  function onPlay(e: YouTubeEvent) {
-    isPlayingVideoRef.current = true;
-    if (!isShuffled) savePlaylistsProgress(e.target, playlistId, pageRef.current);
+  async function onPlay(e: YouTubeEvent) {
+    try {
+      if (!e.target) return;
+      isPlayingVideoRef.current = true;
+      if (!isShuffled) savePlaylistsProgress(e.target, playlistId, pageRef.current);
+    } catch (error) {
+      console.error("Error in onPlay:", error);
+    }
   }
 
   async function onPause(e: YouTubeEvent) {
-    if (!isShuffled) savePlaylistsProgress(e.target, playlistId, pageRef.current);
+    try {
+      if (!e.target) return;
+      if (!isShuffled) savePlaylistsProgress(e.target, playlistId, pageRef.current);
+    } catch (error) {
+      console.error("Error in onPause:", error);
+    }
   }
+
   async function onError(e: YouTubeEvent) {
     console.log("error", e);
 
@@ -167,45 +224,74 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       if (index > plLengthRef.current) {
         return resetPlaylist();
       } else if (e.target.playerInfo?.playerState < 0) {
-        toast.error("Error! Please refresh the page");
+        toast(
+          (t: Toast) => (
+            <div className="flex items-center gap-2">
+              <span>Error, Please refresh!</span>
+              <span
+                onClick={() => {
+                  window.location.reload();
+                  toast.dismiss(t.id);
+                }}
+                className="cursor-pointer rounded bg-indigo-600 px-2 py-1 text-sm text-white hover:bg-indigo-600"
+              >
+                Refresh
+              </span>
+            </div>
+          ),
+          toastRefresh,
+        );
       }
     }
-    // if (e.data === 2) window.location.reload();
   }
 
   async function onStateChange(e: YouTubeEvent) {
-    const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
+    try {
+      if (!e.target) return;
 
-    if (e.data === 1) setCurrentVideoIndex(index);
+      const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
+      if (e.data === 1) setCurrentVideoIndex(index);
 
-    const title = e.target.getVideoData().title;
-    if (title) setCurrentVideoTitle(title);
-    setCurrentTime(e.target.getCurrentTime());
+      const title = e.target.getVideoData()?.title;
+      if (title) setCurrentVideoTitle(title);
+      setCurrentTime(e.target.getCurrentTime());
 
-    let videoId = e.target.getVideoData().video_id;
-    currentVideoId.current = videoId;
-    let pl = await get(`pl=${playlistId}`);
+      let videoId = e.target.getVideoData()?.video_id;
+      if (!videoId) return;
 
-    const video = pl?.find((v: PlaylistAPI) => v.id === videoId);
-    if (!video) return;
-    setDescription(video.description);
-    setPublishedAt(video.publishedAt);
+      currentVideoId.current = videoId;
+      let pl = await get(`pl=${playlistId}`);
+
+      const video = pl?.find((v: PlaylistAPI) => v.id === videoId);
+      if (!video) return;
+      setDescription(video.description);
+      setPublishedAt(video.publishedAt);
+    } catch (error) {
+      console.error("Error in onStateChange:", error);
+    }
   }
 
   async function onEnd(e: YouTubeEvent) {
-    const currentIndex = e.target.getPlaylistIndex();
+    try {
+      if (!e.target) return;
 
-    if (currentIndex < e.target.getPlaylist().length - 1) {
-      // e.target.nextVideo();
+      const currentIndex = await e.target.getPlaylistIndex();
+      const playlist = await e.target.getPlaylist();
 
-      e.target.playVideoAt(currentIndex + 1);
-      e.target.seekTo(0);
-    }
-    if ((currentIndex + 1) % 200 === 0 && plLengthRef.current > 200) {
-      // if the index is 199, 399, 599, etc. and videosIds  has more than 200 , 400, 600, etc. videos
-      const nextPage = pageRef.current + 1;
-      pageRef.current = nextPage;
-      await loadPlaylist(e.target, videosIdsRef.current, nextPage);
+      if (!playlist) return;
+
+      if (currentIndex < playlist.length - 1) {
+        e.target.playVideoAt(currentIndex + 1);
+        e.target.seekTo(0);
+      }
+
+      if ((currentIndex + 1) % 200 === 0 && plLengthRef.current > 200) {
+        const nextPage = pageRef.current + 1;
+        pageRef.current = nextPage;
+        await loadPlaylist(e.target, videosIdsRef.current, nextPage);
+      }
+    } catch (error) {
+      console.error("Error in onEnd:", error);
     }
   }
 
@@ -217,36 +303,54 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }
 
   async function previousVideo() {
-    const player = PlaylistPlayerRef.current?.getInternalPlayer();
-    const index = await player.getPlaylistIndex();
+    try {
+      const player = PlaylistPlayerRef.current?.getInternalPlayer();
+      if (!player) return;
 
-    // if the pl is bigger than 200 and we're on the first video of the page
-    if (plLengthRef.current > 200 && index === 0 && pageRef.current > 1) {
-      pageRef.current -= 1;
-      await loadPlaylist(player, videosIdsRef.current, pageRef.current, 199);
-    } else {
-      const targetIndex = index > 0 ? index - 1 : 0;
-      player.playVideoAt(targetIndex);
+      const index = await player.getPlaylistIndex();
+
+      if (plLengthRef.current > 200 && index === 0 && pageRef.current > 1) {
+        pageRef.current -= 1;
+        await loadPlaylist(player, videosIdsRef.current, pageRef.current, 199);
+      } else {
+        const targetIndex = index > 0 ? index - 1 : 0;
+        await player.playVideoAt(targetIndex);
+      }
+    } catch (error) {
+      console.error("Error in previousVideo:", error);
     }
   }
+
   async function nextVideo() {
-    const player = PlaylistPlayerRef.current?.getInternalPlayer();
-    const index = await player.getPlaylistIndex();
+    try {
+      const player = PlaylistPlayerRef.current?.getInternalPlayer();
+      if (!player) return;
 
-    if (plLengthRef.current > 200 && (index + 1) % 200 === 0) {
-      pageRef.current += 1;
-      await loadPlaylist(player, videosIdsRef.current, pageRef.current);
-    } else {
-      player.nextVideo();
-      player.seekTo(0);
+      const index = await player.getPlaylistIndex();
+
+      if (plLengthRef.current > 200 && (index + 1) % 200 === 0) {
+        pageRef.current += 1;
+        await loadPlaylist(player, videosIdsRef.current, pageRef.current);
+      } else {
+        await player.nextVideo();
+        await player.seekTo(0);
+      }
+    } catch (error) {
+      console.error("Error in nextVideo:", error);
     }
   }
-  async function playVideoAt(index: number) {
-    const player = PlaylistPlayerRef.current?.getInternalPlayer();
 
-    pageRef.current = Math.floor(index / 200) + 1;
-    const paginatedIndex = index % 200;
-    await loadPlaylist(player, videosIdsRef.current, pageRef.current, paginatedIndex);
+  async function playVideoAt(index: number) {
+    try {
+      const player = PlaylistPlayerRef.current?.getInternalPlayer();
+      if (!player) return;
+
+      pageRef.current = Math.floor(index / 200) + 1;
+      const paginatedIndex = index % 200;
+      await loadPlaylist(player, videosIdsRef.current, pageRef.current, paginatedIndex);
+    } catch (error) {
+      console.error("Error in playVideoAt:", error);
+    }
   }
 
   async function resetPlaylist(includeRemovedVideos = false) {
@@ -366,19 +470,34 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }
 
   async function isVideoPaused() {
-    const playerState = await PlaylistPlayerRef.current?.internalPlayer.getPlayerState();
-    return playerState === 2;
+    try {
+      const player = PlaylistPlayerRef.current?.internalPlayer;
+      if (!player) return true;
+
+      const playerState = await player.getPlayerState();
+      return playerState === 2;
+    } catch (error) {
+      console.error("Error checking video pause state:", error);
+      return true;
+    }
   }
 
   async function handleVideoPlayback(mode: "play" | "pause") {
-    const playerState = await PlaylistPlayerRef.current?.internalPlayer.getPlayerState();
+    try {
+      const player = PlaylistPlayerRef.current?.internalPlayer;
+      if (!player) return;
 
-    if (mode === "play" && playerState === 2) {
-      PlaylistPlayerRef.current?.internalPlayer.playVideo();
-      isPaused.current = false;
-    } else if (mode === "pause" && playerState === 1) {
-      PlaylistPlayerRef.current?.internalPlayer.pauseVideo();
-      isPaused.current = true;
+      const playerState = await player.getPlayerState();
+
+      if (mode === "play" && playerState === 2) {
+        await player.playVideo();
+        isPaused.current = false;
+      } else if (mode === "pause" && playerState === 1) {
+        await player.pauseVideo();
+        isPaused.current = true;
+      }
+    } catch (error) {
+      console.error("Error handling video playback:", error);
     }
   }
 
@@ -450,7 +569,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     <>
       <LogoButton />
       <div className="flex flex-col items-center justify-center pt-12">
-        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[0.15rem] pt-2 xl:max-w-[62vw] xl:pt-0 2xl:max-w-[70vw]">
+        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[2.4px] pt-2 xl:max-w-[62vw] xl:pt-0 2xl:max-w-[70vw]">
           <div className="relative w-full overflow-auto pb-[56.25%]">
             {(!plLengthRef.current || isLoading) && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
@@ -476,118 +595,127 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
         </div>
         {!!plLengthRef.current && (
           <div className="flex max-w-[80vw] flex-col pt-1 md:max-w-[60vw] 2xl:max-w-[65vw] 2xl:pt-2">
-            <div className="flex justify-center gap-1 py-2 max-md:flex-wrap xs:gap-3 sm:py-0">
+            <div className="my-[4px] flex justify-center gap-1 py-2 max-md:flex-wrap xs:gap-3 sm:py-0">
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger>
-                    <ResetPlaylistModal resetPlaylist={resetPlaylist} isVideoPaused={isVideoPaused} handleVideoPlayback={handleVideoPlayback} />
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center">
+                      <ResetPlaylistModal resetPlaylist={resetPlaylist} isVideoPaused={isVideoPaused} handleVideoPlayback={handleVideoPlayback} />
+                    </div>
                   </TooltipTrigger>
                   <TooltipContent>Restart Playlist</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <button
-                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      className="-mr-[6px] flex h-8 w-8 items-center justify-center text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, -10)}
                     >
-                      <Rewind10 className="h-8 w-8" />
+                      <Rewind10 className="h-full w-full" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>Rewind 10s</TooltipContent>
                 </Tooltip>
+
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <button
-                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      className="flex h-8 w-8 items-center justify-center text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={previousVideo}
                     >
-                      <PointerLeft className="h-8 w-8" />
+                      <PointerLeft className="h-full w-full" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>Previous Video</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <button
-                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      className="flex h-8 w-8 items-center justify-center text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={nextVideo}
                     >
-                      <PointerRight className="h-8 w-8" />
+                      <PointerRight className="h-full w-full" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>Next Video</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <button
-                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      className="-ml-[6px] flex h-8 w-8 items-center justify-center text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, 10)}
                     >
-                      <Skip10 className="h-8 w-8" />
+                      <Skip10 className="h-full w-full" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>Skip 10s</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <Link
                       href={`https://www.youtube.com/watch?v=${currentVideoId.current}&list=${playlistId}&t=${Math.floor(currentTime)}`}
                       target="_blank"
                       rel="noopener noreferrer"
+                      className="mx-[3px] mt-[1px] flex size-[30px] items-center justify-center"
                     >
-                      <Youtube className="mx-[0.3rem] mb-[0.4rem] h-8 w-8 fill-neutral-200 px-[0.038rem] text-neutral-600 transition duration-300 hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
+                      <Youtube className="h-full w-full text-neutral-600 transition duration-300 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-neutral-200" />
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent>Open on Youtube</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
-                  <TooltipTrigger>
-                    <ModalDelete
-                      icon={<RemoveVideo className={`h-8 w-8 py-[0.175rem]`} />}
-                      deleteText="Remove"
-                      type="Video"
-                      extraText="From Playlist"
-                      title={currentVideoTitle}
-                      onDelete={removeVideo}
-                      handleVideoPlayback={handleVideoPlayback}
-                      isVideoPaused={isVideoPaused}
-                    />
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center">
+                      <ModalDelete
+                        icon={<RemoveVideo className="mx-[2px] mb-[3px] size-[30px]" />}
+                        deleteText="Remove"
+                        type="Video"
+                        extraText="From Playlist"
+                        title={currentVideoTitle}
+                        onDelete={removeVideo}
+                        handleVideoPlayback={handleVideoPlayback}
+                        isVideoPaused={isVideoPaused}
+                      />
+                    </div>
                   </TooltipTrigger>
                   <TooltipContent>Remove Video from Playlist</TooltipContent>
                 </Tooltip>
+
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <button
-                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      className="flex h-8 w-8 items-center justify-center text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={isShuffled ? unShuffle : onShuffle}
                     >
-                      <Shuffle className={`h-8 w-8 py-[0.175rem] ${isShuffled && "text-indigo-500"}`} />
+                      <Shuffle className={`mt-[1px] h-[30px] w-[30px] ${isShuffled && "text-indigo-500"}`} />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>{isShuffled ? "Unshuffle" : "Shuffle"}</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
-                  <TooltipTrigger>
-                    <ModalDelete
-                      icon={<Close className="h-8 w-8" />}
-                      deleteText="Remove"
-                      type="Playlist"
-                      title={currentVideoTitle}
-                      onDelete={onDelete}
-                      handleVideoPlayback={handleVideoPlayback}
-                      isVideoPaused={isVideoPaused}
-                    />
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center">
+                      <ModalDelete
+                        icon={<Close className="h-9 w-9" />}
+                        deleteText="Remove"
+                        type="Playlist"
+                        title={currentVideoTitle}
+                        onDelete={onDelete}
+                        handleVideoPlayback={handleVideoPlayback}
+                        isVideoPaused={isVideoPaused}
+                      />
+                    </div>
                   </TooltipTrigger>
                   <TooltipContent>Delete Playlist</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <p className="min-w-[4rem] whitespace-nowrap px-1 text-[1.35rem] text-neutral-600 dark:text-[#818386]">
+              <p className="min-w-[64px] whitespace-nowrap px-1 pt-[1px] text-[1.35rem] text-neutral-600 dark:text-[#818386]">
                 {currentVideoIndex && plLengthRef.current && !isNaN(plLengthRef.current) ? (
                   <span>
                     {currentVideoIndex} / {plLengthRef.current}

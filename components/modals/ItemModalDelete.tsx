@@ -23,7 +23,7 @@ export default function ItemModalDelete({ button, deleteText, type, title, id, o
     <Dialog open={isOpen} onOpenChange={handleOpenModal}>
       <DialogTrigger asChild>{button}</DialogTrigger>
       <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
-        <div className="mx-auto flex max-w-[18rem] flex-col items-center justify-center gap-4 px-8 pb-6 pt-2 xs:max-w-sm sm:max-w-lg md:min-w-[18rem] lg:min-w-[25rem]">
+        <div className="mx-auto flex max-w-[288px] flex-col items-center justify-center gap-4 px-8 pb-6 pt-2 xs:max-w-sm sm:max-w-lg md:min-w-[288px] lg:min-w-[400px]">
           <DialogTitle className="text-lg font-semibold tracking-wide text-red-600 dark:text-red-500 sm:text-2xl">
             {deleteText} {type}
           </DialogTitle>

@@ -23,7 +23,7 @@ export default function About({ button }: { button?: React.ReactNode }) {
           aria-hidden="true"
         >
           <div
-            className="aspect-[1108/632] w-[80rem] bg-gradient-to-r from-indigo-500 to-purple-700 opacity-10"
+            className="aspect-[1108/632] w-[1280px] bg-gradient-to-r from-indigo-500 to-purple-700 opacity-10"
             style={{
               clipPath:
                 "polygon(10% 20%, 80% 30%, 70% 80%, 40% 10%, 60% 80%, 55% 40%, 42% 27%, 30% 60%, 45% 50%, 30.3% 57%, 26% 64.1%, 59% 20%, 15.4% 31.1%, 35% 59%, 33.9% 20.2%, 73.6% 71.7%)",
@@ -44,7 +44,7 @@ export default function About({ button }: { button?: React.ReactNode }) {
             <div className="flex flex-col gap-3 text-lg">
               {texts.map((i) => (
                 <div key={i.id} className="flex items-center justify-start gap-2">
-                  <CheckMark className="h-5 w-5 min-w-[2rem] text-green-500" />
+                  <CheckMark className="h-5 w-5 min-w-[32px] text-green-500" />
                   <p className="relative leading-8 text-neutral-600 dark:text-neutral-300 sm:max-w-md lg:max-w-none">{i.text}</p>
                 </div>
               ))}

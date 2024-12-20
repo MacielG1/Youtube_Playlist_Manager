@@ -45,10 +45,10 @@ export default function DeleteAllDataModal({ closeSettingsModal }: Props) {
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenModal}>
       <DialogTrigger asChild>
-        <Button className="max-w-[9rem] whitespace-nowrap border border-neutral-950 px-[4rem]">Delete Data</Button>
+        <Button className="max-w-[144px] whitespace-nowrap border border-neutral-950 px-[64px]">Delete Data</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
-        <div className="mx-auto flex max-w-[18rem] flex-col items-center justify-center gap-4 px-8 pb-6 pt-2 xs:max-w-sm sm:max-w-lg md:min-w-[18rem] lg:min-w-[25rem]">
+        <div className="mx-auto flex max-w-[288px] flex-col items-center justify-center gap-4 px-8 pb-6 pt-2 xs:max-w-sm sm:max-w-lg md:min-w-[288px] lg:min-w-[400px]">
           <DialogTitle className="text-lg font-semibold tracking-wide text-red-600 dark:text-red-500 sm:text-2xl">Delete All Saved Data</DialogTitle>
           <h3 className="max-h-[50vh] max-w-full overflow-auto break-words pt-2 text-center text-sm font-semibold text-neutral-800 dark:text-neutral-400 sm:text-lg">
             This will remove all of your saved Playlists and Videos stored in here

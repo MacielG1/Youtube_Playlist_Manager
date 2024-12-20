@@ -28,3 +28,13 @@ export const toastSuccess: ToastOptions = {
     secondary: "#000",
   },
 };
+
+export const toastRefresh: ToastOptions = {
+  duration: 5000,
+  style: {
+    border: "1px solid #333333",
+    padding: "12px",
+    color: "#a7a7a8",
+    backgroundColor: "#000",
+  },
+};

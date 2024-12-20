@@ -115,7 +115,7 @@ export default function ResetPlaylistModal({ handleVideoPlayback, resetPlaylist,
           onClick={handlePauseVideo}
           className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
         >
-          <Reset className="h-8 w-8" />
+          <Reset className="mb-[2.5px] size-[30px]" />
         </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">

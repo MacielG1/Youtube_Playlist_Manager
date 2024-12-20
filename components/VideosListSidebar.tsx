@@ -71,7 +71,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
       <div
         ref={sidebarRef}
         className={cn(
-          "custom-scrollbar right-1 top-0 mx-auto mt-4 flex max-h-[90vh] max-w-fit flex-col gap-3 overflow-y-auto overflow-x-hidden rounded-md border border-neutral-400 p-1 px-2 pr-[1.05rem] dark:border-neutral-700 lg:mt-12 1.5xl:right-7 2xl:right-3 3xl:right-11",
+          "custom-scrollbar right-1 top-0 mx-auto mt-4 flex max-h-[90vh] max-w-fit flex-col gap-3 overflow-y-auto overflow-x-hidden rounded-md border border-neutral-400 p-1 px-2 pr-[16.8px] dark:border-neutral-700 lg:mt-12 1.5xl:right-7 2xl:right-3 3xl:right-11",
           className,
         )}
       >
@@ -105,7 +105,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
               <Link
                 href={url}
                 onClick={(e) => leftClickHandler(e, i)}
-                className="w-[10rem] max-w-fit overflow-hidden whitespace-normal break-words pl-5 text-xs font-normal text-black dark:text-neutral-100"
+                className="w-[160px] max-w-fit overflow-hidden whitespace-normal break-words pl-5 text-xs font-normal text-black dark:text-neutral-100"
               >
                 <span className="cursor-pointer">{title}</span>
               </Link>
