@@ -40,6 +40,8 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   const [currentVideoTitle, setCurrentVideoTitle] = useState("");
   const [isShuffled, setIsShuffled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialFetchDone, setIsInitialFetchDone] = useState(false);
+  const [hasValidVideoIds, setHasValidVideoIds] = useState(false);
 
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
@@ -91,16 +93,26 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   useEffect(() => {
     async function run() {
-      const isEmpty = !videosIdsRef.current.length;
-
-      if (isEmpty || olderThan1day) {
-        console.log("Fetching new videos");
-        const data = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
-
-        if (!data) return console.log("No data");
+      setIsLoading(true);
+      try {
+        const data = await get(`pl=${playlistId}`);
+        if (!data) {
+          console.log("No playlist data found");
+          setIsLoading(false);
+          return;
+        }
 
         plLengthRef.current = data.length;
-        await set(`pl=${playlistId}`, data);
+        videosIdsRef.current = data.map((video: PlaylistAPI) => video.id);
+
+        if (videosIdsRef.current.length > 0) {
+          setHasValidVideoIds(true);
+        }
+      } catch (error) {
+        console.error("Error loading playlist data:", error);
+      } finally {
+        setIsLoading(false);
+        setIsInitialFetchDone(true);
       }
     }
     run();
@@ -458,11 +470,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     await del(item);
     await del(`plRemoved=${playlistId}`);
 
-    queryClient.setQueryData<Items>(["playlists"], (oldData) => {
+    queryClient.setQueryData<Items>(["playlists"], (oldData: Items | undefined) => {
       if (oldData) {
         return {
           ...oldData,
-          items: oldData.items.filter((pl) => pl.id !== playlistId),
+          items: oldData.items.filter((pl: Playlist) => pl.id !== playlistId),
         };
       }
       return oldData;
@@ -571,24 +583,26 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       <div className="flex flex-col items-center justify-center pt-12">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[2.4px] pt-2 xl:max-w-[62vw] xl:pt-0 2xl:max-w-[70vw]">
           <div className="relative w-full overflow-auto pb-[56.25%]">
-            {(!plLengthRef.current || isLoading) && (
+            {(isLoading || !isInitialFetchDone || !hasValidVideoIds) && (
               <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
                 <Spin className="h-7 w-7 animate-spin text-indigo-500" />
                 <span className="sr-only">Loading...</span>
               </div>
             )}
-            <YouTube
-              ref={PlaylistPlayerRef}
-              opts={plOptions}
-              onReady={onReady}
-              onPlay={onPlay}
-              onPause={onPause}
-              onEnd={onEnd}
-              onError={onError}
-              onStateChange={onStateChange}
-              onPlaybackRateChange={onSpeedChange}
-              className={`absolute left-0 right-0 top-0 h-full w-full border-none ${(!plLengthRef.current || isLoading) && "invisible"}`}
-            />
+            {isInitialFetchDone && hasValidVideoIds && videosIdsRef.current.length > 0 && (
+              <YouTube
+                ref={PlaylistPlayerRef}
+                opts={plOptions}
+                onReady={onReady}
+                onPlay={onPlay}
+                onPause={onPause}
+                onEnd={onEnd}
+                onError={onError}
+                onStateChange={onStateChange}
+                onPlaybackRateChange={onSpeedChange}
+                className={`absolute left-0 right-0 top-0 h-full w-full border-none ${isLoading && "invisible"}`}
+              />
+            )}
           </div>
 
           {!isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className="xl:absolute" />}
