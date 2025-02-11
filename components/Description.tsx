@@ -31,7 +31,7 @@ export default function Description({ description, className }: Props) {
       <div className="mb-2">
         <button
           onClick={toggleAccordion}
-          className="flex items-center text-base text-neutral-700 transition-colors duration-300 hover:text-neutral-950 focus:outline-none dark:text-white dark:hover:text-neutral-300 md:pl-4"
+          className="flex cursor-pointer items-center text-base text-neutral-700 transition-colors duration-300 hover:text-neutral-950 focus:outline-hidden md:pl-4 dark:text-white dark:hover:text-neutral-300"
         >
           Description
           {isAccordionOpen ? (
@@ -42,7 +42,7 @@ export default function Description({ description, className }: Props) {
         </button>
       </div>
       {isAccordionOpen && (
-        <div className="flex flex-col gap-1 pb-10 pt-2">
+        <div className="flex flex-col gap-1 pt-2 pb-10">
           {lines.map((line, index) => (
             <span key={index} className="text-sm md:text-base">
               {line.split(urlRegex).map((part, i) =>

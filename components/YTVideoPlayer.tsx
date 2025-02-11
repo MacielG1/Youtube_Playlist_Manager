@@ -254,7 +254,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                 <Tooltip>
                   <TooltipTrigger>
                     <span
-                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      className="cursor-pointer text-neutral-600 outline-hidden transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={() => videoPlayerRef?.current?.internalPlayer.seekTo(0)}
                     >
                       <SkipBack className="h-8 w-8" />
@@ -266,7 +266,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                 <Tooltip>
                   <TooltipTrigger>
                     <span
-                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      className="cursor-pointer text-neutral-600 outline-hidden transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}
                     >
                       <Rewind10 className="h-8 w-8" />
@@ -278,7 +278,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                 <Tooltip>
                   <TooltipTrigger>
                     <span
-                      className="cursor-pointer text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      className="cursor-pointer text-neutral-600 outline-hidden transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, 10)}
                     >
                       <Skip10 className="h-8 w-8" />

@@ -67,7 +67,7 @@ export default function AllPlaylists() {
           <Empty className="h-12 w-12 text-neutral-400 dark:text-neutral-500" />
           <Link
             href="/about"
-            className="focus-visible:ring-ring my-5 inline-flex items-center justify-center rounded-md border border-neutral-800 bg-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-900 ring-offset-background transition-colors hover:border-neutral-700 hover:bg-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-300/80"
+            className="focus-visible:ring-ring my-5 inline-flex items-center justify-center rounded-md border border-neutral-800 bg-neutral-200 px-4 py-2 text-sm font-semibold text-neutral-900 ring-offset-background transition-colors hover:border-neutral-700 hover:bg-neutral-300 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-offset-2 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-neutral-300/80"
           >
             Learn how it works
           </Link>

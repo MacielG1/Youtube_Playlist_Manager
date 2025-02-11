@@ -185,7 +185,7 @@ export default function Input() {
 
   return (
     <header className="sticky max-sm:pt-12">
-      <nav className="relative top-0 z-20 w-full bg-inherit px-2 pb-5 xs:pt-3 sm:pt-4">
+      <nav className="xs:pt-3 relative top-0 z-20 w-full bg-inherit px-2 pb-5 sm:pt-4">
         <form className="flex max-h-12 justify-center gap-2" onSubmit={handleSubmit}>
           <input
             type="text"
@@ -193,12 +193,12 @@ export default function Input() {
             id="input"
             onChange={handleInputChange}
             placeholder="Enter a Video or Playlist URL or Channel Name"
-            className="w-[65vw] min-w-[16px] rounded-md border-2 border-neutral-600 bg-neutral-300 px-3 text-neutral-900 placeholder-neutral-700 caret-neutral-800 transition-colors duration-300 placeholder:text-sm hover:bg-neutral-200 focus:border-gray-600 focus:placeholder-neutral-500 focus-visible:border-neutral-900 focus-visible:bg-neutral-200 focus-visible:outline-none dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300 dark:placeholder-neutral-400 dark:caret-neutral-500 dark:hover:bg-black dark:focus:placeholder-neutral-500 dark:focus-visible:border-neutral-600 dark:focus-visible:bg-neutral-950 xs:placeholder:text-base sm:text-lg md:w-[480px]"
+            className="xs:placeholder:text-base w-[65vw] min-w-[16px] rounded-md border-2 border-neutral-600 bg-neutral-300 px-3 text-neutral-900 placeholder-neutral-700 caret-neutral-800 transition-colors duration-300 placeholder:text-sm hover:bg-neutral-200 focus:border-gray-600 focus:placeholder-neutral-500 focus-visible:border-neutral-900 focus-visible:bg-neutral-200 focus-visible:outline-hidden sm:text-lg md:w-[480px] dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300 dark:placeholder-neutral-400 dark:caret-neutral-500 dark:hover:bg-black dark:focus:placeholder-neutral-500 dark:focus-visible:border-neutral-600 dark:focus-visible:bg-neutral-950"
           />
           <button
             type="submit"
             disabled={isLoading}
-            className={`group flex items-center justify-center rounded-lg border border-blue-800 bg-blue-700 px-4 py-2 text-gray-100 transition duration-300 hover:border-blue-950 hover:bg-blue-800 hover:text-gray-200 disabled:border-neutral-600 disabled:bg-neutral-700 dark:border-blue-800 dark:bg-blue-800 dark:hover:border-blue-900 dark:hover:bg-blue-900 dark:hover:text-gray-200 dark:disabled:border-neutral-600 dark:disabled:bg-neutral-900`}
+            className={`group flex cursor-pointer items-center justify-center rounded-lg border border-blue-800 bg-blue-700 px-4 py-2 text-gray-100 transition duration-300 hover:border-blue-950 hover:bg-blue-800 hover:text-gray-200 disabled:border-neutral-600 disabled:bg-neutral-700 dark:border-blue-800 dark:bg-blue-800 dark:hover:border-blue-900 dark:hover:bg-blue-900 dark:hover:text-gray-200 dark:disabled:border-neutral-600 dark:disabled:bg-neutral-900`}
           >
             <Search className="h-4 w-4 sm:h-7 sm:w-7" />
           </button>

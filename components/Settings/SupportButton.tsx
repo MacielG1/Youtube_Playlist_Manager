@@ -7,7 +7,7 @@ export default function SupportButton() {
 
   return (
     <Link target="_blank" rel="noopener noreferrer" href="https://www.buymeacoffee.com/macielg1">
-      <Button className={`${isExportable ? "px-16" : "px-3"} max-w-[144px] whitespace-nowrap border border-neutral-950`}>Support Me</Button>
+      <Button className={`${isExportable ? "px-16" : "px-3"} max-w-[144px] cursor-pointer border border-neutral-950 whitespace-nowrap`}>Support Me</Button>
     </Link>
   );
 }

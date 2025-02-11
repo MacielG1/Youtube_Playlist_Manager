@@ -245,7 +245,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                   window.location.reload();
                   toast.dismiss(t.id);
                 }}
-                className="cursor-pointer rounded bg-indigo-600 px-2 py-1 text-sm text-white hover:bg-indigo-600"
+                className="cursor-pointer rounded-sm bg-indigo-600 px-2 py-1 text-sm text-white hover:bg-indigo-600"
               >
                 Refresh
               </span>
@@ -584,7 +584,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[2.4px] pt-2 xl:max-w-[62vw] xl:pt-0 2xl:max-w-[70vw]">
           <div className="relative w-full overflow-auto pb-[56.25%]">
             {(isLoading || !isInitialFetchDone || !hasValidVideoIds) && (
-              <div className="absolute inset-0 -ml-4 -mt-1 flex flex-col items-center justify-center">
+              <div className="absolute inset-0 -mt-1 -ml-4 flex flex-col items-center justify-center">
                 <Spin className="h-7 w-7 animate-spin text-indigo-500" />
                 <span className="sr-only">Loading...</span>
               </div>
@@ -600,7 +600,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                 onError={onError}
                 onStateChange={onStateChange}
                 onPlaybackRateChange={onSpeedChange}
-                className={`absolute left-0 right-0 top-0 h-full w-full border-none ${isLoading && "invisible"}`}
+                className={`absolute top-0 right-0 left-0 h-full w-full border-none ${isLoading && "invisible"}`}
               />
             )}
           </div>
@@ -609,7 +609,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
         </div>
         {!!plLengthRef.current && (
           <div className="flex max-w-[80vw] flex-col pt-1 md:max-w-[60vw] 2xl:max-w-[65vw] 2xl:pt-2">
-            <div className="my-[4px] flex justify-center gap-1 py-2 max-md:flex-wrap xs:gap-3 sm:py-0">
+            <div className="xs:gap-3 my-[4px] flex justify-center gap-1 py-2 max-md:flex-wrap sm:py-0">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -623,7 +623,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      className="-mr-[6px] flex h-8 w-8 items-center justify-center text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      className="-mr-[6px] flex h-8 w-8 cursor-pointer items-center justify-center text-neutral-600 outline-hidden transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, -10)}
                     >
                       <Rewind10 className="h-full w-full" />
@@ -635,7 +635,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      className="flex h-8 w-8 items-center justify-center text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      className="flex h-8 w-8 cursor-pointer items-center justify-center text-neutral-600 outline-hidden transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={previousVideo}
                     >
                       <PointerLeft className="h-full w-full" />
@@ -647,7 +647,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      className="flex h-8 w-8 items-center justify-center text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      className="flex h-8 w-8 cursor-pointer items-center justify-center text-neutral-600 outline-hidden transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={nextVideo}
                     >
                       <PointerRight className="h-full w-full" />
@@ -659,7 +659,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      className="-ml-[6px] flex h-8 w-8 items-center justify-center text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      className="-ml-[6px] flex h-8 w-8 cursor-pointer items-center justify-center text-neutral-600 outline-hidden transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={() => seekTime(isPlayingVideoRef, PlaylistPlayerRef, 10)}
                     >
                       <Skip10 className="h-full w-full" />
@@ -674,7 +674,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                       href={`https://www.youtube.com/watch?v=${currentVideoId.current}&list=${playlistId}&t=${Math.floor(currentTime)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mx-[3px] mt-[1px] flex size-[30px] items-center justify-center"
+                      className="mx-[3px] mt-[1px] flex size-[30px] cursor-pointer items-center justify-center"
                     >
                       <Youtube className="h-full w-full text-neutral-600 transition duration-300 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-neutral-200" />
                     </Link>
@@ -703,7 +703,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <button
-                      className="flex h-8 w-8 items-center justify-center text-neutral-600 outline-none transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
+                      className="flex h-8 w-8 cursor-pointer items-center justify-center text-neutral-600 outline-hidden transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={isShuffled ? unShuffle : onShuffle}
                     >
                       <Shuffle className={`mt-[1px] h-[30px] w-[30px] ${isShuffled && "text-indigo-500"}`} />
@@ -729,7 +729,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                   <TooltipContent>Delete Playlist</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <p className="min-w-[64px] whitespace-nowrap px-1 pt-[1px] text-[1.35rem] text-neutral-600 dark:text-[#818386]">
+              <p className="min-w-[64px] px-1 pt-[1px] text-[1.35rem] whitespace-nowrap text-neutral-600 dark:text-[#818386]">
                 {currentVideoIndex && plLengthRef.current && !isNaN(plLengthRef.current) ? (
                   <span>
                     {currentVideoIndex} / {plLengthRef.current}
@@ -740,7 +740,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
             <div className="pb-5 max-2xl:-mt-1 2xl:pb-1">
               {currentVideoTitle && (
-                <span className="flex justify-center break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">
+                <span className="flex justify-center text-center tracking-wide break-words text-neutral-800 dark:text-neutral-200">
                   {currentVideoTitle} - {playlistTitle}
                 </span>
               )}
@@ -748,7 +748,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
             {publishedAt && <VideoDate publishedAt={publishedAt} />}
 
-            {description && <Description description={description} className="pb-2 pt-5 2xl:pt-4" />}
+            {description && <Description description={description} className="pt-5 pb-2 2xl:pt-4" />}
 
             <div>{isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} />}</div>
           </div>

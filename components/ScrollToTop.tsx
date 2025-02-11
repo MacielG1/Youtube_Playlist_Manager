@@ -31,7 +31,7 @@ export default function ScrollToTop() {
     <button
       className={`${
         isVisible ? "visible opacity-100" : "invisible opacity-0"
-      } fixed bottom-12 right-1 z-50 rounded-full bg-indigo-900 p-2 text-white transition-opacity duration-300 ease-in-out focus:outline-none focus:ring-1 focus:ring-indigo-700 xl:right-10`}
+      } fixed bottom-12 right-1 z-50 rounded-full bg-indigo-900 p-2 text-white transition-opacity duration-300 ease-in-out focus:outline-hidden focus:ring-1 focus:ring-indigo-700 xl:right-10`}
       onClick={handleClick}
     >
       <ArrowTop className="h-4 w-4" />
