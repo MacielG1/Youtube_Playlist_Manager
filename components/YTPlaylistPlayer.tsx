@@ -147,6 +147,10 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     };
   }, []);
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   async function onReady(e: YouTubeEvent) {
     try {
       if (!e.target) return;
@@ -236,6 +240,18 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       if (index > plLengthRef.current) {
         return resetPlaylist();
       } else if (e.target.playerInfo?.playerState < 0) {
+        // Check if the page was recently refreshed due to error
+        const refreshTimestamp = localStorage.getItem("forced-refresh");
+        const wasForcedRefreshed = refreshTimestamp && (Date.now() - parseInt(refreshTimestamp) < 10000);
+        
+        // If not recently refreshed, refresh automatically
+        if (!wasForcedRefreshed) {
+          localStorage.setItem("forced-refresh", Date.now().toString());
+          window.location.reload();
+          return;
+        }
+        
+        // If recently refreshed and error persists, show toast
         toast(
           (t: Toast) => (
             <div className="flex items-center gap-2">
@@ -570,10 +586,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   let playlistTitle = reduceStringSize(params.title, 100);
 
   const isSmaller = useMediaQuery("(max-width: 1280px)");
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
 
   if (!isMounted) return null;
 
