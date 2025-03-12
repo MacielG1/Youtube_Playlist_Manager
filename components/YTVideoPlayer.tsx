@@ -30,7 +30,7 @@ type Params = {
 
 export default function YTVideoPlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
-
+  const [embedError, setEmbedError] = useState(false);
   const [videoData, setVideoData] = useState<Video | null>(null);
   const { isAudioMuted } = useAudioToggle();
 
@@ -131,6 +131,9 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   }
   function onError(e: YouTubeEvent) {
     console.log(e);
+    if (e.data === 101 || e.data === 150) {
+      setEmbedError(true);
+    }
   }
   function onSpeedChange(e: YouTubeEvent) {
     let currentData = JSON.parse(localStorage.getItem(item) || "[]");
@@ -243,8 +246,26 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               onPlaybackRateChange={onSpeedChange}
               // onEnd={onEnd}
               onStateChange={onStateChange}
-              className={`${isLoaded ? "visible" : "hidden"} absolute left-0 right-0 top-0 h-full w-full border-none`}
+              className={`${isLoaded && !embedError ? "visible" : "hidden"} absolute left-0 right-0 top-0 h-full w-full border-none`}
             />
+
+            {embedError && (
+              <div className="absolute left-0 right-0 top-0 flex h-full w-full flex-col items-center justify-center bg-neutral-100 dark:bg-neutral-900">
+                <div className="text-center">
+                  <h2 className="mb-4 text-xl font-semibold text-neutral-800 dark:text-neutral-200">Video Unavailable</h2>
+                  <p className="mb-6 text-neutral-600 dark:text-neutral-400">This video cannot be embedded due to the owner's settings.</p>
+                  <Link
+                    href={`https://www.youtube.com/watch?v=${videoId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                  >
+                    <Youtube className="h-5 w-5" />
+                    Watch on YouTube
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </div>
         {isLoaded && (

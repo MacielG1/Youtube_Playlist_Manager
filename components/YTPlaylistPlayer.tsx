@@ -34,6 +34,7 @@ import ResetPlaylistModal from "./modals/ResetPlaylistModal";
 import Close from "@/assets/icons/Close";
 import toast, { type Toast } from "react-hot-toast";
 import { toastRefresh } from "@/utils/toastStyles";
+import Reset from "@/assets/icons/Reset";
 
 export default function YoutubePlayer({ params }: { params: { list: string; title: string } }) {
   const [currentVideoIndex, setCurrentVideoIndex] = useState<number | null>(null);
@@ -42,6 +43,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   const [isLoading, setIsLoading] = useState(false);
   const [isInitialFetchDone, setIsInitialFetchDone] = useState(false);
   const [hasValidVideoIds, setHasValidVideoIds] = useState(false);
+  const [embedError, setEmbedError] = useState(false);
 
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
@@ -230,6 +232,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   async function onError(e: YouTubeEvent) {
     console.log("error", e);
 
+    // YouTube error code 101 or 150 indicates embedding is disabled
+    if (e.data === 101 || e.data === 150) {
+      setEmbedError(true);
+    }
+
     if (e.data == 150) {
       const savedData = JSON.parse(localStorage.getItem(item) || "[]");
       const currentIndex = await e.target.getPlaylistIndex();
@@ -239,19 +246,8 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       setCurrentVideoIndex(index);
       if (index > plLengthRef.current) {
         return resetPlaylist();
-      } else if (e.target.playerInfo?.playerState < 0) {
-        // Check if the page was recently refreshed due to error
-        const refreshTimestamp = localStorage.getItem("forced-refresh");
-        const wasForcedRefreshed = refreshTimestamp && (Date.now() - parseInt(refreshTimestamp) < 10000);
-        
-        // If not recently refreshed, refresh automatically
-        if (!wasForcedRefreshed) {
-          localStorage.setItem("forced-refresh", Date.now().toString());
-          window.location.reload();
-          return;
-        }
-        
-        // If recently refreshed and error persists, show toast
+
+      } else if (e.target.playerInfo?.playerState < 0 && e.data !== 101 && e.data !== 150) {
         toast(
           (t: Toast) => (
             <div className="flex items-center gap-2">
@@ -277,8 +273,18 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     try {
       if (!e.target) return;
 
+      // -1 (unstarted)
+      // 0 (ended)
+      // 1 (playing)
+      // 2 (paused)
+      // 3 (buffering)
+      // 5 (video cued)
+
       const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
-      if (e.data === 1) setCurrentVideoIndex(index);
+      if (e.data === 1) {
+        setCurrentVideoIndex(index);
+        if (embedError) setEmbedError(false);
+      }
 
       const title = e.target.getVideoData()?.title;
       if (title) setCurrentVideoTitle(title);
@@ -365,6 +371,22 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       }
     } catch (error) {
       console.error("Error in nextVideo:", error);
+    }
+  }
+
+  async function nextVideoOnError() {
+    try {
+      const currentIndex = currentVideoIndex !== null ? currentVideoIndex : 0;
+      const nextIndex = currentIndex + 1;
+
+      if (nextIndex < plLengthRef.current) {
+        setCurrentVideoIndex(nextIndex);
+        await playVideoAt(nextIndex);
+      } else {
+        toast.error("No more videos in the playlist");
+      }
+    } catch (error) {
+      console.error("Error in nextVideoOnError:", error);
     }
   }
 
@@ -602,18 +624,54 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
               </div>
             )}
             {isInitialFetchDone && hasValidVideoIds && videosIdsRef.current.length > 0 && (
-              <YouTube
-                ref={PlaylistPlayerRef}
-                opts={plOptions}
-                onReady={onReady}
-                onPlay={onPlay}
-                onPause={onPause}
-                onEnd={onEnd}
-                onError={onError}
-                onStateChange={onStateChange}
-                onPlaybackRateChange={onSpeedChange}
-                className={`absolute top-0 right-0 left-0 h-full w-full border-none ${isLoading && "invisible"}`}
-              />
+              <>
+                <YouTube
+                  ref={PlaylistPlayerRef}
+                  opts={plOptions}
+                  onReady={onReady}
+                  onPlay={onPlay}
+                  onPause={onPause}
+                  onEnd={onEnd}
+                  onError={onError}
+                  onStateChange={onStateChange}
+                  onPlaybackRateChange={onSpeedChange}
+                  className="absolute top-0 right-0 left-0 h-full w-full border-none"
+                />
+                
+                {embedError && (
+                  <div className="absolute inset-0 flex h-full w-full flex-col items-center justify-center bg-neutral-100 dark:bg-neutral-900">
+                    <div className="text-center">
+                      <h2 className="mb-4 text-xl font-semibold text-neutral-800 dark:text-neutral-200">Video Unavailable</h2>
+                      <p className="mb-6 text-neutral-600 dark:text-neutral-400">This video cannot be embedded due to the owner's settings.</p>
+                      <div className="flex gap-4">
+                        <button
+                          onClick={() => window.location.reload()}
+                          className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
+                        > <Reset className="size-5" />
+                        
+                          Refresh
+                        </button>
+                        <button
+                          onClick={nextVideoOnError}
+                          className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+                        >
+                          <PointerRight className="h-5 w-5" />
+                          Next Video
+                        </button>
+                        <Link
+                          href={`https://www.youtube.com/watch?v=${currentVideoId.current}&list=${playlistId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                        >
+                          <Youtube className="h-5 w-5" />
+                          Watch on YouTube
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </div>
 

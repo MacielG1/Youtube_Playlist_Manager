@@ -64,9 +64,9 @@ export default function ModalDelete({
           {icon}
         </span>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md" aria-describedby={undefined}>
+      <DialogContent className="sm:max-w-[500px]" aria-describedby={undefined}>
         <div className="mx-auto flex max-w-[288px] flex-col items-center justify-center gap-4 px-8 pb-6 pt-2 xs:max-w-sm sm:max-w-lg md:min-w-[288px] lg:min-w-[400px]">
-          <DialogTitle className="text-lg font-semibold tracking-wide text-red-600 dark:text-red-500 sm:text-2xl">
+          <DialogTitle className="text-lg font-semibold text-balance tracking-wide text-red-600 dark:text-red-500 sm:text-2xl">
             {deleteText} {type} {extraText}
           </DialogTitle>
           <h3 className="max-h-[50vh] max-w-full overflow-auto break-words pt-2 text-center text-sm font-semibold text-neutral-800 dark:text-neutral-400 sm:text-lg">
