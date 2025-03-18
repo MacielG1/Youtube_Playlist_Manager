@@ -42,7 +42,7 @@ export default function Description({ description, className }: Props) {
         </button>
       </div>
       {isAccordionOpen && (
-        <div className="flex flex-col gap-1 pt-2 pb-10">
+        <div className="flex flex-col gap-1 pt-2 pb-10 md:pl-4">
           {lines.map((line, index) => (
             <span key={index} className="text-sm md:text-base">
               {line.split(urlRegex).map((part, i) =>
