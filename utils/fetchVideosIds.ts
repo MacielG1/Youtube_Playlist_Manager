@@ -20,7 +20,7 @@ export default async function fetchVideosIds(playlistId: string, videosIdsRef?: 
 
     let data = await res.json();
 
-    if (isChannel) data.reverse(); // Reverse if it's a channel
+    // if (isChannel) data.reverse(); // Reverse if it's a channel
 
     // Filter out videos that were manually removed
     const newVideos = data.filter((video: Playlist) => !removedVideos.includes(video.id));
