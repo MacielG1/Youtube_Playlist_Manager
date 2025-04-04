@@ -1,7 +1,8 @@
 import { Playlist } from "@/types";
 import { get } from "idb-keyval";
+import { RefObject } from "react";
 
-export default async function fetchVideosIds(playlistId: string, videosIdsRef?: React.MutableRefObject<string[]>, isChannel?: boolean) {
+export default async function fetchVideosIds(playlistId: string, videosIdsRef?: RefObject<string[]>, isChannel?: boolean) {
   try {
     const removedVideos = (await get(`plRemoved=${playlistId}`)) || [];
 
@@ -21,6 +22,7 @@ export default async function fetchVideosIds(playlistId: string, videosIdsRef?: 
     let data = await res.json();
 
     // if (isChannel) data.reverse(); // Reverse if it's a channel
+    data = data.reverse();
 
     // Filter out videos that were manually removed
     const newVideos = data.filter((video: Playlist) => !removedVideos.includes(video.id));
