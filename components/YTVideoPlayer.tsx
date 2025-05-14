@@ -246,23 +246,26 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               onPlaybackRateChange={onSpeedChange}
               // onEnd={onEnd}
               onStateChange={onStateChange}
-              className={`${isLoaded && !embedError ? "visible" : "hidden"} absolute left-0 right-0 top-0 h-full w-full border-none`}
+              className="absolute top-0 right-0 left-0 h-full w-full border-none"
             />
 
             {embedError && (
-              <div className="absolute left-0 right-0 top-0 flex h-full w-full flex-col items-center justify-center bg-neutral-100 dark:bg-neutral-900">
-                <div className="text-center">
-                  <h2 className="mb-4 text-xl font-semibold text-neutral-800 dark:text-neutral-200">Video Unavailable</h2>
-                  <p className="mb-6 text-neutral-600 dark:text-neutral-400">This video cannot be embedded due to the owner's settings.</p>
-                  <Link
-                    href={`https://www.youtube.com/watch?v=${videoId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
-                  >
-                    <Youtube className="h-5 w-5" />
-                    Watch on YouTube
-                  </Link>
+              <div className="absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center justify-center pb-4">
+                <div className="rounded-lg bg-neutral-100/95 dark:bg-neutral-900/95 px-6 py-4 shadow-lg border border-neutral-300 dark:border-neutral-700 max-w-[95%]">
+                  <div className="text-center">
+                    <h2 className="mb-2 text-lg font-semibold text-neutral-800 dark:text-neutral-200">Video Unavailable</h2>
+                    <div className="flex flex-wrap gap-2 justify-center">
+                      <Link
+                        href={`https://www.youtube.com/watch?v=${videoId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                      >
+                        <Youtube className="h-5 w-5" />
+                        Watch on YouTube
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -270,7 +273,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         </div>
         {isLoaded && (
           <div className="flex max-w-[80vw] flex-col">
-            <div className="flex justify-center gap-1 pt-1 xs:gap-3">
+            <div className="xs:gap-3 flex justify-center gap-1 pt-1">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -335,13 +338,13 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               </TooltipProvider>
             </div>
             {/* Title */}
-            <span className="mx-auto my-1 break-words text-center tracking-wide text-neutral-800 dark:text-neutral-200">
+            <span className="mx-auto my-1 text-center tracking-wide break-words text-neutral-800 dark:text-neutral-200">
               {videoTitle} {videoData?.channel && `- ${videoData.channel}`}
             </span>
 
             {videoData?.publishedAt && <VideoDate publishedAt={videoData.publishedAt} />}
 
-            {videoData?.description && <Description description={videoData?.description} className="pb-2 pt-5 2xl:pt-4" />}
+            {videoData?.description && <Description description={videoData?.description} className="pt-5 pb-2 2xl:pt-4" />}
           </div>
         )}
       </div>

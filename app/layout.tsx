@@ -26,6 +26,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_GOOGLE_ADSENSE_PUB}`}
         crossOrigin="anonymous"
       />
+       {/* <script
+          crossOrigin="anonymous"
+          src="//unpkg.com/react-scan/dist/auto.global.js"
+        />  */}
       <body className={`${font.className} bg-background`}>
         <QueryProvider>
           <SettingsProvider>

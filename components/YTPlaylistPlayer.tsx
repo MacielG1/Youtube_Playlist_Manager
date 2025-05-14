@@ -91,21 +91,49 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   plLengthRef.current = videosIdsRef.current.length;
 
   let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 10 * 60 * 60 * 1000; // 10 hours
-  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // 20s to test
+  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // 20s
 
   useEffect(() => {
     async function run() {
       setIsLoading(true);
       try {
-        const data = await get(`pl=${playlistId}`);
-        if (!data) {
-          console.log("No playlist data found");
-          setIsLoading(false);
-          return;
-        }
+        // Check if we already have data in IndexedDB
+        const isEmpty = !videosIdsRef.current.length;
+        
+        if (isEmpty || olderThan1day) {
+          console.log("Fetching new videos");
+          const data = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
+          
+          if (!data) {
+            console.log("No data");
+            setIsLoading(false);
+            return;
+          }
 
-        plLengthRef.current = data.length;
-        videosIdsRef.current = data.map((video: PlaylistAPI) => video.id);
+          plLengthRef.current = data.length;
+          videosIdsRef.current = data.map((video: PlaylistAPI) => video.id);
+          setVideosList(data);
+
+          // Save the data
+          await set(`pl=${playlistId}`, data);
+          
+          localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ 
+            videosIds: videosIdsRef.current, 
+            updatedTime: Date.now() 
+          }));
+        } else {
+          // Use existing data
+          const data = await get(`pl=${playlistId}`);
+          if (!data) {
+            console.log("No playlist data found");
+            setIsLoading(false);
+            return;
+          }
+
+          plLengthRef.current = data.length;
+          videosIdsRef.current = data.map((video: PlaylistAPI) => video.id);
+          setVideosList(data);
+        }
 
         if (videosIdsRef.current.length > 0) {
           setHasValidVideoIds(true);
@@ -398,6 +426,8 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       pageRef.current = Math.floor(index / 200) + 1;
       const paginatedIndex = index % 200;
       await loadPlaylist(player, videosIdsRef.current, pageRef.current, paginatedIndex);
+
+      await player.playVideoAt(paginatedIndex);
     } catch (error) {
       console.error("Error in playVideoAt:", error);
     }
@@ -639,34 +669,34 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                 />
                 
                 {embedError && (
-                  <div className="absolute inset-0 flex h-full w-full flex-col items-center justify-center bg-neutral-100 dark:bg-neutral-900">
-                    <div className="text-center">
-                      <h2 className="mb-4 text-xl font-semibold text-neutral-800 dark:text-neutral-200">Video Unavailable</h2>
-                      <p className="mb-6 text-neutral-600 dark:text-neutral-400">This video cannot be embedded due to the owner's settings.</p>
-                      <div className="flex gap-4">
-                        <button
-                          onClick={() => window.location.reload()}
-                          className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
-                        > <Reset className="size-5" />
-                        
-                          Refresh
-                        </button>
-                        <button
-                          onClick={nextVideoOnError}
-                          className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
-                        >
-                          <PointerRight className="h-5 w-5" />
-                          Next Video
-                        </button>
-                        <Link
-                          href={`https://www.youtube.com/watch?v=${currentVideoId.current}&list=${playlistId}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
-                        >
-                          <Youtube className="h-5 w-5" />
-                          Watch on YouTube
-                        </Link>
+                  <div className="absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center justify-center pb-4">
+                    <div className="rounded-lg bg-neutral-100/95 dark:bg-neutral-900/95 px-6 py-4 shadow-lg border border-neutral-300 dark:border-neutral-700 max-w-[95%]">
+                      <div className="text-center">
+                        <h2 className="mb-2 text-lg font-semibold text-neutral-800 dark:text-neutral-200">Video Unavailable</h2>
+                        <div className="flex flex-wrap gap-2 justify-center">
+                          <button
+                            onClick={() => window.location.reload()}
+                            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
+                          > <Reset className="size-5" />
+                            Refresh
+                          </button>
+                          <button
+                            onClick={nextVideoOnError}
+                            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+                          >
+                            <PointerRight className="h-5 w-5" />
+                            Next Video
+                          </button>
+                          <Link
+                            href={`https://www.youtube.com/watch?v=${currentVideoId.current}&list=${playlistId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                          >
+                            <Youtube className="h-5 w-5" />
+                            Watch on YouTube
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>
