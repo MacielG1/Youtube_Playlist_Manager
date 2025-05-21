@@ -121,6 +121,8 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
             videosIds: videosIdsRef.current, 
             updatedTime: Date.now() 
           }));
+
+          await new Promise(resolve => setTimeout(resolve, 300));
         } else {
           // Use existing data
           const data = await get(`pl=${playlistId}`);
@@ -266,9 +268,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     }
 
     if (e.data == 150) {
+
+      console.error("Video Id", e.target.getVideoData()?.video_id);
+      console.error("current Video Index", currentVideoIndex);
       const savedData = JSON.parse(localStorage.getItem(item) || "[]");
       const currentIndex = await e.target.getPlaylistIndex();
-
       const index = currentIndex + 1 + (savedData.currentPage - 1) * 200;
 
       setCurrentVideoIndex(index);
