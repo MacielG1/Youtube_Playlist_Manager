@@ -44,6 +44,8 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   const [isInitialFetchDone, setIsInitialFetchDone] = useState(false);
   const [hasValidVideoIds, setHasValidVideoIds] = useState(false);
   const [embedError, setEmbedError] = useState(false);
+  const [isPlayerReady, setIsPlayerReady] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
@@ -90,8 +92,8 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   videosIdsRef.current = plVideos?.videosIds || [];
   plLengthRef.current = videosIdsRef.current.length;
 
-  let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 10 * 60 * 60 * 1000; // 10 hours
-  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // 20s
+  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 10 * 60 * 60 * 1000; // 10 hours
+  let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // 20s
 
   useEffect(() => {
     async function run() {
@@ -99,11 +101,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       try {
         // Check if we already have data in IndexedDB
         const isEmpty = !videosIdsRef.current.length;
-        
+
         if (isEmpty || olderThan1day) {
           console.log("Fetching new videos");
           const data = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
-          
+
           if (!data) {
             console.log("No data");
             setIsLoading(false);
@@ -116,13 +118,16 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
           // Save the data
           await set(`pl=${playlistId}`, data);
-          
-          localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ 
-            videosIds: videosIdsRef.current, 
-            updatedTime: Date.now() 
-          }));
 
-          await new Promise(resolve => setTimeout(resolve, 300));
+          localStorage.setItem(
+            `plVideos=${playlistId}`,
+            JSON.stringify({
+              videosIds: videosIdsRef.current,
+              updatedTime: Date.now(),
+            }),
+          );
+
+          await new Promise((resolve) => setTimeout(resolve, 300));
         } else {
           // Use existing data
           const data = await get(`pl=${playlistId}`);
@@ -187,6 +192,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     try {
       if (!e.target) return;
 
+      // Reset retry count when player is ready
+      setRetryCount(0);
+      setIsPlayerReady(true);
+      setEmbedError(false);
+
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       try {
@@ -237,6 +247,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       return () => clearInterval(intervalId);
     } catch (error) {
       console.error("Error in onReady:", error);
+      setIsPlayerReady(true);
     }
   }
 
@@ -265,9 +276,31 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     // YouTube error code 101 or 150 indicates embedding is disabled
     if (e.data === 101 || e.data === 150) {
       setEmbedError(true);
+
+      if (retryCount < 3) {
+        setRetryCount((prev) => prev + 1);
+        setIsPlayerReady(false);
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        // Force a reload of the player
+        const player = PlaylistPlayerRef.current?.internalPlayer;
+        if (player) {
+          try {
+            await player.loadVideoById(videosIdsRef.current[0]);
+          } catch (error) {
+            console.error("Error reloading video:", error);
+          }
+        }
+        return;
+      }
     }
 
     if (e.data == 150) {
+      if (!isPlayerReady || !hasValidVideoIds) {
+        console.log("Player not ready or no valid video IDs yet");
+        return;
+      }
 
       console.error("Video Id", e.target.getVideoData()?.video_id);
       console.error("current Video Index", currentVideoIndex);
@@ -278,7 +311,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       setCurrentVideoIndex(index);
       if (index > plLengthRef.current) {
         return resetPlaylist();
-
       } else if (e.target.playerInfo?.playerState < 0 && e.data !== 101 && e.data !== 150) {
         toast(
           (t: Toast) => (
@@ -671,17 +703,23 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                   onPlaybackRateChange={onSpeedChange}
                   className="absolute top-0 right-0 left-0 h-full w-full border-none"
                 />
-                
+
                 {embedError && (
-                  <div className="absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center justify-center pb-4">
-                    <div className="rounded-lg bg-neutral-100/95 dark:bg-neutral-900/95 px-6 py-4 shadow-lg border border-neutral-300 dark:border-neutral-700 max-w-[95%]">
+                  <div className="absolute right-0 bottom-0 left-0 z-20 flex flex-col items-center justify-center pb-4">
+                    <div className="max-w-[95%] rounded-lg border border-neutral-300 bg-neutral-100/95 px-6 py-4 shadow-lg dark:border-neutral-700 dark:bg-neutral-900/95">
                       <div className="text-center">
                         <h2 className="mb-2 text-lg font-semibold text-neutral-800 dark:text-neutral-200">Video Unavailable</h2>
-                        <div className="flex flex-wrap gap-2 justify-center">
+                        <div className="flex flex-wrap justify-center gap-2">
                           <button
-                            onClick={() => window.location.reload()}
+                            onClick={() => {
+                              setRetryCount(0);
+                              setIsPlayerReady(false);
+                              setEmbedError(false);
+                              window.location.reload();
+                            }}
                             className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
-                          > <Reset className="size-5" />
+                          >
+                            <Reset className="size-5" />
                             Refresh
                           </button>
                           <button
