@@ -46,6 +46,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   const [embedError, setEmbedError] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [isFetchingVideos, setIsFetchingVideos] = useState(false);
 
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
@@ -98,8 +99,8 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   useEffect(() => {
     async function run() {
       setIsLoading(true);
+      setIsFetchingVideos(true);
       try {
-        // Check if we already have data in IndexedDB
         const isEmpty = !videosIdsRef.current.length;
 
         if (isEmpty || olderThan1day) {
@@ -109,6 +110,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
           if (!data) {
             console.log("No data");
             setIsLoading(false);
+            setIsFetchingVideos(false);
             return;
           }
 
@@ -116,7 +118,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
           videosIdsRef.current = data.map((video: PlaylistAPI) => video.id);
           setVideosList(data);
 
-          // Save the data
           await set(`pl=${playlistId}`, data);
 
           localStorage.setItem(
@@ -127,13 +128,13 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
             }),
           );
 
-          await new Promise((resolve) => setTimeout(resolve, 300));
+          await new Promise((resolve) => setTimeout(resolve, 1000));
         } else {
-          // Use existing data
           const data = await get(`pl=${playlistId}`);
           if (!data) {
             console.log("No playlist data found");
             setIsLoading(false);
+            setIsFetchingVideos(false);
             return;
           }
 
@@ -149,6 +150,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
         console.error("Error loading playlist data:", error);
       } finally {
         setIsLoading(false);
+        setIsFetchingVideos(false);
         setIsInitialFetchDone(true);
       }
     }
@@ -190,14 +192,13 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   async function onReady(e: YouTubeEvent) {
     try {
-      if (!e.target) return;
+      if (!e.target || isFetchingVideos) return;
 
-      // Reset retry count when player is ready
       setRetryCount(0);
       setIsPlayerReady(true);
       setEmbedError(false);
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       try {
         const videoData = e.target.getVideoData();
@@ -683,7 +684,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       <div className="flex flex-col items-center justify-center pt-12">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[2.4px] pt-2 xl:max-w-[62vw] xl:pt-0 2xl:max-w-[70vw]">
           <div className="relative w-full overflow-auto pb-[56.25%]">
-            {(isLoading || !isInitialFetchDone || !hasValidVideoIds) && (
+            {(isLoading || !isInitialFetchDone || !hasValidVideoIds || isFetchingVideos) && (
               <div className="absolute inset-0 -mt-1 -ml-4 flex flex-col items-center justify-center">
                 <Spin className="h-7 w-7 animate-spin text-indigo-500" />
                 <span className="sr-only">Loading...</span>
