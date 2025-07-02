@@ -93,8 +93,10 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   videosIdsRef.current = plVideos?.videosIds || [];
   plLengthRef.current = videosIdsRef.current.length;
 
-  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 10 * 60 * 60 * 1000; // 10 hours
-  let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // 20s
+  let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 10 * 60 * 60 * 1000; // 10 hours
+  // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // 20s
+
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   useEffect(() => {
     async function run() {
@@ -311,7 +313,8 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
       setCurrentVideoIndex(index);
       if (index > plLengthRef.current) {
-        return resetPlaylist();
+        setShowResetConfirm(true);
+        return;
       } else if (e.target.playerInfo?.playerState < 0 && e.data !== 101 && e.data !== 150) {
         toast(
           (t: Toast) => (
@@ -470,33 +473,15 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     }
   }
 
-  async function resetPlaylist(includeRemovedVideos = false) {
+  async function resetPlaylist() {
     try {
       pageRef.current = 1;
 
-      if (includeRemovedVideos) {
-        handleVideoPlayback("pause");
-        setIsLoading(true);
-        await del(`plRemoved=${playlistId}`);
+      const pl = await get(`pl=${playlistId}`);
+      if (!pl) return;
 
-        const newlyFetchedData = await fetchVideosIds(playlistId, videosIdsRef, isChannel);
-
-        const videosIds = newlyFetchedData.map((video: PlaylistAPI) => video.id);
-        plLengthRef.current = newlyFetchedData.length;
-        videosIdsRef.current = videosIds;
-
-        setVideosList(newlyFetchedData);
-
-        await set(`pl=${playlistId}`, newlyFetchedData);
-
-        localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ videosIds, updatedTime: Date.now() }));
-      } else {
-        const pl = await get(`pl=${playlistId}`);
-        if (!pl) return;
-
-        videosIdsRef.current = pl.map((video: PlaylistAPI) => video.id);
-        plLengthRef.current = videosIdsRef.current.length;
-      }
+      videosIdsRef.current = pl.map((video: PlaylistAPI) => video.id);
+      plLengthRef.current = videosIdsRef.current.length;
 
       await loadPlaylist(PlaylistPlayerRef.current?.getInternalPlayer(), videosIdsRef.current, pageRef.current, 0);
       await savePlaylistsProgress(PlaylistPlayerRef.current?.getInternalPlayer(), playlistId, 1);
@@ -674,7 +659,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   let playlistTitle = reduceStringSize(params.title, 100);
 
-  const isSmaller = useMediaQuery("(max-width: 1280px)");
+  const isSmaller = useMediaQuery("(max-width: 1685px)");
 
   if (!isMounted) return null;
 
@@ -897,6 +882,36 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
           </div>
         )}
       </div>
+      {showResetConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 pointer-events-none">
+          <div className="pointer-events-auto rounded-2xl bg-white p-8 shadow-2xl dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 min-w-[320px] max-w-[90vw]">
+            <h2 className="mb-4 text-xl font-bold text-neutral-800 dark:text-neutral-100 text-center">An error has occurred</h2>
+            <div className="flex gap-3 justify-center">
+              <button
+                className="cursor-pointer rounded-lg bg-gray-200 px-5 py-2 text-gray-800 font-medium transition hover:bg-gray-300 dark:bg-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                onClick={() => setShowResetConfirm(false)}
+              >
+                Close
+              </button>
+              <button
+                className="cursor-pointer rounded-lg bg-blue-500 px-5 py-2 text-white font-medium transition hover:bg-blue-600"
+                onClick={() => window.location.reload()}
+              >
+                Refresh Page
+              </button>
+              <button
+                className="cursor-pointer rounded-lg bg-indigo-600 px-5 py-2 text-white font-medium transition hover:bg-indigo-700"
+                onClick={async () => {
+                  setShowResetConfirm(false);
+                  await resetPlaylist();
+                }}
+              >
+                Reset Playlist
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
