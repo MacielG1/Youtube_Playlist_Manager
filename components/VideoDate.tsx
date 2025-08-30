@@ -7,5 +7,5 @@ export default function VideoDate({ publishedAt }: { publishedAt: string }) {
     minute: "numeric",
     hour12: false,
   });
-  return <div className="pt-2 text-sm text-neutral-500 dark:text-neutral-400 md:pl-4 md:pt-0.5">{date}</div>;
+  return <span className="text-sm text-neutral-500 dark:text-neutral-400">{date}</span>;
 }

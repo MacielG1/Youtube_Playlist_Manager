@@ -17,10 +17,12 @@ import Spin from "@/assets/icons/Spin";
 import Rewind10 from "@/assets/icons/Rewind10";
 import Skip10 from "@/assets/icons/Skip10";
 import Youtube from "@/assets/icons/Youtube";
+import Channel from "@/assets/icons/Channel";
 import Close from "@/assets/icons/Close";
 import { useAudioToggle } from "@/providers/SettingsProvider";
 import SkipBack from "@/assets/icons/skipBack";
 import VideoDate from "./VideoDate";
+import Reset from "@/assets/icons/Reset";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "./ToolTip";
 
 type Params = {
@@ -32,6 +34,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [embedError, setEmbedError] = useState(false);
   const [videoData, setVideoData] = useState<Video | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
   const { isAudioMuted } = useAudioToggle();
 
   const queryClient = useQueryClient();
@@ -74,10 +77,13 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     }
   }, [isAudioMuted]);
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   async function onReady(e: YouTubeEvent) {
     try {
       if (!e.target) return;
-
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       try {
@@ -98,18 +104,6 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
         let data = await get(`v=${videoId}`);
         setVideoData(data);
-
-        const intervalId = setInterval(() => {
-          if (isPlayingVideoRef.current && e.target) {
-            try {
-              saveVideoProgress(e.target, videoId);
-            } catch (error) {
-              console.error("Error saving video progress in interval:", error);
-            }
-          }
-        }, 15000);
-
-        return () => clearInterval(intervalId);
       } catch (err) {
         console.warn("Error initializing player:", err);
       }
@@ -130,9 +124,11 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     saveVideoProgress(e.target, videoId);
   }
   function onError(e: YouTubeEvent) {
-    console.log(e);
+    console.log("Video error:", e);
+
     if (e.data === 101 || e.data === 150) {
       setEmbedError(true);
+      console.log("Video unavailable - showing error modal");
     }
   }
   function onSpeedChange(e: YouTubeEvent) {
@@ -222,9 +218,12 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   let videoTitle = reduceStringSize(videoData?.title, 100);
 
+  if (!isMounted) return null;
+
   return (
     <>
       <LogoButton />
+
       <div className="flex min-h-screen flex-col items-center justify-center pt-12">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center pt-2 max-xl:p-[2.4px] 2xl:max-w-[71vw]">
           <div className="relative w-full overflow-auto pb-[56.25%]">
@@ -250,11 +249,21 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
             />
 
             {embedError && (
-              <div className="absolute bottom-0 left-0 right-0 z-20 flex flex-col items-center justify-center pb-4">
-                <div className="rounded-lg bg-neutral-100/95 dark:bg-neutral-900/95 px-6 py-4 shadow-lg border border-neutral-300 dark:border-neutral-700 max-w-[95%]">
+              <div className="absolute right-0 bottom-0 left-0 z-20 flex flex-col items-center justify-center pb-4">
+                <div className="max-w-[95%] rounded-lg border border-neutral-300 bg-neutral-100/95 px-6 py-4 shadow-lg dark:border-neutral-700 dark:bg-neutral-900/95">
                   <div className="text-center">
                     <h2 className="mb-2 text-lg font-semibold text-neutral-800 dark:text-neutral-200">Video Unavailable</h2>
-                    <div className="flex flex-wrap gap-2 justify-center">
+                    <div className="flex flex-wrap justify-center gap-2">
+                      <button
+                        onClick={() => {
+                          setEmbedError(false);
+                          window.location.reload();
+                        }}
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
+                      >
+                        <Reset className="size-5" />
+                        Refresh
+                      </button>
                       <Link
                         href={`https://www.youtube.com/watch?v=${videoId}`}
                         target="_blank"
@@ -318,6 +327,24 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                     </Link>
                   </TooltipTrigger>
                   <TooltipContent>Open on Youtube</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Link
+                      href={
+                        videoData?.channelId
+                          ? `https://www.youtube.com/channel/${videoData.channelId}`
+                          : `https://www.youtube.com/results?search_query=${encodeURIComponent(videoData?.channel || "")}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mx-[1px]"
+                    >
+                      <Channel className="h-8 w-8 text-neutral-600 transition duration-300 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-neutral-200" />
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>Open Channel</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>

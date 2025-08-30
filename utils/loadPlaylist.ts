@@ -2,24 +2,45 @@ import getVideosSlice from "./getVideosSlice";
 import { YouTubePlayer } from "react-youtube";
 
 export default async function loadPlaylist(Player: YouTubePlayer, videoIds: string[], page = 1, index = 0) {
-  const videosArr = getVideosSlice(videoIds, page);
+  try {
+    const videosArr = getVideosSlice(videoIds, page);
 
-  await Player.cuePlaylist({ playlist: videosArr, index, startSeconds: 0.1 });
+    if (!videosArr || videosArr.length === 0) {
+      throw new Error("No videos to load in playlist");
+    }
 
-  setTimeout(async () => {
-    const loadPlaylist = async () => {
-      const state = await Player.getPlayerState();
+    await Player.cuePlaylist({ playlist: videosArr, index, startSeconds: 0.1 });
 
-      if (state === 5) {
-        await Player.loadPlaylist(videosArr, index);
-      } else {
-        setTimeout(() => {
-          loadPlaylist();
-        }, 1000);
-      }
-    };
-    await loadPlaylist();
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error("Playlist loading timeout"));
+      }, 15000); // 15 second timeout
 
-    return true;
-  }, 500);
+      const loadPlaylistInternal = async () => {
+        try {
+          const state = await Player.getPlayerState();
+
+          if (state === 5) {
+            await Player.loadPlaylist(videosArr, index);
+            clearTimeout(timeout);
+            resolve(true);
+          } else {
+            setTimeout(() => {
+              loadPlaylistInternal();
+            }, 1000);
+          }
+        } catch (error) {
+          clearTimeout(timeout);
+          reject(error);
+        }
+      };
+
+      setTimeout(() => {
+        loadPlaylistInternal();
+      }, 500);
+    });
+  } catch (error) {
+    console.error("Error in loadPlaylist:", error);
+    throw error;
+  }
 }

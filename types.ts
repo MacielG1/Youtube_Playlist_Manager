@@ -45,6 +45,7 @@ export type Video = {
   thumbnails: Thumbnails;
   description: string;
   channel: string;
+  channelId?: string;
   publishedAt: string;
 };
 

@@ -26,6 +26,7 @@ import PointerLeft from "@/assets/icons/PointerLeft";
 import PointerRight from "@/assets/icons/PointerRight";
 import Skip10 from "@/assets/icons/Skip10";
 import Youtube from "@/assets/icons/Youtube";
+import Channel from "@/assets/icons/Channel";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "./ToolTip";
 import Shuffle from "@/assets/icons/Shuffle";
 import VideoDate from "./VideoDate";
@@ -52,6 +53,8 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   const [videosList, setVideosList] = useState<Items["items"]>([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
+  const [currentChannel, setCurrentChannel] = useState<{ id?: string; title?: string } | null>(null);
+  const [channelAvatar, setChannelAvatar] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
 
@@ -236,18 +239,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       } catch (err) {
         console.warn("Could not set playback rate:", err);
       }
-
-      const intervalId = setInterval(() => {
-        if (isPlayingVideoRef.current && !isShuffled && e.target) {
-          try {
-            savePlaylistsProgress(e.target, playlistId, pageRef.current);
-          } catch (error) {
-            console.error("Error saving playlist progress in interval:", error);
-          }
-        }
-      }, 15000);
-
-      return () => clearInterval(intervalId);
     } catch (error) {
       console.error("Error in onReady:", error);
       setIsPlayerReady(true);
@@ -280,25 +271,18 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     if (e.data === 101 || e.data === 150) {
       setEmbedError(true);
 
-      if (retryCount < 3) {
-        setRetryCount((prev) => prev + 1);
-        setIsPlayerReady(false);
-
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        // Force a reload of the player
-        const player = PlaylistPlayerRef.current?.internalPlayer;
-        if (player) {
-          try {
-            await player.loadVideoById(videosIdsRef.current[0]);
-          } catch (error) {
-            console.error("Error reloading video:", error);
-          }
-        }
-        return;
+      try {
+        const currentIndex = await e.target.getPlaylistIndex();
+        const index = currentIndex + 1 + (pageRef.current - 1) * 200;
+        setCurrentVideoIndex(index);
+      } catch (err) {
+        console.warn("Could not get playlist index for error:", err);
       }
+
+      return;
     }
 
+    // Handle other error codes (not embed-related)
     if (e.data == 150) {
       if (!isPlayerReady || !hasValidVideoIds) {
         console.log("Player not ready or no valid video IDs yet");
@@ -306,7 +290,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       }
 
       console.error("Video Id", e.target.getVideoData()?.video_id);
-      console.error("current Video Index", currentVideoIndex);
+      console.error("Current Video Index", currentVideoIndex);
       const savedData = JSON.parse(localStorage.getItem(item) || "[]");
       const currentIndex = await e.target.getPlaylistIndex();
       const index = currentIndex + 1 + (savedData.currentPage - 1) * 200;
@@ -351,7 +335,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
       if (e.data === 1) {
         setCurrentVideoIndex(index);
-        if (embedError) setEmbedError(false);
+        // Clear embed error when video successfully starts playing
+        if (embedError) {
+          console.log("Video playing successfully, clearing embed error");
+          setEmbedError(false);
+        }
       }
 
       const title = e.target.getVideoData()?.title;
@@ -368,6 +356,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       if (!video) return;
       setDescription(video.description);
       setPublishedAt(video.publishedAt);
+      setCurrentChannel({ id: video.snippet?.channelId, title: video.snippet?.title });
     } catch (error) {
       console.error("Error in onStateChange:", error);
     }
@@ -376,6 +365,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   async function onEnd(e: YouTubeEvent) {
     try {
       if (!e.target) return;
+
+      if (embedError) {
+        console.log("Embed error present, not auto-advancing");
+        return;
+      }
 
       const currentIndex = await e.target.getPlaylistIndex();
       const playlist = await e.target.getPlaylist();
@@ -447,8 +441,10 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       const currentIndex = currentVideoIndex !== null ? currentVideoIndex : 0;
       const nextIndex = currentIndex + 1;
 
-      if (nextIndex < plLengthRef.current) {
+      if (nextIndex <= plLengthRef.current) {
         setCurrentVideoIndex(nextIndex);
+        setEmbedError(false);
+        setRetryCount(0);
         await playVideoAt(nextIndex);
       } else {
         toast.error("No more videos in the playlist");
@@ -463,8 +459,9 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       const player = PlaylistPlayerRef.current?.getInternalPlayer();
       if (!player) return;
 
-      pageRef.current = Math.floor(index / 200) + 1;
-      const paginatedIndex = index % 200;
+      const zeroBasedIndex = index - 1;
+      pageRef.current = Math.floor(zeroBasedIndex / 200) + 1;
+      const paginatedIndex = zeroBasedIndex % 200;
       await loadPlaylist(player, videosIdsRef.current, pageRef.current, paginatedIndex);
 
       await player.playVideoAt(paginatedIndex);
@@ -475,19 +472,41 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   async function resetPlaylist() {
     try {
+      setIsLoading(true);
       pageRef.current = 1;
 
       const pl = await get(`pl=${playlistId}`);
-      if (!pl) return;
+      if (!pl || !pl.length) {
+        console.error("No playlist data found for reset");
+        return;
+      }
+
+      const player = PlaylistPlayerRef.current?.getInternalPlayer();
+      if (!player) {
+        console.error("Player not available for reset");
+        return;
+      }
+
+      setEmbedError(false);
 
       videosIdsRef.current = pl.map((video: PlaylistAPI) => video.id);
       plLengthRef.current = videosIdsRef.current.length;
 
-      await loadPlaylist(PlaylistPlayerRef.current?.getInternalPlayer(), videosIdsRef.current, pageRef.current, 0);
-      await savePlaylistsProgress(PlaylistPlayerRef.current?.getInternalPlayer(), playlistId, 1);
-      setCurrentVideoIndex(1);
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      await loadPlaylist(player, videosIdsRef.current, pageRef.current, 0);
+
+      setTimeout(async () => {
+        try {
+          await savePlaylistsProgress(player, playlistId, 1);
+          setCurrentVideoIndex(1);
+        } catch (err) {
+          console.warn("Could not save progress after reset:", err);
+        }
+      }, 1000);
     } catch (e) {
-      console.log("error", e);
+      console.error("Error resetting playlist:", e);
+      toast.error("Failed to reset playlist. Try refreshing the page.");
     } finally {
       setIsLoading(false);
     }
@@ -692,7 +711,15 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
                 {embedError && (
                   <div className="absolute right-0 bottom-0 left-0 z-20 flex flex-col items-center justify-center pb-4">
-                    <div className="max-w-[95%] rounded-lg border border-neutral-300 bg-neutral-100/95 px-6 py-4 shadow-lg dark:border-neutral-700 dark:bg-neutral-900/95">
+                    <div className="relative max-w-[95%] rounded-lg border border-neutral-300 bg-neutral-100/95 px-6 py-4 shadow-lg dark:border-neutral-700 dark:bg-neutral-900/95">
+                      <button
+                        onClick={() => setEmbedError(false)}
+                        className="absolute top-2 right-2 cursor-pointer text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
+                        aria-label="Close"
+                      >
+                        <Close className="h-5 w-5" />
+                      </button>
+
                       <div className="text-center">
                         <h2 className="mb-2 text-lg font-semibold text-neutral-800 dark:text-neutral-200">Video Unavailable</h2>
                         <div className="flex flex-wrap justify-center gap-2">
@@ -812,6 +839,24 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
                 <Tooltip>
                   <TooltipTrigger asChild>
+                    <Link
+                      href={
+                        currentChannel?.id
+                          ? `https://www.youtube.com/channel/${currentChannel.id}`
+                          : `https://www.youtube.com/results?search_query=${encodeURIComponent(currentChannel?.title || "")}`
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mx-[0px] mt-[1px] flex size-[30px] cursor-pointer items-center justify-center"
+                    >
+                      <Channel className="h-full w-full text-neutral-600 transition duration-300 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-neutral-200" />
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>Open Channel</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
                     <div className="flex items-center">
                       <ModalDelete
                         icon={<RemoveVideo className="mx-[2px] mb-[3px] size-[30px]" />}
@@ -883,24 +928,24 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
         )}
       </div>
       {showResetConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 pointer-events-none">
-          <div className="pointer-events-auto rounded-2xl bg-white p-8 shadow-2xl dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 min-w-[320px] max-w-[90vw]">
-            <h2 className="mb-4 text-xl font-bold text-neutral-800 dark:text-neutral-100 text-center">An error has occurred</h2>
-            <div className="flex gap-3 justify-center">
+        <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+          <div className="pointer-events-auto max-w-[90vw] min-w-[320px] rounded-2xl border border-neutral-200 bg-white p-8 shadow-2xl dark:border-neutral-700 dark:bg-neutral-900">
+            <h2 className="mb-4 text-center text-xl font-bold text-neutral-800 dark:text-neutral-100">An error has occurred</h2>
+            <div className="flex justify-center gap-3">
               <button
-                className="cursor-pointer rounded-lg bg-gray-200 px-5 py-2 text-gray-800 font-medium transition hover:bg-gray-300 dark:bg-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
+                className="cursor-pointer rounded-lg bg-gray-200 px-5 py-2 font-medium text-gray-800 transition hover:bg-gray-300 dark:bg-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800"
                 onClick={() => setShowResetConfirm(false)}
               >
                 Close
               </button>
               <button
-                className="cursor-pointer rounded-lg bg-blue-500 px-5 py-2 text-white font-medium transition hover:bg-blue-600"
+                className="cursor-pointer rounded-lg bg-blue-500 px-5 py-2 font-medium text-white transition hover:bg-blue-600"
                 onClick={() => window.location.reload()}
               >
                 Refresh Page
               </button>
               <button
-                className="cursor-pointer rounded-lg bg-indigo-600 px-5 py-2 text-white font-medium transition hover:bg-indigo-700"
+                className="cursor-pointer rounded-lg bg-indigo-600 px-5 py-2 font-medium text-white transition hover:bg-indigo-700"
                 onClick={async () => {
                   setShowResetConfirm(false);
                   await resetPlaylist();
