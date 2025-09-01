@@ -46,15 +46,12 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   const [hasValidVideoIds, setHasValidVideoIds] = useState(false);
   const [embedError, setEmbedError] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
   const [isFetchingVideos, setIsFetchingVideos] = useState(false);
 
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
-  const [currentChannel, setCurrentChannel] = useState<{ id?: string; title?: string } | null>(null);
-  const [channelAvatar, setChannelAvatar] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
 
@@ -74,6 +71,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   const playlistId = params.list;
   const item = `pl=${playlistId}`;
+  const currentChannelName = playlistId.replace("UU", "UC");
 
   let plVideos: PlVideos = { videosIds: [] };
   let isBrowser = typeof window !== "undefined";
@@ -199,7 +197,8 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     try {
       if (!e.target || isFetchingVideos) return;
 
-      setRetryCount(0);
+      console.log(e.target)
+      console.log(e.target.getVideoData())
       setIsPlayerReady(true);
       setEmbedError(false);
 
@@ -356,7 +355,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       if (!video) return;
       setDescription(video.description);
       setPublishedAt(video.publishedAt);
-      setCurrentChannel({ id: video.snippet?.channelId, title: video.snippet?.title });
     } catch (error) {
       console.error("Error in onStateChange:", error);
     }
@@ -444,7 +442,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       if (nextIndex <= plLengthRef.current) {
         setCurrentVideoIndex(nextIndex);
         setEmbedError(false);
-        setRetryCount(0);
         await playVideoAt(nextIndex);
       } else {
         toast.error("No more videos in the playlist");
@@ -677,6 +674,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   plOptions.playerVars.playlist = getVideosSlice(videosIdsRef.current, pageRef.current).join(",");
 
   let playlistTitle = reduceStringSize(params.title, 100);
+  const channelName = params.title.split(" from ")[1];
 
   const isSmaller = useMediaQuery("(max-width: 1685px)");
 
@@ -725,7 +723,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                         <div className="flex flex-wrap justify-center gap-2">
                           <button
                             onClick={() => {
-                              setRetryCount(0);
                               setIsPlayerReady(false);
                               setEmbedError(false);
                               window.location.reload();
@@ -841,9 +838,9 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                   <TooltipTrigger asChild>
                     <Link
                       href={
-                        currentChannel?.id
-                          ? `https://www.youtube.com/channel/${currentChannel.id}`
-                          : `https://www.youtube.com/results?search_query=${encodeURIComponent(currentChannel?.title || "")}`
+                        currentChannelName
+                          ? `https://www.youtube.com/channel/${currentChannelName}`
+                          : "#"
                       }
                       target="_blank"
                       rel="noopener noreferrer"
