@@ -12,12 +12,39 @@ export default async function savePlaylistsProgress(videoPlayer: YouTubePlayer, 
 
   if (!videoPlayer || !videoPlayer.getCurrentTime()) return;
 
+  const currentTime = ((await videoPlayer?.getCurrentTime()) as number) || 0;
+  const duration = ((await videoPlayer?.getDuration()) as number) || 0;
+  const currentIndex = index !== undefined ? index : ((await videoPlayer?.getPlaylistIndex()) as number) || 0;
+
+  // Check if video is 97% watched
+  const isVideoFinished = duration > 0 && currentTime / duration >= 0.97;
+
+  let nextIndex = currentIndex;
+  let nextPage = page && page > 0 ? page : 1;
+
+  if (isVideoFinished) {
+    const savedItem = currentPl.currentItem || 0;
+    const savedPage = currentPl.currentPage || 1;
+
+    const savedAbsoluteIndex = savedItem + (savedPage - 1) * 200;
+    const currentAbsoluteIndex = currentIndex + (page - 1) * 200;
+
+    if (savedAbsoluteIndex <= currentAbsoluteIndex) {
+      nextIndex = currentIndex + 1;
+
+      if (nextIndex >= 200) {
+        nextIndex = 0;
+        nextPage = nextPage + 1;
+      }
+    }
+  }
+
   const data = {
     ...currentPl,
     playlistId,
-    currentItem: index || ((await videoPlayer?.getPlaylistIndex()) as number) || 0,
-    initialTime: ((await videoPlayer?.getCurrentTime()) as number) || 0,
-    currentPage: page && page > 0 ? page : 1,
+    currentItem: isVideoFinished ? nextIndex : currentIndex,
+    initialTime: isVideoFinished ? 0 : currentTime,
+    currentPage: nextPage,
   };
 
   localStorage.setItem(item, JSON.stringify(data));

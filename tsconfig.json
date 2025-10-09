@@ -53,7 +53,8 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "components/BackButton.jsx",
-    "prettier.config.js"
+    "prettier.config.js",
+    ".next\\dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
