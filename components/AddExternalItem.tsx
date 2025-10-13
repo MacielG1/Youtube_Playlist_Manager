@@ -28,9 +28,27 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
         if (searchParams.type === "video") {
           let videoKey = "v=" + id;
 
+          // Double check both IndexedDB and localStorage array
           let isVideoSaved = await get(videoKey);
+          const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
+          const isInLocalStorage = allVideos.includes(id);
 
-          if (isVideoSaved) {
+          // If in localStorage but not in IndexedDB, remove from localStorage and allow re-adding
+          if (!isVideoSaved && isInLocalStorage) {
+            console.log("Video found in localStorage but not in IndexedDB, cleaning up localStorage...");
+            const updatedVideos = allVideos.filter((videoId: string) => videoId !== id);
+            localStorage.setItem("videos", JSON.stringify(updatedVideos));
+            localStorage.removeItem(videoKey); // Remove any localStorage entry for this video
+          }
+
+          // If in IndexedDB but not in localStorage, clean it up
+          if (isVideoSaved && !isInLocalStorage) {
+            console.log("Video found in IndexedDB but not in localStorage, cleaning up...");
+            isVideoSaved = null;
+          }
+
+          // Only block if it's in both storage locations
+          if (isVideoSaved && isInLocalStorage) {
             console.log("Video Already Added!");
             toast.error("Video Already Added!", toastError);
             return;
@@ -69,9 +87,27 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
         if (searchParams.type === "playlist") {
           let playlistKey = "pl=" + id;
 
+          // Double check both IndexedDB and localStorage array
           let isPlSaved = await get(playlistKey);
+          const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
+          const isInLocalStorage = allPlaylists.includes(id);
 
-          if (isPlSaved) {
+          // If in localStorage but not in IndexedDB, remove from localStorage and allow re-adding
+          if (!isPlSaved && isInLocalStorage) {
+            console.log("Playlist found in localStorage but not in IndexedDB, cleaning up localStorage...");
+            const updatedPlaylists = allPlaylists.filter((playlistId: string) => playlistId !== id);
+            localStorage.setItem("playlists", JSON.stringify(updatedPlaylists));
+            localStorage.removeItem(playlistKey); // Remove any localStorage entry for this playlist
+          }
+
+          // If in IndexedDB but not in localStorage, clean it up
+          if (isPlSaved && !isInLocalStorage) {
+            console.log("Playlist found in IndexedDB but not in localStorage, cleaning up...");
+            isPlSaved = null;
+          }
+
+          // Only block if it's in both storage locations
+          if (isPlSaved && isInLocalStorage) {
             toast.error("Playlist Already Added!", toastError);
             return null;
           }
@@ -114,7 +150,28 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
             return null;
           }
           const playlistKey = "pl=" + channelId;
-          if (localStorage.getItem(playlistKey)) {
+
+          // Double check both IndexedDB and localStorage array
+          let isChannelSaved = await get(playlistKey);
+          const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
+          const isInLocalStorage = allPlaylists.includes(channelId);
+
+          // If in localStorage but not in IndexedDB, remove from localStorage and allow re-adding
+          if (!isChannelSaved && isInLocalStorage) {
+            console.log("Channel found in localStorage but not in IndexedDB, cleaning up localStorage...");
+            const updatedPlaylists = allPlaylists.filter((playlistId: string) => playlistId !== channelId);
+            localStorage.setItem("playlists", JSON.stringify(updatedPlaylists));
+            localStorage.removeItem(playlistKey); // Remove any localStorage entry for this channel
+          }
+
+          // If in IndexedDB but not in localStorage, clean it up
+          if (isChannelSaved && !isInLocalStorage) {
+            console.log("Channel found in IndexedDB but not in localStorage, cleaning up...");
+            isChannelSaved = null;
+          }
+
+          // Only block if it's in both storage locations
+          if (isChannelSaved && isInLocalStorage) {
             toast.error("Channel Already Added!", toastError);
             return null;
           }
