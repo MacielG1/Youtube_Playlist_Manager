@@ -8,7 +8,6 @@ export default function Youtube(props: SVGProps<SVGSVGElement>) {
         fontFamily="none"
         fontWeight="none"
         fontSize="none"
-        textAnchor="none"
         style={{
           mixBlendMode: "normal",
         }}
