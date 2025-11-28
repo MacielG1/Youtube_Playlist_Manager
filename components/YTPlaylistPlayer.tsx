@@ -197,8 +197,8 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     try {
       if (!e.target || isFetchingVideos) return;
 
-      console.log(e.target)
-      console.log(e.target.getVideoData())
+      console.log(e.target);
+      console.log(e.target.getVideoData());
       setIsPlayerReady(true);
       setEmbedError(false);
 
@@ -837,11 +837,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link
-                      href={
-                        currentChannelName
-                          ? `https://www.youtube.com/channel/${currentChannelName}`
-                          : "#"
-                      }
+                      href={currentChannelName ? `https://www.youtube.com/channel/${currentChannelName}` : "#"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mx-[0px] mt-[1px] flex size-[30px] cursor-pointer items-center justify-center"
