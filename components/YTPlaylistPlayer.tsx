@@ -4,6 +4,7 @@ import { useRef, useEffect, useState, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import YouTube, { type YouTubeEvent, type YouTubeProps } from "react-youtube";
+import dynamic from "next/dynamic";
 import { useAudioToggle } from "@/providers/SettingsProvider";
 import { shuffle } from "@/utils/shuffle";
 import { del, get, set } from "idb-keyval";
@@ -18,8 +19,8 @@ import ModalDelete from "./modals/ModalDelete";
 import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Description from "./Description";
-import VideosListSidebar from "./VideosListSidebar";
 import Link from "next/link";
+
 import Spin from "@/assets/icons/Spin";
 import Rewind10 from "@/assets/icons/Rewind10";
 import PointerLeft from "@/assets/icons/PointerLeft";
@@ -30,12 +31,18 @@ import Channel from "@/assets/icons/Channel";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "./ToolTip";
 import Shuffle from "@/assets/icons/Shuffle";
 import VideoDate from "./VideoDate";
+
 import RemoveVideo from "@/assets/icons/RemoveVideo";
 import ResetPlaylistModal from "./modals/ResetPlaylistModal";
 import Close from "@/assets/icons/Close";
 import toast, { type Toast } from "react-hot-toast";
 import { toastRefresh } from "@/utils/toastStyles";
 import Reset from "@/assets/icons/Reset";
+
+const VideosListSidebar = dynamic(() => import("./VideosListSidebar"), {
+  ssr: false,
+  loading: () => <div className="w-[200px]" />,
+});
 
 export default function YoutubePlayer({ params }: { params: { list: string; title: string } }) {
   const [currentVideoIndex, setCurrentVideoIndex] = useState<number | null>(null);
@@ -120,7 +127,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
           plLengthRef.current = data.length;
           videosIdsRef.current = data.map((video: PlaylistAPI) => video.id);
           setVideosList(data);
-
           await set(`pl=${playlistId}`, data);
 
           localStorage.setItem(
@@ -130,8 +136,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
               updatedTime: Date.now(),
             }),
           );
-
-          await new Promise((resolve) => setTimeout(resolve, 1000));
         } else {
           const data = await get(`pl=${playlistId}`);
           if (!data) {
@@ -201,9 +205,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       console.log(e.target.getVideoData());
       setIsPlayerReady(true);
       setEmbedError(false);
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
       try {
         const videoData = e.target.getVideoData();
         if (videoData && videoData.title) {
@@ -673,8 +674,14 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   plOptions.playerVars.playlist = getVideosSlice(videosIdsRef.current, pageRef.current).join(",");
 
-  let playlistTitle = reduceStringSize(params.title, 100);
-  const channelName = params.title.split(" from ")[1];
+  // Memoize title computations
+  const { playlistTitle, channelName } = useMemo(
+    () => ({
+      playlistTitle: reduceStringSize(params.title, 100),
+      channelName: params.title.split(" from ")[1],
+    }),
+    [params.title]
+  );
 
   const isSmaller = useMediaQuery("(max-width: 1685px)");
 

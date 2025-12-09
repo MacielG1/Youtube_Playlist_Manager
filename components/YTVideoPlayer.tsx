@@ -216,7 +216,11 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     };
   }, []);
 
-  let videoTitle = reduceStringSize(videoData?.title, 100);
+  // Memoize title computation
+  const videoTitle = useMemo(
+    () => reduceStringSize(videoData?.title, 100),
+    [videoData?.title]
+  );
 
   if (!isMounted) return null;
 
@@ -243,7 +247,6 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               onPause={onPause}
               onError={onError}
               onPlaybackRateChange={onSpeedChange}
-              // onEnd={onEnd}
               onStateChange={onStateChange}
               className="absolute top-0 right-0 left-0 h-full w-full border-none"
             />

@@ -6,7 +6,7 @@ import { getThumbnailInfo } from "@/utils/getThumbnailInfo";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
 
 type Props = {
   videosList: Items["items"];
@@ -64,6 +64,23 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
     }
   }
 
+  // Memoize processed video data to avoid recalculating on every render
+  const processedVideos = useMemo(
+    () =>
+      videosList.map((video) => {
+        const { thumbnailURL = "", hasBlackBars = false } = getThumbnailInfo(video.thumbnails);
+        return {
+          id: video.id,
+          title: video.title,
+          shortTitle: reduceStringSize(video.title, 60),
+          thumbnailURL,
+          hasBlackBars,
+          url: `/video/v?v=${video.id}&title=${encodeURIComponent(video.title)}`,
+        };
+      }),
+    [videosList]
+  );
+
   if (videosList.length === 0) return null;
 
   return (
@@ -75,10 +92,8 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
           className,
         )}
       >
-        {videosList.map((video, i) => {
-          const { thumbnailURL = "", hasBlackBars = false } = getThumbnailInfo(video.thumbnails);
-          const title = reduceStringSize(video.title, 60);
-          const url = `/video/v?v=${video.id}&title=${encodeURIComponent(video.title)}`;
+        {processedVideos.map((video, i) => {
+          const { thumbnailURL, hasBlackBars, shortTitle, url } = video;
           return (
             <div className="relative flex cursor-default flex-col items-center justify-center text-center first:pt-3 last:pb-3" key={video.id}>
               <div className="group flex aspect-video items-center justify-center gap-2 rounded-xl">
@@ -96,7 +111,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                       width={is700 ? 150 : is1280 ? 240 : is1500 ? 130 : 150}
                       height={is700 ? 84 : is1280 ? 135 : is1500 ? 73 : 84}
                       className={`rounded-xl transition duration-300 hover:scale-[1.03] ${hasBlackBars ? "-my-[14px]" : "-my-[1px]"} `}
-                      priority
+                      loading="lazy"
                       unoptimized
                     />
                   </div>
@@ -107,7 +122,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                 onClick={(e) => leftClickHandler(e, i)}
                 className="w-[160px] max-w-fit overflow-hidden pl-5 text-xs font-normal break-words whitespace-normal text-black dark:text-neutral-100"
               >
-                <span className="cursor-pointer">{title}</span>
+                <span className="cursor-pointer">{shortTitle}</span>
               </Link>
             </div>
           );
