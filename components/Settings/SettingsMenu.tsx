@@ -24,15 +24,13 @@ export default function SettingsMenu() {
   }
 
   let content = (
-    <div className="flex flex-col items-center justify-center gap-y-2 pb-3">
+    <div className="flex flex-col gap-1">
       <ThemeToggler />
       <ImportExportTimers setModalOpen={setIsOpen} />
       <HowItWorks setModalOpen={setIsOpen} />
-      {/* <DeleteAllBtn openDeleteModal={openDeleteModal} /> */}
-
-      <DeleteAllDataModal closeSettingsModal={closeSettingsModal} />
       <SupportButton />
       <ToggleMute />
+      <DeleteAllDataModal closeSettingsModal={closeSettingsModal} />
     </div>
   );
   const isPlaylist = pathname.includes("/playlist");

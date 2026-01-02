@@ -45,5 +45,4 @@ export default async function middleware(request: NextRequest, event: NextFetchE
 
 export const config = {
   matcher: "/api/:path*",
-  runtime: "experimental-edge",
 };

@@ -186,28 +186,30 @@ export default function Input() {
   return (
     <header className="sticky max-sm:pt-12">
       <nav className="xs:pt-3 relative top-0 z-20 w-full bg-inherit px-2 pb-5 sm:pt-4">
-        <form className="flex max-h-12 justify-center gap-2" onSubmit={handleSubmit}>
-          <input
-            type="text"
-            value={addedURL}
-            id="input"
-            onChange={handleInputChange}
-            placeholder="Enter a Video or Playlist URL or Channel Name"
-            className="xs:placeholder:text-base w-[65vw] min-w-[16px] rounded-md border-2 border-neutral-600 bg-neutral-300 px-3 text-neutral-900 placeholder-neutral-700 caret-neutral-800 transition-colors duration-300 placeholder:text-sm hover:bg-neutral-200 focus:border-gray-600 focus:placeholder-neutral-500 focus-visible:border-neutral-900 focus-visible:bg-neutral-200 focus-visible:outline-hidden sm:text-lg md:w-[480px] dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-300 dark:placeholder-neutral-400 dark:caret-neutral-500 dark:hover:bg-black dark:focus:placeholder-neutral-500 dark:focus-visible:border-neutral-600 dark:focus-visible:bg-neutral-950"
-          />
+        <form className="flex max-h-12 justify-center gap-3" onSubmit={handleSubmit}>
+          <div className="group relative w-[65vw] min-w-[16px] md:w-[480px]">
+            <input
+              type="text"
+              value={addedURL}
+              id="input"
+              onChange={handleInputChange}
+              placeholder="Enter a Video or Playlist URL or Channel Name"
+              className="xs:placeholder:text-base peer h-11 w-full rounded-xl border border-neutral-300 bg-white/80 px-4 pr-3 text-neutral-900 shadow-sm backdrop-blur-sm transition-all duration-200 placeholder:text-sm placeholder:text-neutral-400 hover:border-neutral-400 hover:bg-white focus:border-blue-500 focus:bg-white focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)] focus:outline-none sm:text-base dark:border-neutral-700 dark:bg-neutral-900/80 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:hover:border-neutral-600 dark:hover:bg-neutral-900 dark:focus:border-blue-500 dark:focus:bg-neutral-900 dark:focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]"
+            />
+            {isLoading && (
+              <div className="absolute top-1/2 right-3 -translate-y-1/2">
+                <Spin className="h-4 w-4 animate-spin text-blue-500" />
+              </div>
+            )}
+          </div>
           <button
             type="submit"
             disabled={isLoading}
-            className={`group flex cursor-pointer items-center justify-center rounded-lg border border-blue-800 bg-blue-700 px-4 py-2 text-gray-100 transition duration-300 hover:border-blue-950 hover:bg-blue-800 hover:text-gray-200 disabled:border-neutral-600 disabled:bg-neutral-700 dark:border-blue-800 dark:bg-blue-800 dark:hover:border-blue-900 dark:hover:bg-blue-900 dark:hover:text-gray-200 dark:disabled:border-neutral-600 dark:disabled:bg-neutral-900`}
+            className="group relative flex h-11 w-11 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-linear-to-b from-blue-500 to-blue-600 text-white shadow-md transition-all duration-200 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:from-neutral-400 disabled:to-neutral-500 disabled:shadow-none dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-500 dark:hover:to-blue-600 dark:focus:ring-offset-neutral-900 dark:disabled:from-neutral-700 dark:disabled:to-neutral-800"
           >
-            <Search className="h-4 w-4 sm:h-7 sm:w-7" />
+            <Search className="h-5 w-5 transition-transform duration-300 group-hover:scale-105" />
           </button>
         </form>
-        {isLoading && (
-          <div className="absolute -bottom-1 left-1/2 flex items-center justify-center sm:-bottom-[0.35rem]">
-            <Spin className="h-3 w-3 animate-spin text-indigo-500 sm:h-4 sm:w-4" />
-          </div>
-        )}
       </nav>
     </header>
   );

@@ -1,16 +1,9 @@
-import { useState } from "react";
 import { useTheme } from "next-themes";
 import Sun from "@/assets/icons/Sun";
 import Moon from "@/assets/icons/Moon";
 
 export default function ThemeToggler() {
-  const [isOpen, setIsOpen] = useState(false);
-
   const { setTheme, resolvedTheme } = useTheme();
-
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
 
   function onThemeChange() {
     if (resolvedTheme === "dark") {
@@ -21,18 +14,17 @@ export default function ThemeToggler() {
   }
 
   return (
-    <div className="relative inline-block w-24 px-4 py-2 text-center">
-      <button
-        type="button"
-        onClick={toggleDropdown}
-        className="cursor-pointer rounded-md text-white transition duration-300 hover:scale-110 focus:outline-hidden focus-visible:ring-3 focus-visible:ring-neutral-700"
-      >
-        <span onClick={onThemeChange}>
-          {resolvedTheme === "dark" ? <Sun className="h-6 w-6 text-yellow-400" /> : <Moon className="h-6 w-6 text-gray-800" />}
-        </span>
-        {/* screen reader */}
-        <span className="sr-only">Toggle Theme</span>
-      </button>
-    </div>
+    <button
+      type="button"
+      onClick={onThemeChange}
+      className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-neutral-700 transition-colors duration-150 hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-neutral-200 dark:hover:bg-neutral-700/50"
+    >
+      {resolvedTheme === "dark" ? (
+        <Sun className="h-4 w-4 text-amber-500" />
+      ) : (
+        <Moon className="h-4 w-4 text-slate-600" />
+      )}
+      <span>{resolvedTheme === "dark" ? "Light Mode" : "Dark Mode"}</span>
+    </button>
   );
 }

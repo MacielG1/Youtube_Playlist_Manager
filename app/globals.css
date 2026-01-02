@@ -116,3 +116,47 @@
         max-width: 150px;
     }
 }
+
+/* Settings modal animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoomIn {
+  from { 
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInFromTop {
+  from { 
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: slideInFromTop 0.2s ease-out forwards;
+}
+
+.fade-in-0 {
+  animation: fadeIn 0.15s ease-out forwards;
+}
+
+.zoom-in-95 {
+  animation: zoomIn 0.2s ease-out forwards;
+}
+
+.slide-in-from-top-2 {
+  animation: slideInFromTop 0.2s ease-out forwards;
+}

@@ -140,23 +140,26 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
   }
 
   return (
-    <div className="mx-auto flex justify-center gap-2">
-      <div className="grid max-w-sm items-center justify-center">
-        <label
-          htmlFor="fileInput"
-          className={`relative inline-flex items-center rounded-md border border-neutral-950 bg-neutral-200 px-[6.9px] py-[6.9px] text-base font-medium text-neutral-950 shadow-md ring-offset-background transition-colors duration-300 hover:cursor-pointer hover:border hover:bg-white focus-visible:outline-hidden dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-black ${isExportable ? "max-w-[83px]" : "w-[115px] max-w-[115px] pl-[30.5px]"} focus-within:ring-3 focus-within:ring-neutral-700 focus-within:ring-offset-2`}
-        >
-          Import
-          {/* Screen Reader */}
-          <input type="file" id="fileInput" accept=".json" className="sr-only" onChange={importTimers} />
-        </label>
-      </div>
+    <div className="flex w-full gap-2">
+      <label
+        htmlFor="fileInput"
+        className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm font-medium text-neutral-700 transition-all duration-150 hover:border-neutral-300 hover:bg-neutral-100 focus-within:ring-2 focus-within:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700/50 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-700"
+      >
+        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+        Import
+        <input type="file" id="fileInput" accept=".json" className="sr-only" onChange={importTimers} />
+      </label>
 
       {isExportable && (
         <button
           onClick={exportTimers}
-          className="h-10 max-w-[83px] rounded-md border border-neutral-950 bg-neutral-200 px-2 py-2 text-base font-medium text-neutral-950 shadow-md ring-offset-background transition-colors duration-300 hover:cursor-pointer hover:border hover:bg-white focus-visible:outline-hidden focus-visible:ring-3 focus-visible:ring-neutral-700 focus-visible:ring-offset-2 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-black"
+          className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-sm font-medium text-neutral-700 transition-all duration-150 hover:border-neutral-300 hover:bg-neutral-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-neutral-600 dark:bg-neutral-700/50 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-700"
         >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
           Export
         </button>
       )}
