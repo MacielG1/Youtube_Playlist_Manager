@@ -342,7 +342,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                       }
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mx-[1px]"
+                      className="mx-1px"
                     >
                       <Channel className="h-8 w-8 text-neutral-600 transition duration-300 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-neutral-200" />
                     </Link>
@@ -368,7 +368,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               </TooltipProvider>
             </div>
             {/* Title */}
-            <span className="mx-auto my-1 text-center tracking-wide break-words text-neutral-800 dark:text-neutral-200">
+            <span className="mx-auto my-1 text-center tracking-wide wrap-break-wor text-neutral-800 dark:text-neutral-200">
               {videoTitle} {videoData?.channel && `- ${videoData.channel}`}
             </span>
 

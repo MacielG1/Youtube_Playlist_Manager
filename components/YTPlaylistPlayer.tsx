@@ -61,12 +61,13 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
   const [isMounted, setIsMounted] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
+  const [currentVideoIdState, setCurrentVideoIdState] = useState<string>("");
 
   const { isAudioMuted } = useAudioToggle();
   const isPaused = useRef(false);
   const pageRef = useRef(1);
   const plLengthRef = useRef(0);
-  const currentVideoId = useRef(0);
+  const currentVideoId = useRef("");
   const pageAndIndexBeforeShuffle = useRef({ page: 1, index: 0 });
 
   const PlaylistPlayerRef = useRef<YouTube | null>(null);
@@ -350,6 +351,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       if (!videoId) return;
 
       currentVideoId.current = videoId;
+      setCurrentVideoIdState(videoId);
       let pl = await get(`pl=${playlistId}`);
 
       const video = pl?.find((v: PlaylistAPI) => v.id === videoId);
@@ -747,7 +749,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                             Next Video
                           </button>
                           <Link
-                            href={`https://www.youtube.com/watch?v=${currentVideoId.current}&list=${playlistId}`}
+                            href={`https://www.youtube.com/watch?v=${currentVideoIdState}&list=${playlistId}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
@@ -830,7 +832,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Link
-                      href={`https://www.youtube.com/watch?v=${currentVideoId.current}&list=${playlistId}&t=${Math.floor(currentTime)}`}
+                      href={`https://www.youtube.com/watch?v=${currentVideoIdState}&list=${playlistId}&t=${Math.floor(currentTime)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mx-[3px] mt-[1px] flex size-[30px] cursor-pointer items-center justify-center"
