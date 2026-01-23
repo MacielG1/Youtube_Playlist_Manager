@@ -1,3 +1,5 @@
+import type { Playlist, Thumbnails } from "@/types";
+
 export default async function getPlaylistsData(newPlaylistId?: string) {
   let playlistsIds = "";
 
@@ -33,6 +35,17 @@ export default async function getPlaylistsData(newPlaylistId?: string) {
     if (!data) {
       console.log("Error", res.statusText);
       return {};
+    }
+
+    // Apply custom thumbnails if set
+    const customThumbnails = JSON.parse(localStorage.getItem("customPlaylistThumbnails") || "{}");
+    if (data.items && Object.keys(customThumbnails).length > 0) {
+      data.items = data.items.map((item: Playlist) => {
+        if (customThumbnails[item.id]) {
+          return { ...item, thumbnails: customThumbnails[item.id] as Thumbnails };
+        }
+        return item;
+      });
     }
 
     return data;

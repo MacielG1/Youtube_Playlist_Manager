@@ -1,21 +1,26 @@
 import ArrowRight from "@/assets/icons/ArrowRight";
+import ImageIcon from "@/assets/icons/ImageIcon";
 import { useMediaQuery } from "usehooks-ts";
-import { Items } from "@/types";
+import { Items, Thumbnails } from "@/types";
 import { cn } from "@/utils/cn";
 import { getThumbnailInfo } from "@/utils/getThumbnailInfo";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 type Props = {
   videosList: Items["items"];
   playVideoAt: (index: number) => void;
   currentVideoIndex: number | null;
   className?: string;
+  playlistId?: string;
 };
 
-export default function VideosListSidebar({ videosList, playVideoAt, currentVideoIndex, className }: Props) {
+export default function VideosListSidebar({ videosList, playVideoAt, currentVideoIndex, className, playlistId }: Props) {
+  const queryClient = useQueryClient();
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const isInitialMount = useRef(true); // to prevent scrolling on initial mount
 
@@ -75,6 +80,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
           shortTitle: reduceStringSize(video.title, 60),
           thumbnailURL,
           hasBlackBars,
+          thumbnails: video.thumbnails,
           url: `/video/v?v=${video.id}&title=${encodeURIComponent(video.title)}`,
         };
       }),
@@ -93,7 +99,31 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
         )}
       >
         {processedVideos.map((video, i) => {
-          const { thumbnailURL, hasBlackBars, shortTitle, url } = video;
+          const { thumbnailURL, hasBlackBars, shortTitle, url, thumbnails } = video;
+
+          function setAsPlaylistThumbnail(e: React.MouseEvent) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!playlistId || !thumbnails) return;
+
+            // Update localStorage
+            const customThumbnails = JSON.parse(localStorage.getItem("customPlaylistThumbnails") || "{}");
+            customThumbnails[playlistId] = thumbnails;
+            localStorage.setItem("customPlaylistThumbnails", JSON.stringify(customThumbnails));
+
+            // Update the playlists query cache
+            queryClient.setQueryData<Items>(["playlists"], (oldData) => {
+              if (!oldData) return oldData;
+              return {
+                ...oldData,
+                items: oldData.items.map((item) =>
+                  item.id === playlistId ? { ...item, thumbnails: thumbnails as Thumbnails } : item
+                ),
+              };
+            });
+
+            toast.success("Playlist thumbnail updated!", { position: "top-right", duration: 1500 });
+          }
           return (
             <div className="relative flex cursor-default flex-col items-center justify-center text-center first:pt-3 last:pb-3" key={video.id}>
               <div className="group flex aspect-video items-center justify-center gap-2 rounded-xl">
@@ -103,19 +133,30 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                   <span className="text-center text-xs">{i + 1}</span>
                 )}
 
-                <Link onClick={(e) => leftClickHandler(e, i)} href={url} className="flex transition duration-300">
-                  <div className="h-auto cursor-pointer overflow-hidden rounded-xl">
-                    <Image
-                      src={thumbnailURL}
-                      alt={video.title}
-                      width={is700 ? 150 : is1280 ? 240 : is1500 ? 130 : 150}
-                      height={is700 ? 84 : is1280 ? 135 : is1500 ? 73 : 84}
-                      className={`rounded-xl transition duration-300 hover:scale-[1.03] ${hasBlackBars ? "-my-[14px]" : "-my-[1px]"} `}
-                      loading="lazy"
-                      unoptimized
-                    />
-                  </div>
-                </Link>
+                <div className="relative">
+                  <Link onClick={(e) => leftClickHandler(e, i)} href={url} className="flex transition duration-300">
+                    <div className="h-auto cursor-pointer overflow-hidden rounded-xl">
+                      <Image
+                        src={thumbnailURL}
+                        alt={video.title}
+                        width={is700 ? 150 : is1280 ? 240 : is1500 ? 130 : 150}
+                        height={is700 ? 84 : is1280 ? 135 : is1500 ? 73 : 84}
+                        className={`rounded-xl transition duration-300 group-hover:scale-[1.03] ${hasBlackBars ? "-my-[14px]" : "-my-[1px]"} `}
+                        loading="lazy"
+                        unoptimized
+                      />
+                    </div>
+                  </Link>
+                  {playlistId && (
+                    <button
+                      onClick={setAsPlaylistThumbnail}
+                      className="absolute top-0 left-0 z-10 cursor-pointer rounded-br-md bg-neutral-800/80 p-1 text-neutral-300 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-neutral-900 hover:text-indigo-400"
+                      title="Set as playlist thumbnail"
+                    >
+                      <ImageIcon className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
               <Link
                 href={url}

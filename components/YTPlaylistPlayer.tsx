@@ -766,7 +766,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
             )}
           </div>
 
-          {!isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className="xl:absolute" />}
+          {!isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className="xl:absolute" playlistId={playlistId} />}
         </div>
         {!!plLengthRef.current && (
           <div className="flex max-w-[80vw] flex-col pt-1 md:max-w-[60vw] 2xl:max-w-[65vw] 2xl:pt-2">
@@ -925,7 +925,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
             {description && <Description description={description} className="pt-5 pb-2 2xl:pt-4" />}
 
-            <div>{isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} />}</div>
+            <div>{isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} playlistId={playlistId} />}</div>
           </div>
         )}
       </div>

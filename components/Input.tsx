@@ -196,11 +196,6 @@ export default function Input() {
               placeholder="Enter a Video or Playlist URL or Channel Name"
               className="xs:placeholder:text-base peer h-11 w-full rounded-xl border border-neutral-300 bg-white/80 px-4 pr-3 text-neutral-900 shadow-sm backdrop-blur-sm transition-all duration-200 placeholder:text-sm placeholder:text-neutral-400 hover:border-neutral-400 hover:bg-white focus:border-blue-500 focus:bg-white focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)] focus:outline-none sm:text-base dark:border-neutral-700 dark:bg-neutral-900/80 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:hover:border-neutral-600 dark:hover:bg-neutral-900 dark:focus:border-blue-500 dark:focus:bg-neutral-900 dark:focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]"
             />
-            {isLoading && (
-              <div className="absolute top-1/2 right-3 -translate-y-1/2">
-                <Spin className="h-4 w-4 animate-spin text-blue-500" />
-              </div>
-            )}
           </div>
           <button
             type="submit"
@@ -210,6 +205,11 @@ export default function Input() {
             <Search className="h-5 w-5 transition-transform duration-300 group-hover:scale-105" />
           </button>
         </form>
+        {isLoading && (
+          <div className="absolute -bottom-1 left-1/2 flex -translate-x-1/2 items-center justify-center sm:-bottom-[0.35rem]">
+            <Spin className="h-3 w-3 animate-spin text-blue-500 sm:h-4 sm:w-4" />
+          </div>
+        )}
       </nav>
     </header>
   );
