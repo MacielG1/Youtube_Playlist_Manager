@@ -4,6 +4,22 @@ import { get, set, del } from "idb-keyval";
 import { QueryClient } from "@tanstack/react-query";
 import { PersistedClient, Persister, PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 
+function createIDBPersister(idbValidKey: IDBValidKey = "reactQuery") {
+  return {
+    persistClient: async (client: PersistedClient) => {
+      set(idbValidKey, client);
+    },
+    restoreClient: async () => {
+      return await get<PersistedClient>(idbValidKey);
+    },
+    removeClient: async () => {
+      await del(idbValidKey);
+    },
+  } as Persister;
+}
+
+const persister = createIDBPersister();
+
 export default function QueryProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
     () =>
@@ -17,29 +33,9 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
       }),
   );
 
-  const persister = createIDBPersister();
-
-  const options = {
-    persister,
-  };
-
   return (
-    <PersistQueryClientProvider client={queryClient} persistOptions={options}>
+    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
       {children}
     </PersistQueryClientProvider>
   );
-}
-
-export function createIDBPersister(idbValidKey: IDBValidKey = "reactQuery") {
-  return {
-    persistClient: async (client: PersistedClient) => {
-      set(idbValidKey, client);
-    },
-    restoreClient: async () => {
-      return await get<PersistedClient>(idbValidKey);
-    },
-    removeClient: async () => {
-      await del(idbValidKey);
-    },
-  } as Persister;
 }

@@ -52,8 +52,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   const [isInitialFetchDone, setIsInitialFetchDone] = useState(false);
   const [hasValidVideoIds, setHasValidVideoIds] = useState(false);
   const [embedError, setEmbedError] = useState(false);
+  const embedErrorRef = useRef(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
   const [isFetchingVideos, setIsFetchingVideos] = useState(false);
+  const [unavailableVideoIds, setUnavailableVideoIds] = useState<Set<string>>(new Set());
+  const [autoSkipCountdown, setAutoSkipCountdown] = useState<number | null>(null);
 
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
@@ -73,6 +76,10 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   const PlaylistPlayerRef = useRef<YouTube | null>(null);
   const isPlayingVideoRef = useRef<boolean | null>(false);
   const videosIdsRef = useRef<string[]>([]);
+  const autoSkipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoSkipCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const skipAttemptCountRef = useRef(0);
+  const pendingSkipTargetRef = useRef<number | null>(null);
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -104,6 +111,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 10 * 60 * 60 * 1000; // 10 hours
   // let olderThan1day = Date.now() - (plVideos.updatedTime || 0) > 20000; // 20s
+
+  function updateEmbedError(value: boolean) {
+    embedErrorRef.current = value;
+    setEmbedError(value);
+  }
 
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
@@ -196,16 +208,70 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   useEffect(() => {
     setIsMounted(true);
+    return () => {
+      if (autoSkipTimerRef.current) clearTimeout(autoSkipTimerRef.current);
+      if (autoSkipCountdownRef.current) clearInterval(autoSkipCountdownRef.current);
+    };
   }, []);
+
+  function cancelAutoSkip() {
+    if (autoSkipTimerRef.current) {
+      clearTimeout(autoSkipTimerRef.current);
+      autoSkipTimerRef.current = null;
+    }
+    if (autoSkipCountdownRef.current) {
+      clearInterval(autoSkipCountdownRef.current);
+      autoSkipCountdownRef.current = null;
+    }
+    setAutoSkipCountdown(null);
+    pendingSkipTargetRef.current = null;
+  }
+
+  function startAutoSkip(targetIndex: number) {
+    cancelAutoSkip();
+    pendingSkipTargetRef.current = targetIndex;
+
+    let countdown = 3;
+    setAutoSkipCountdown(countdown);
+
+    autoSkipCountdownRef.current = setInterval(() => {
+      countdown -= 1;
+      setAutoSkipCountdown(countdown);
+      if (countdown <= 0 && autoSkipCountdownRef.current) {
+        clearInterval(autoSkipCountdownRef.current);
+        autoSkipCountdownRef.current = null;
+      }
+    }, 1000);
+
+    autoSkipTimerRef.current = setTimeout(() => {
+      autoSkipTimerRef.current = null;
+      setAutoSkipCountdown(null);
+      skipToIndex(targetIndex);
+    }, 3000);
+  }
+
+  async function skipToIndex(targetIndex: number) {
+    try {
+      cancelAutoSkip();
+
+      if (targetIndex <= plLengthRef.current) {
+        setCurrentVideoIndex(targetIndex);
+        await playVideoAt(targetIndex);
+      } else {
+        toast.error("No more videos in the playlist");
+        skipAttemptCountRef.current = 0;
+      }
+    } catch (error) {
+      console.error("Error skipping to video:", error);
+    }
+  }
 
   async function onReady(e: YouTubeEvent) {
     try {
       if (!e.target || isFetchingVideos) return;
 
-      console.log(e.target);
-      console.log(e.target.getVideoData());
       setIsPlayerReady(true);
-      setEmbedError(false);
+
       try {
         const videoData = e.target.getVideoData();
         if (videoData && videoData.title) {
@@ -216,10 +282,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       }
 
       const player = PlaylistPlayerRef.current?.internalPlayer;
-      if (!player) {
-        console.warn("Player not initialized in onReady");
-        return;
-      }
+      if (!player) return;
 
       try {
         const playlistIndex = await player.getPlaylistIndex();
@@ -266,16 +329,36 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }
 
   async function onError(e: YouTubeEvent) {
-    console.log("error", e);
+    console.log("error", e.data);
 
-    // YouTube error code 101 or 150 indicates embedding is disabled
     if (e.data === 101 || e.data === 150) {
-      setEmbedError(true);
+      updateEmbedError(true);
 
       try {
+        const videoId = e.target.getVideoData()?.video_id;
+        if (videoId) {
+          setUnavailableVideoIds((prev) => new Set(prev).add(videoId));
+        }
+
         const currentIndex = await e.target.getPlaylistIndex();
         const index = currentIndex + 1 + (pageRef.current - 1) * 200;
         setCurrentVideoIndex(index);
+
+        if (index > plLengthRef.current) {
+          setShowResetConfirm(true);
+          return;
+        }
+
+        skipAttemptCountRef.current += 1;
+
+        if (skipAttemptCountRef.current > 25) {
+          toast.error("Too many unavailable videos in a row. Try a different section.", { duration: 4000 });
+          skipAttemptCountRef.current = 0;
+          return;
+        }
+
+        const nextIndex = index + 1;
+        startAutoSkip(nextIndex);
       } catch (err) {
         console.warn("Could not get playlist index for error:", err);
       }
@@ -283,43 +366,25 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       return;
     }
 
-    // Handle other error codes (not embed-related)
-    if (e.data == 150) {
-      if (!isPlayerReady || !hasValidVideoIds) {
-        console.log("Player not ready or no valid video IDs yet");
-        return;
-      }
+    if (!isPlayerReady || !hasValidVideoIds) return;
 
-      console.error("Video Id", e.target.getVideoData()?.video_id);
-      console.error("Current Video Index", currentVideoIndex);
-      const savedData = JSON.parse(localStorage.getItem(item) || "[]");
-      const currentIndex = await e.target.getPlaylistIndex();
-      const index = currentIndex + 1 + (savedData.currentPage - 1) * 200;
-
-      setCurrentVideoIndex(index);
-      if (index > plLengthRef.current) {
-        setShowResetConfirm(true);
-        return;
-      } else if (e.target.playerInfo?.playerState < 0 && e.data !== 101 && e.data !== 150) {
-        toast(
-          (t: Toast) => (
-            <div className="flex items-center gap-2">
-              <span>Error, Please refresh!</span>
-              <span
-                onClick={() => {
-                  window.location.reload();
-                  toast.dismiss(t.id);
-                }}
-                className="cursor-pointer rounded-sm bg-indigo-600 px-2 py-1 text-sm text-white hover:bg-indigo-600"
-              >
-                Refresh
-              </span>
-            </div>
-          ),
-          toastRefresh,
-        );
-      }
-    }
+    toast(
+      (t: Toast) => (
+        <div className="flex items-center gap-2">
+          <span>Error, Please refresh!</span>
+          <span
+            onClick={() => {
+              window.location.reload();
+              toast.dismiss(t.id);
+            }}
+            className="cursor-pointer rounded-sm bg-indigo-600 px-2 py-1 text-sm text-white hover:bg-indigo-600"
+          >
+            Refresh
+          </span>
+        </div>
+      ),
+      toastRefresh,
+    );
   }
 
   async function onStateChange(e: YouTubeEvent) {
@@ -336,11 +401,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
       if (e.data === 1) {
         setCurrentVideoIndex(index);
-        // Clear embed error when video successfully starts playing
-        if (embedError) {
-          console.log("Video playing successfully, clearing embed error");
-          setEmbedError(false);
+        if (embedErrorRef.current) {
+          updateEmbedError(false);
+          cancelAutoSkip();
         }
+        skipAttemptCountRef.current = 0;
       }
 
       const title = e.target.getVideoData()?.title;
@@ -367,8 +432,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     try {
       if (!e.target) return;
 
-      if (embedError) {
-        console.log("Embed error present, not auto-advancing");
+      if (embedErrorRef.current) {
         return;
       }
 
@@ -404,14 +468,12 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       const player = PlaylistPlayerRef.current?.getInternalPlayer();
       if (!player) return;
 
-      const index = await player.getPlaylistIndex();
+      const playlistIndex = await player.getPlaylistIndex();
+      const globalIndex = playlistIndex + 1 + (pageRef.current - 1) * 200;
+      const prevIndex = globalIndex - 1;
 
-      if (plLengthRef.current > 200 && index === 0 && pageRef.current > 1) {
-        pageRef.current -= 1;
-        await loadPlaylist(player, videosIdsRef.current, pageRef.current, 199);
-      } else {
-        const targetIndex = index > 0 ? index - 1 : 0;
-        await player.playVideoAt(targetIndex);
+      if (prevIndex >= 1) {
+        await playVideoAt(prevIndex);
       }
     } catch (error) {
       console.error("Error in previousVideo:", error);
@@ -423,14 +485,12 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       const player = PlaylistPlayerRef.current?.getInternalPlayer();
       if (!player) return;
 
-      const index = await player.getPlaylistIndex();
+      const playlistIndex = await player.getPlaylistIndex();
+      const globalIndex = playlistIndex + 1 + (pageRef.current - 1) * 200;
+      const nextIndex = globalIndex + 1;
 
-      if (plLengthRef.current > 200 && (index + 1) % 200 === 0) {
-        pageRef.current += 1;
-        await loadPlaylist(player, videosIdsRef.current, pageRef.current);
-      } else {
-        await player.nextVideo();
-        await player.seekTo(0);
+      if (nextIndex <= plLengthRef.current) {
+        await playVideoAt(nextIndex);
       }
     } catch (error) {
       console.error("Error in nextVideo:", error);
@@ -439,15 +499,17 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   async function nextVideoOnError() {
     try {
-      const currentIndex = currentVideoIndex !== null ? currentVideoIndex : 0;
-      const nextIndex = currentIndex + 1;
+      const target = pendingSkipTargetRef.current;
+      if (target !== null) {
+        await skipToIndex(target);
+        return;
+      }
 
-      if (nextIndex <= plLengthRef.current) {
-        setCurrentVideoIndex(nextIndex);
-        setEmbedError(false);
-        await playVideoAt(nextIndex);
-      } else {
-        toast.error("No more videos in the playlist");
+      const player = PlaylistPlayerRef.current?.getInternalPlayer();
+      if (player) {
+        const playlistIndex = await player.getPlaylistIndex();
+        const currentIdx = playlistIndex + 1 + (pageRef.current - 1) * 200;
+        await skipToIndex(currentIdx + 1);
       }
     } catch (error) {
       console.error("Error in nextVideoOnError:", error);
@@ -459,10 +521,16 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       const player = PlaylistPlayerRef.current?.getInternalPlayer();
       if (!player) return;
 
+      cancelAutoSkip();
+
       const zeroBasedIndex = index - 1;
-      pageRef.current = Math.floor(zeroBasedIndex / 200) + 1;
+      const targetPage = Math.floor(zeroBasedIndex / 200) + 1;
       const paginatedIndex = zeroBasedIndex % 200;
-      await loadPlaylist(player, videosIdsRef.current, pageRef.current, paginatedIndex);
+
+      if (targetPage !== pageRef.current) {
+        pageRef.current = targetPage;
+        await loadPlaylist(player, videosIdsRef.current, targetPage, paginatedIndex);
+      }
 
       await player.playVideoAt(paginatedIndex);
     } catch (error) {
@@ -487,7 +555,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
         return;
       }
 
-      setEmbedError(false);
+      updateEmbedError(false);
 
       videosIdsRef.current = pl.map((video: PlaylistAPI) => video.id);
       plLengthRef.current = videosIdsRef.current.length;
@@ -720,7 +788,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                   <div className="absolute right-0 bottom-0 left-0 z-20 flex flex-col items-center justify-center pb-4">
                     <div className="relative max-w-[95%] rounded-lg border border-neutral-300 bg-neutral-100/95 px-6 py-4 shadow-lg dark:border-neutral-700 dark:bg-neutral-900/95">
                       <button
-                        onClick={() => setEmbedError(false)}
+                        onClick={() => {
+                          updateEmbedError(false);
+                          cancelAutoSkip();
+                          skipAttemptCountRef.current = 0;
+                        }}
                         className="absolute top-2 right-2 cursor-pointer text-neutral-600 hover:text-neutral-800 dark:text-neutral-400 dark:hover:text-neutral-200"
                         aria-label="Close"
                       >
@@ -728,30 +800,41 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                       </button>
 
                       <div className="text-center">
-                        <h2 className="mb-2 text-lg font-semibold text-neutral-800 dark:text-neutral-200">Video Unavailable</h2>
+                        <h2 className="mb-2 text-lg font-semibold text-neutral-800 dark:text-neutral-200">
+                          Video Unavailable
+                          {autoSkipCountdown !== null && (
+                            <span className="ml-2 text-sm font-normal text-neutral-500 dark:text-neutral-400">
+                              (skipping in {autoSkipCountdown}s)
+                            </span>
+                          )}
+                        </h2>
                         <div className="flex flex-wrap justify-center gap-2">
-                          <button
-                            onClick={() => {
-                              setIsPlayerReady(false);
-                              setEmbedError(false);
-                              window.location.reload();
-                            }}
-                            className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
-                          >
-                            <Reset className="size-5" />
-                            Refresh
-                          </button>
+                          {autoSkipCountdown !== null && (
+                            <button
+                              onClick={() => {
+                                cancelAutoSkip();
+                                skipAttemptCountRef.current = 0;
+                              }}
+                              className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-gray-600 px-4 py-2 text-white hover:bg-gray-700"
+                            >
+                              Cancel Skip
+                            </button>
+                          )}
                           <button
                             onClick={nextVideoOnError}
                             className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
                           >
                             <PointerRight className="h-5 w-5" />
-                            Next Video
+                            Skip Now
                           </button>
                           <Link
                             href={`https://www.youtube.com/watch?v=${currentVideoIdState}&list=${playlistId}`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={() => {
+                              cancelAutoSkip();
+                              skipAttemptCountRef.current = 0;
+                            }}
                             className="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
                           >
                             <Youtube className="h-5 w-5" />
@@ -766,7 +849,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
             )}
           </div>
 
-          {!isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className="xl:absolute" playlistId={playlistId} />}
+          {!isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} className="xl:absolute" playlistId={playlistId} unavailableVideoIds={unavailableVideoIds} />}
         </div>
         {!!plLengthRef.current && (
           <div className="flex max-w-[80vw] flex-col pt-1 md:max-w-[60vw] 2xl:max-w-[65vw] 2xl:pt-2">
@@ -925,7 +1008,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
             {description && <Description description={description} className="pt-5 pb-2 2xl:pt-4" />}
 
-            <div>{isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} playlistId={playlistId} />}</div>
+            <div>{isSmaller && <VideosListSidebar videosList={videosList} playVideoAt={playVideoAt} currentVideoIndex={currentVideoIndex} playlistId={playlistId} unavailableVideoIds={unavailableVideoIds} />}</div>
           </div>
         )}
       </div>

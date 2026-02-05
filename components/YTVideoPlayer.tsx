@@ -252,10 +252,11 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
             />
 
             {embedError && (
-              <div className="absolute right-0 bottom-0 left-0 z-20 flex flex-col items-center justify-center pb-4">
-                <div className="max-w-[95%] rounded-lg border border-neutral-300 bg-neutral-100/95 px-6 py-4 shadow-lg dark:border-neutral-700 dark:bg-neutral-900/95">
+              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60">
+                <div className="max-w-[95%] rounded-lg border border-neutral-300 bg-neutral-100/95 px-8 py-6 shadow-lg dark:border-neutral-700 dark:bg-neutral-900/95">
                   <div className="text-center">
-                    <h2 className="mb-2 text-lg font-semibold text-neutral-800 dark:text-neutral-200">Video Unavailable</h2>
+                    <h2 className="mb-1 text-xl font-semibold text-neutral-800 dark:text-neutral-200">Video Unavailable</h2>
+                    <p className="mb-4 text-sm text-neutral-500 dark:text-neutral-400">This video can&apos;t be embedded. Watch it directly on YouTube.</p>
                     <div className="flex flex-wrap justify-center gap-2">
                       <button
                         onClick={() => {

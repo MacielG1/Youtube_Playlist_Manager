@@ -17,12 +17,13 @@ type Props = {
   currentVideoIndex: number | null;
   className?: string;
   playlistId?: string;
+  unavailableVideoIds?: Set<string>;
 };
 
-export default function VideosListSidebar({ videosList, playVideoAt, currentVideoIndex, className, playlistId }: Props) {
+export default function VideosListSidebar({ videosList, playVideoAt, currentVideoIndex, className, playlistId, unavailableVideoIds }: Props) {
   const queryClient = useQueryClient();
   const sidebarRef = useRef<HTMLDivElement | null>(null);
-  const isInitialMount = useRef(true); // to prevent scrolling on initial mount
+  const isInitialMount = useRef(true);
 
   const is700 = useMediaQuery("(max-width: 700px)");
   const is1280 = useMediaQuery("(max-width: 1280px)");
@@ -58,10 +59,10 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
     }
   }, [currentVideoIndex, videosList]);
 
-  function leftClickHandler(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, index: number) {
+  function leftClickHandler(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, oneBasedIndex: number) {
     if (e.button === 0) {
-      e.preventDefault(); // prevent left click default behavior
-      playVideoAt(index);
+      e.preventDefault();
+      playVideoAt(oneBasedIndex);
       window.scrollTo({
         top: 0,
         behavior: "smooth",
@@ -69,7 +70,6 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
     }
   }
 
-  // Memoize processed video data to avoid recalculating on every render
   const processedVideos = useMemo(
     () =>
       videosList.map((video) => {
@@ -100,18 +100,18 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
       >
         {processedVideos.map((video, i) => {
           const { thumbnailURL, hasBlackBars, shortTitle, url, thumbnails } = video;
+          const isUnavailable = unavailableVideoIds?.has(video.id);
+          const oneBasedIndex = i + 1;
 
           function setAsPlaylistThumbnail(e: React.MouseEvent) {
             e.preventDefault();
             e.stopPropagation();
             if (!playlistId || !thumbnails) return;
 
-            // Update localStorage
             const customThumbnails = JSON.parse(localStorage.getItem("customPlaylistThumbnails") || "{}");
             customThumbnails[playlistId] = thumbnails;
             localStorage.setItem("customPlaylistThumbnails", JSON.stringify(customThumbnails));
 
-            // Update the playlists query cache
             queryClient.setQueryData<Items>(["playlists"], (oldData) => {
               if (!oldData) return oldData;
               return {
@@ -125,16 +125,16 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
             toast.success("Playlist thumbnail updated!", { position: "top-right", duration: 1500 });
           }
           return (
-            <div className="relative flex cursor-default flex-col items-center justify-center text-center first:pt-3 last:pb-3" key={video.id}>
+            <div className={`relative flex cursor-default flex-col items-center justify-center text-center first:pt-3 last:pb-3 ${isUnavailable ? "opacity-45" : ""}`} key={video.id}>
               <div className="group flex aspect-video items-center justify-center gap-2 rounded-xl">
                 {currentVideoIndex && currentVideoIndex - 1 === i ? (
                   <ArrowRight className="h-2 w-2 text-indigo-500" />
                 ) : (
-                  <span className="text-center text-xs">{i + 1}</span>
+                  <span className="text-center text-xs">{oneBasedIndex}</span>
                 )}
 
                 <div className="relative">
-                  <Link onClick={(e) => leftClickHandler(e, i)} href={url} className="flex transition duration-300">
+                  <Link onClick={(e) => leftClickHandler(e, oneBasedIndex)} href={url} className="flex transition duration-300">
                     <div className="h-auto cursor-pointer overflow-hidden rounded-xl">
                       <Image
                         src={thumbnailURL}
@@ -147,6 +147,11 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                       />
                     </div>
                   </Link>
+                  {isUnavailable && (
+                    <div className="absolute inset-0 flex items-center justify-center rounded-xl">
+                      <span className="rounded bg-red-600/90 px-1.5 py-0.5 text-[10px] font-medium text-white">Unavailable</span>
+                    </div>
+                  )}
                   {playlistId && (
                     <button
                       onClick={setAsPlaylistThumbnail}
@@ -160,8 +165,8 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
               </div>
               <Link
                 href={url}
-                onClick={(e) => leftClickHandler(e, i)}
-                className="w-[160px] max-w-fit overflow-hidden pl-5 text-xs font-normal break-words whitespace-normal text-black dark:text-neutral-100"
+                onClick={(e) => leftClickHandler(e, oneBasedIndex)}
+                className={`w-[160px] max-w-fit overflow-hidden pl-5 text-xs font-normal break-words whitespace-normal ${isUnavailable ? "line-through text-neutral-500 dark:text-neutral-500" : "text-black dark:text-neutral-100"}`}
               >
                 <span className="cursor-pointer">{shortTitle}</span>
               </Link>
