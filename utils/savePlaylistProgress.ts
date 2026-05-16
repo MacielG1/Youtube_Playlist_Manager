@@ -16,8 +16,9 @@ export default async function savePlaylistsProgress(videoPlayer: YouTubePlayer, 
   const duration = ((await videoPlayer?.getDuration()) as number) || 0;
   const currentIndex = index !== undefined ? index : ((await videoPlayer?.getPlaylistIndex()) as number) || 0;
 
-  // Check if video is 97% watched
-  const isVideoFinished = duration > 0 && currentTime / duration >= 0.97;
+  const remainingSeconds = duration - currentTime;
+  const watchedThresholdSeconds = duration > 0 ? Math.min(30, Math.max(5, duration * 0.01)) : 0;
+  const isVideoFinished = duration > 0 && remainingSeconds <= watchedThresholdSeconds;
 
   let nextIndex = currentIndex;
   let nextPage = page && page > 0 ? page : 1;

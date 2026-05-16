@@ -25,17 +25,23 @@ const longRangeLimiter = new Ratelimit({
 const isDev = process.env.NODE_ENV === "development";
 
 export default async function middleware(request: NextRequest, event: NextFetchEvent): Promise<Response | undefined> {
+  if (isDev) return NextResponse.next();
+
   const ip = ipAddress(request) ?? "127.0.0.1";
 
   // Check both limiters for the same identifier
   const shortRangeResult = await shortRangeLimiter.limit(ip);
+  if (!shortRangeResult.success) {
+    return new NextResponse("Error", { status: 429 });
+  }
+
   const longRangeResult = await longRangeLimiter.limit(ip);
 
   // console.log(`Short range attempts left: ${shortRangeResult.remaining}`);
   // console.log(`Long range attempts left: ${longRangeResult.remaining}`);
 
   // If either of the limiters is exceeded, return a redirect response
-  if (!isDev && (!shortRangeResult.success || !longRangeResult.success)) {
+  if (!longRangeResult.success) {
     return new NextResponse("Error", { status: 429 });
   }
 

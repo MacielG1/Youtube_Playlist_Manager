@@ -1,13 +1,12 @@
 import ArrowRight from "@/assets/icons/ArrowRight";
 import ImageIcon from "@/assets/icons/ImageIcon";
-import { useMediaQuery } from "usehooks-ts";
 import { Items, Thumbnails } from "@/types";
 import { cn } from "@/utils/cn";
 import { getThumbnailInfo } from "@/utils/getThumbnailInfo";
 import reduceStringSize from "@/utils/reduceStringLength";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
@@ -24,40 +23,51 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
   const queryClient = useQueryClient();
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const isInitialMount = useRef(true);
+  const [scrollTop, setScrollTop] = useState(0);
+  const [viewportWidth, setViewportWidth] = useState(0);
 
-  const is700 = useMediaQuery("(max-width: 700px)");
-  const is1280 = useMediaQuery("(max-width: 1280px)");
-  const is1500 = useMediaQuery("(max-width: 1500px)");
+  useEffect(() => {
+    const updateViewportWidth = () => setViewportWidth(window.innerWidth);
+    updateViewportWidth();
+    window.addEventListener("resize", updateViewportWidth);
+    return () => window.removeEventListener("resize", updateViewportWidth);
+  }, []);
+
+  const is700 = viewportWidth <= 700;
+  const is1280 = viewportWidth <= 1280;
+  const is1500 = viewportWidth <= 1500;
+
+  const itemHeight = is1280 && !is700 ? 184 : is1500 && !is1280 ? 122 : 132;
 
   useEffect(() => {
     if (sidebarRef.current && currentVideoIndex !== null) {
-      const item = sidebarRef.current.children[currentVideoIndex - 1] as HTMLElement;
-      if (item) {
-        let scrollAmount;
-        if (window.innerWidth < 500) {
-          scrollAmount = item.offsetTop - 500;
-        } else if (window.innerWidth < 700) {
-          scrollAmount = item.offsetTop - 610;
-        } else if (window.innerWidth < 900) {
-          scrollAmount = item.offsetTop - 700;
-        } else if (window.innerWidth < 1280) {
-          scrollAmount = item.offsetTop - 850;
-        } else {
-          scrollAmount = item.offsetTop - 10;
-        }
+      let scrollOffset;
+      if (window.innerWidth < 500) {
+        scrollOffset = 500;
+      } else if (window.innerWidth < 700) {
+        scrollOffset = 610;
+      } else if (window.innerWidth < 900) {
+        scrollOffset = 700;
+      } else if (window.innerWidth < 1280) {
+        scrollOffset = 850;
+      } else {
+        scrollOffset = 10;
+      }
 
-        if (isInitialMount.current) {
-          sidebarRef.current.scrollTop = scrollAmount;
-          isInitialMount.current = false;
-        } else {
-          sidebarRef.current.scrollTo({
-            top: scrollAmount,
-            behavior: "smooth",
-          });
-        }
+      const scrollAmount = (currentVideoIndex - 1) * itemHeight - scrollOffset;
+
+      if (isInitialMount.current) {
+        sidebarRef.current.scrollTop = scrollAmount;
+        setScrollTop(scrollAmount);
+        isInitialMount.current = false;
+      } else {
+        sidebarRef.current.scrollTo({
+          top: scrollAmount,
+          behavior: "smooth",
+        });
       }
     }
-  }, [currentVideoIndex, videosList]);
+  }, [currentVideoIndex, itemHeight, videosList.length]);
 
   function leftClickHandler(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, oneBasedIndex: number) {
     if (e.button === 0) {
@@ -70,9 +80,19 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
     }
   }
 
+  const visibleRange = useMemo(() => {
+    const viewportHeight = sidebarRef.current?.clientHeight || 900;
+    const overscan = 8;
+    const viewportItems = Math.ceil(viewportHeight / itemHeight);
+    const start = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
+    const end = Math.min(videosList.length, start + viewportItems + overscan * 2);
+
+    return { start, end };
+  }, [itemHeight, scrollTop, videosList.length]);
+
   const processedVideos = useMemo(
     () =>
-      videosList.map((video) => {
+      videosList.slice(visibleRange.start, visibleRange.end).map((video, index) => {
         const { thumbnailURL = "", hasBlackBars = false } = getThumbnailInfo(video.thumbnails);
         return {
           id: video.id,
@@ -82,9 +102,10 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
           hasBlackBars,
           thumbnails: video.thumbnails,
           url: `/video/v?v=${video.id}&title=${encodeURIComponent(video.title)}`,
+          originalIndex: visibleRange.start + index,
         };
       }),
-    [videosList]
+    [videosList, visibleRange]
   );
 
   if (videosList.length === 0) return null;
@@ -97,11 +118,13 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
           "custom-scrollbar 1.5xl:right-7 3xl:right-11 top-0 right-1 mx-auto mt-4 flex max-h-[90vh] max-w-fit flex-col gap-3 overflow-x-hidden overflow-y-auto rounded-md border border-neutral-400 p-1 px-2 pr-[16.8px] lg:mt-12 2xl:right-3 dark:border-neutral-700",
           className,
         )}
+        onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
       >
-        {processedVideos.map((video, i) => {
+        {visibleRange.start > 0 && <div aria-hidden style={{ height: visibleRange.start * itemHeight, flex: "0 0 auto" }} />}
+        {processedVideos.map((video) => {
           const { thumbnailURL, hasBlackBars, shortTitle, url, thumbnails } = video;
           const isUnavailable = unavailableVideoIds?.has(video.id);
-          const oneBasedIndex = i + 1;
+          const oneBasedIndex = video.originalIndex + 1;
 
           function setAsPlaylistThumbnail(e: React.MouseEvent) {
             e.preventDefault();
@@ -127,7 +150,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
           return (
             <div className={`relative flex cursor-default flex-col items-center justify-center text-center first:pt-3 last:pb-3 ${isUnavailable ? "opacity-45" : ""}`} key={video.id}>
               <div className="group flex aspect-video items-center justify-center gap-2 rounded-xl">
-                {currentVideoIndex && currentVideoIndex - 1 === i ? (
+                {currentVideoIndex && currentVideoIndex - 1 === video.originalIndex ? (
                   <ArrowRight className="h-2 w-2 text-indigo-500" />
                 ) : (
                   <span className="text-center text-xs">{oneBasedIndex}</span>
@@ -173,6 +196,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
             </div>
           );
         })}
+        {visibleRange.end < videosList.length && <div aria-hidden style={{ height: (videosList.length - visibleRange.end) * itemHeight, flex: "0 0 auto" }} />}
       </div>
     </aside>
   );

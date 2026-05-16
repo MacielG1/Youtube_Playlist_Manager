@@ -57,6 +57,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   const [isFetchingVideos, setIsFetchingVideos] = useState(false);
   const [unavailableVideoIds, setUnavailableVideoIds] = useState<Set<string>>(new Set());
   const [autoSkipCountdown, setAutoSkipCountdown] = useState<number | null>(null);
+  const [embedErrorReason, setEmbedErrorReason] = useState("");
 
   const [description, setDescription] = useState<string | null>(null);
   const [videosList, setVideosList] = useState<Items["items"]>([]);
@@ -76,6 +77,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   const PlaylistPlayerRef = useRef<YouTube | null>(null);
   const isPlayingVideoRef = useRef<boolean | null>(false);
   const videosIdsRef = useRef<string[]>([]);
+  const playlistVideosByIdRef = useRef(new Map<string, Playlist>());
   const autoSkipTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoSkipCountdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const skipAttemptCountRef = useRef(0);
@@ -117,6 +119,20 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     setEmbedError(value);
   }
 
+  function updatePlaylistVideosCache(videos: Playlist[]) {
+    playlistVideosByIdRef.current = new Map(videos.map((video) => [video.id, video]));
+  }
+
+  function getYouTubeEmbedErrorReason() {
+    if (typeof document === "undefined") return "";
+    return document.querySelector(".ytp-error-content-wrap-reason")?.textContent?.trim() ?? "";
+  }
+
+  function isYouTubeSessionBlocked(reason: string) {
+    const normalizedReason = reason.toLowerCase();
+    return normalizedReason.includes("sign in to confirm") || normalizedReason.includes("not a bot") || normalizedReason.includes("confirm you’re not a bot") || normalizedReason.includes("confirm you're not a bot");
+  }
+
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   useEffect(() => {
@@ -139,6 +155,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
           plLengthRef.current = data.length;
           videosIdsRef.current = data.map((video: PlaylistAPI) => video.id);
+          updatePlaylistVideosCache(data);
           setVideosList(data);
           await set(`pl=${playlistId}`, data);
 
@@ -160,6 +177,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
           plLengthRef.current = data.length;
           videosIdsRef.current = data.map((video: PlaylistAPI) => video.id);
+          updatePlaylistVideosCache(data);
           setVideosList(data);
         }
 
@@ -295,7 +313,10 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       }
 
       const vidsData = await get(`pl=${playlistId}`);
-      if (vidsData) setVideosList(vidsData);
+      if (vidsData) {
+        updatePlaylistVideosCache(vidsData);
+        setVideosList(vidsData);
+      }
 
       try {
         const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
@@ -335,9 +356,17 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       updateEmbedError(true);
 
       try {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        const errorReason = getYouTubeEmbedErrorReason();
+        const isSessionBlocked = isYouTubeSessionBlocked(errorReason);
+        setEmbedErrorReason(errorReason);
+
         const videoId = e.target.getVideoData()?.video_id;
         if (videoId) {
-          setUnavailableVideoIds((prev) => new Set(prev).add(videoId));
+          setCurrentVideoIdState(videoId);
+          if (!isSessionBlocked) {
+            setUnavailableVideoIds((prev) => new Set(prev).add(videoId));
+          }
         }
 
         const currentIndex = await e.target.getPlaylistIndex();
@@ -346,6 +375,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
         if (index > plLengthRef.current) {
           setShowResetConfirm(true);
+          return;
+        }
+
+        if (isSessionBlocked) {
+          toast.error("YouTube blocked playback. Video was not skipped.", { duration: 4000 });
           return;
         }
 
@@ -417,12 +451,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
       currentVideoId.current = videoId;
       setCurrentVideoIdState(videoId);
-      let pl = await get(`pl=${playlistId}`);
 
-      const video = pl?.find((v: PlaylistAPI) => v.id === videoId);
+      const video = playlistVideosByIdRef.current.get(videoId);
       if (!video) return;
-      setDescription(video.description);
-      setPublishedAt(video.publishedAt);
+      setDescription(video.description ?? null);
+      setPublishedAt(video.publishedAt ?? null);
     } catch (error) {
       console.error("Error in onStateChange:", error);
     }
@@ -559,6 +592,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
       videosIdsRef.current = pl.map((video: PlaylistAPI) => video.id);
       plLengthRef.current = videosIdsRef.current.length;
+      updatePlaylistVideosCache(pl);
 
       await new Promise((resolve) => setTimeout(resolve, 500));
 
@@ -608,16 +642,22 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
     videosIdsRef.current = newPl.map((video: PlaylistAPI) => video.id);
     plLengthRef.current = videosIdsRef.current.length;
-    currentVideoId.current = newPl[currentIndex ? currentIndex - 1 : 0].id;
-    currentVidId = currentVideoId.current;
+    updatePlaylistVideosCache(newPl);
 
     const plVideos = JSON.parse(localStorage.getItem(`plVideos=${playlistId}`) || "{}");
     plVideos.videosIds = videosIdsRef.current;
     localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify(plVideos));
 
-    if (plLengthRef.current === 0) await onDelete();
-    else {
-      await loadPlaylist(player, videosIdsRef.current, pageRef.current, currentIndex ? currentIndex - 1 : 0);
+    if (plLengthRef.current === 0) {
+      setVideosList(newPl);
+      await onDelete();
+      return;
+    } else {
+      const targetIndex = Math.min(currentIndex, newPl.length - 1);
+      currentVideoId.current = newPl[targetIndex].id;
+      currentVidId = currentVideoId.current;
+
+      await loadPlaylist(player, videosIdsRef.current, pageRef.current, targetIndex);
 
       setTimeout(async () => {
         const currentVideoIndex = newPl.findIndex((video: PlaylistAPI) => video.id === currentVidId);
@@ -626,8 +666,8 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
         const url = await player.getVideoUrl();
         if (!url) return setIsRemoving(false);
 
-        if (currentVideo.id !== currentVidId) {
-          await loadPlaylist(player, videosIdsRef.current, pageRef.current, currentIndex ? currentIndex - 1 : 0);
+        if (currentVideo && currentVideo.id !== currentVidId) {
+          await loadPlaylist(player, videosIdsRef.current, pageRef.current, targetIndex);
         }
       }, 2000);
     }
@@ -709,6 +749,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     const shuffledIds = shuffledVideos.map((item) => item.id);
 
     videosIdsRef.current = shuffledIds;
+    updatePlaylistVideosCache(shuffledVideos);
 
     await loadPlaylist(PlaylistPlayerRef.current?.getInternalPlayer(), shuffledIds, 1, 0);
     setVideosList(shuffledVideos);
@@ -721,6 +762,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     const data = (await get(`pl=${playlistId}`)) as Playlist[];
 
     videosIdsRef.current = data.map((item) => item.id);
+    updatePlaylistVideosCache(data);
     await loadPlaylist(PlaylistPlayerRef.current?.getInternalPlayer(), videosIdsRef.current, page, index);
 
     setVideosList(data);
@@ -801,13 +843,14 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
                       <div className="text-center">
                         <h2 className="mb-2 text-lg font-semibold text-neutral-800 dark:text-neutral-200">
-                          Video Unavailable
+                          {isYouTubeSessionBlocked(embedErrorReason) ? "YouTube Blocked Playback" : "Video Unavailable"}
                           {autoSkipCountdown !== null && (
                             <span className="ml-2 text-sm font-normal text-neutral-500 dark:text-neutral-400">
                               (skipping in {autoSkipCountdown}s)
                             </span>
                           )}
                         </h2>
+                        {embedErrorReason && <p className="mb-3 text-sm text-neutral-600 dark:text-neutral-400">{embedErrorReason}</p>}
                         <div className="flex flex-wrap justify-center gap-2">
                           {autoSkipCountdown !== null && (
                             <button
@@ -987,7 +1030,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                   <TooltipContent>Delete Playlist</TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-              <p className="min-w-[64px] px-1 pt-[1px] text-[1.35rem] whitespace-nowrap text-neutral-600 dark:text-[#818386]">
+              <p className="min-w-[96px] px-1 pt-[1px] text-[1.35rem] tabular-nums whitespace-nowrap text-neutral-600 max-md:text-center dark:text-[#818386]">
                 {currentVideoIndex && plLengthRef.current && !isNaN(plLengthRef.current) ? (
                   <span>
                     {currentVideoIndex} / {plLengthRef.current}

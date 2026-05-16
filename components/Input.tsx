@@ -25,8 +25,9 @@ export default function Input() {
     e.preventDefault();
     try {
       setIsLoading(true);
+      const inputValue = addedURL.trim();
 
-      if (!addedURL) {
+      if (!inputValue) {
         toast.error("Please Enter a URL!", toastError);
         return;
       }
@@ -34,7 +35,7 @@ export default function Input() {
       let playlistID, videoId, isChannelUrl, isChannelNameUrl, url;
 
       try {
-        url = new URL(addedURL);
+        url = new URL(inputValue);
       } catch (error) {
         isChannelName = true; // if not url is a entered name
       }
@@ -111,7 +112,7 @@ export default function Input() {
 
           localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0 }));
           const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-          localStorage.setItem("playlists", JSON.stringify([...allPlaylists, playlistID]));
+          localStorage.setItem("playlists", JSON.stringify([...allPlaylists, id]));
         } else {
           toast.error("Playlist is Invalid or Private!", toastError);
           localStorage.removeItem(playlistKey);
@@ -121,7 +122,7 @@ export default function Input() {
 
       // Channel Name or URL with Channel Name
       if (isChannelName || isChannelNameUrl) {
-        const name = isChannelNameUrl ? url!.pathname.split("/")[1] : addedURL;
+        const name = isChannelNameUrl ? url!.pathname.split("/")[1] : inputValue;
 
         const channelId = await getChannelId(name);
         setAddedURL("");
@@ -161,7 +162,7 @@ export default function Input() {
       }
 
       try {
-        let params = new URL(addedURL).searchParams;
+        let params = new URL(inputValue).searchParams;
         playlistID = params.get("list");
         videoId = params.get("v");
       } catch (error) {
