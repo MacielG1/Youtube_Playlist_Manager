@@ -11,13 +11,18 @@ export async function GET(req: Request, props: { params: Promise<Params> }): Pro
   const playlistId = params.playlistId;
 
   try {
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=contentDetails&id=${playlistId}&key=${API_KEY}`);
+    const res = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=contentDetails&id=${playlistId}&key=${API_KEY}`, {
+      signal: AbortSignal.timeout(15000),
+    });
 
     if (!res.ok) {
       console.log(`Error in /api/playlistSize/[playlistId]`, res.status, res.statusText);
       return new NextResponse("Error", { status: 404 });
     }
     let data = await res.json();
+    if (!data.items || data.items.length === 0) {
+      return new NextResponse("Playlist not found", { status: 404 });
+    }
     let playlistLength = data.items[0].contentDetails.itemCount;
 
     return NextResponse.json(playlistLength);

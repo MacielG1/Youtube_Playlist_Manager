@@ -23,6 +23,7 @@ export async function POST(req: Request, props: { params: Promise<Params> }): Pr
     do {
       const res = await fetch(
         `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistsToFetch}&maxResults=50&pageToken=${nextPageToken}&key=${API_KEY}`,
+        { signal: AbortSignal.timeout(15000) },
       );
       if (!res.ok) {
         console.log("Error in /api/fetchVideosIds/[playlistId]", res.status, res.statusText);
@@ -30,6 +31,10 @@ export async function POST(req: Request, props: { params: Promise<Params> }): Pr
       }
 
       let data = await res.json();
+
+      if (!data.items || data.items.length === 0) {
+        break;
+      }
 
       for (let item of data.items) {
         allVideos.push(item);

@@ -33,6 +33,32 @@ export default async function loadPlaylist(Player: YouTubePlayer, videoIds: stri
         finish(() => reject(new Error("Playlist loading timeout")));
       }, 15000);
 
+      const waitForReady = async () => {
+        // After loadPlaylist fires, poll until player reports a valid playlist index
+        // (means new playlist is loaded and player is ready to accept commands)
+        for (let attempt = 0; attempt < 30 && !settled; attempt += 1) {
+          try {
+            const idx = await Player.getPlaylistIndex();
+            const pl = await Player.getPlaylist();
+            if (typeof idx === "number" && pl && pl.length > 0) {
+              // Explicitly play at target index — loadPlaylist may cue without auto-playing
+              try {
+                await Player.playVideoAt(index);
+              } catch (err) {
+                console.warn("[loadPlaylist] playVideoAt failed:", err);
+              }
+              finish(() => resolve(true));
+              return;
+            }
+          } catch {
+            // player not ready yet
+          }
+          await sleep(100);
+        }
+        // Timeout waiting for ready, resolve anyway
+        finish(() => resolve(true));
+      };
+
       const loadPlaylistInternal = async () => {
         try {
           for (let attempt = 0; attempt < 4 && !settled; attempt += 1) {
@@ -43,7 +69,7 @@ export default async function loadPlaylist(Player: YouTubePlayer, videoIds: stri
 
               if (state === 5) {
                 await Player.loadPlaylist(videosArr, index);
-                finish(() => resolve(true));
+                await waitForReady();
                 return;
               }
             } catch (error) {
@@ -61,7 +87,7 @@ export default async function loadPlaylist(Player: YouTubePlayer, videoIds: stri
               console.warn("Fallback playlist load failed:", error);
             }
 
-            finish(() => resolve(true));
+            await waitForReady();
           }
         } catch (error) {
           finish(() => reject(error));

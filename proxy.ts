@@ -8,14 +8,14 @@ const redis = new Redis({
   token: process.env.UPSTASH_TOKEN!,
 });
 
-// Create a short range limiter for 5 requests per minute
+// Create a short range limiter for 70 requests per 10 minutes
 const shortRangeLimiter = new Ratelimit({
   redis: redis,
   limiter: Ratelimit.fixedWindow(70, "10 m"),
   prefix: "ratelimit:short",
 });
 
-// Create a long range limiter for 100 requests per day
+// Create a long range limiter for 300 requests per day
 const longRangeLimiter = new Ratelimit({
   redis: redis,
   limiter: Ratelimit.fixedWindow(300, "1 d"),

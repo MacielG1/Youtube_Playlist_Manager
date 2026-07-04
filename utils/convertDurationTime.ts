@@ -37,11 +37,10 @@ export default function convertDurationTime(duration: string): string {
     // Format the time as HH:MM:SS
     const formattedTime =
       (totalHours > 0 ? totalHours.toString().padStart(2, "0") + ":" : "") + m.toString().padStart(2, "0") + ":" + s.toString().padStart(2, "0");
-    console.log("for", formattedTime);
     return formattedTime;
   } else {
     // Format the time as HH:MM:SS
-    const formattedTime = (h > 0 ? h.toString() + ":" : "") + m.toString().padStart(2, "0") + ":" + s.toString().padStart(2, "0");
+    const formattedTime = (h > 0 ? h.toString().padStart(2, "0") + ":" : "") + m.toString().padStart(2, "0") + ":" + s.toString().padStart(2, "0");
     return formattedTime;
   }
 }

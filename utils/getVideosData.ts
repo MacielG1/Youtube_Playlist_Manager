@@ -36,10 +36,11 @@ export default async function getVideosData(newVideoId?: string) {
       console.log("Error", res.statusText);
       return {};
     }
-    data.items.map(async (item: VideoAPI) => {
-      await set(`v=${item.id}`, item);
-      return item;
-    });
+    await Promise.all(
+      data.items.map(async (item: VideoAPI) => {
+        await set(`v=${item.id}`, item);
+      }),
+    );
 
     return data;
   } catch (err) {

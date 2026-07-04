@@ -10,7 +10,9 @@ export async function POST(req: Request): Promise<NextResponse> {
   if (!videosIds) return new NextResponse("No Playlist Id", { status: 404 });
 
   try {
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videosIds}&key=${API_KEY}&maxResults=50`);
+    const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videosIds}&key=${API_KEY}&maxResults=50`, {
+      signal: AbortSignal.timeout(15000),
+    });
 
     if (!res.ok) {
       console.log(`Error in /api/videosData`, res.status, res.statusText);
@@ -23,6 +25,11 @@ export async function POST(req: Request): Promise<NextResponse> {
       console.log("Error", res.statusText);
       return new NextResponse("Error", { status: 404 });
     }
+
+    if (!data.items || data.items.length === 0) {
+      return NextResponse.json({ items: [] });
+    }
+
     let newData = {
       items: data.items.map((item: VideoAPI) => {
         return {

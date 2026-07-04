@@ -9,7 +9,9 @@ export async function POST(req: Request): Promise<NextResponse> {
   if (!playlistsIds) return new NextResponse("No Playlist Id", { status: 404 });
 
   try {
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistsIds}&key=${API_KEY}&maxResults=50`);
+    const res = await fetch(`https://www.googleapis.com/youtube/v3/playlists?part=snippet&id=${playlistsIds}&key=${API_KEY}&maxResults=50`, {
+      signal: AbortSignal.timeout(15000),
+    });
 
     if (!res.ok) {
       console.log(`Error in /api/playlistsData`, res.status, res.statusText);
@@ -21,6 +23,10 @@ export async function POST(req: Request): Promise<NextResponse> {
     if (!data) {
       console.log("Error", res.statusText);
       return new NextResponse("Error", { status: 404 });
+    }
+
+    if (!data.items || data.items.length === 0) {
+      return NextResponse.json({ items: [] });
     }
 
     let newData = {

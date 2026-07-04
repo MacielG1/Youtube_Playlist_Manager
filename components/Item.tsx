@@ -38,54 +38,54 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
   const queryClient = useQueryClient();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: async () => onDelete,
+    mutationFn: async (id: string) => {
+      if (type === "Playlist") {
+        localStorage.removeItem(`pl=${id}`);
+        localStorage.removeItem(`plVideos=${id}`);
+
+        // remove playlist from playlists array
+        const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
+        const newPlaylists = allPlaylists.filter((pl: string) => pl !== id);
+
+        localStorage.setItem("playlists", JSON.stringify(newPlaylists));
+
+        queryClient.setQueryData<Items>(["playlists"], (prev) => {
+          if (prev === undefined) return prev;
+
+          const newPlaylistsData = prev.items.filter((item: any) => item.id !== id);
+          const newPlaylists = { ...prev, items: newPlaylistsData };
+          return newPlaylists;
+        });
+
+        await del(`pl=${id}`);
+      } else if (type === "Video") {
+        localStorage.removeItem(`v=${id}`);
+
+        // remove video from videos array
+        const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
+        const newVideos = allVideos.filter((v: string) => v !== id);
+
+        localStorage.setItem("videos", JSON.stringify(newVideos));
+
+        queryClient.setQueryData<Items>(["videos"], (prev) => {
+          if (prev === undefined) return prev;
+
+          const newVideosData = prev.items.filter((item) => item.id !== id);
+          const newVideos = { ...prev, items: newVideosData };
+          return newVideos;
+        });
+
+        await del(id);
+      }
+    },
   });
   const storedItem = localStorage.getItem(`v=${id}`);
   const currentTime = useRef(storedItem ? JSON.parse(storedItem) : null);
 
-  async function onDelete(id?: string) {
+  function onDelete(id?: string) {
     if (!id) return;
-
-    if (type === "Playlist") {
-      localStorage.removeItem(`pl=${id}`);
-      localStorage.removeItem(`plVideos=${id}`);
-
-      // remove playlist from playlists array
-      const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-      const newPlaylists = allPlaylists.filter((pl: string) => pl !== id);
-
-      localStorage.setItem("playlists", JSON.stringify(newPlaylists));
-
-      queryClient.setQueryData<Items>(["playlists"], (prev) => {
-        if (prev === undefined) return prev;
-
-        const newPlaylistsData = prev.items.filter((item: any) => item.id !== id);
-        const newPlaylists = { ...prev, items: newPlaylistsData };
-        return newPlaylists;
-      });
-
-      await del(`pl=${id}`);
-    } else if (type === "Video") {
-      localStorage.removeItem(`v=${id}`);
-
-      // remove video from videos array
-      const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
-      const newVideos = allVideos.filter((v: string) => v !== id);
-
-      localStorage.setItem("videos", JSON.stringify(newVideos));
-
-      queryClient.setQueryData<Items>(["videos"], (prev) => {
-        if (prev === undefined) return prev;
-
-        const newVideosData = prev.items.filter((item) => item.id !== id);
-        const newVideos = { ...prev, items: newVideosData };
-        return newVideos;
-      });
-
-      await del(id);
-    }
     setIsModalOpen(false);
-    mutate();
+    mutate(id);
   }
 
   function openModal(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) {

@@ -12,10 +12,6 @@ export default function useIsExportable() {
     } else {
       setIsExportable(false);
     }
-
-    return () => {
-      setIsExportable(false);
-    };
   }, []);
 
   return isExportable;

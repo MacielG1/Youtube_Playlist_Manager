@@ -123,20 +123,26 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
       const uniqueNewVideos = jsonData.savedVideos.filter((video: string) => !existingVideoIds[video]);
       const mergedVideos = [...currentSavedVideos, ...uniqueNewVideos];
 
-      localStorage.setItem("playlists", JSON.stringify(mergedPlaylists));
-      localStorage.setItem("videos", JSON.stringify(mergedVideos));
+      try {
+        localStorage.setItem("playlists", JSON.stringify(mergedPlaylists));
+        localStorage.setItem("videos", JSON.stringify(mergedVideos));
 
-      // Merging Playlist and Video Data
-      const mergedAllPlaylistData = [...currentAllPlaylistData, ...jsonData.allPlaylistData];
-      const mergedAllVideoData = [...currentAllVideoData, ...jsonData.allVideoData];
+        // Merging Playlist and Video Data
+        const mergedAllPlaylistData = [...currentAllPlaylistData, ...jsonData.allPlaylistData];
+        const mergedAllVideoData = [...currentAllVideoData, ...jsonData.allVideoData];
 
-      mergedAllPlaylistData.forEach((playlist) => {
-        localStorage.setItem(playlist.key, JSON.stringify(playlist.data));
-      });
+        for (const playlist of mergedAllPlaylistData) {
+          localStorage.setItem(playlist.key, JSON.stringify(playlist.data));
+        }
 
-      mergedAllVideoData.forEach((video) => {
-        localStorage.setItem(video.key, JSON.stringify(video.data));
-      });
+        for (const video of mergedAllVideoData) {
+          localStorage.setItem(video.key, JSON.stringify(video.data));
+        }
+      } catch (e) {
+        console.error("localStorage quota exceeded during import:", e);
+        toast.error("Storage full — import aborted, partial data may exist", toastError);
+        return;
+      }
 
       queryClient.refetchQueries({ queryKey: ["playlists"] });
       queryClient.refetchQueries({ queryKey: ["videos"] });

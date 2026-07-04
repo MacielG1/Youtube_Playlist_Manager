@@ -51,11 +51,8 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   let isBrowser = typeof window !== "undefined";
 
   useEffect(() => {
-    const player = videoPlayerRef?.current?.getInternalPlayer();
-
-    if (!player) return;
-
     const timer = setInterval(() => {
+      const player = videoPlayerRef?.current?.getInternalPlayer();
       if (isPlayingVideoRef.current && player) {
         saveVideoProgress(player, videoId);
       }
@@ -64,7 +61,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     return () => {
       clearInterval(timer);
     };
-  }, []);
+  }, [videoId]);
 
   useEffect(() => {
     const player = videoPlayerRef?.current?.internalPlayer;
