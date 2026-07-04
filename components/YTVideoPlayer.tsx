@@ -223,6 +223,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   return (
     <>
+      <div className="fixed top-0 left-0 z-20 h-12 w-full bg-background" />
       <LogoButton />
 
       <div className="flex min-h-screen flex-col items-center justify-center pt-12">

@@ -878,6 +878,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   return (
     <>
+      <div className="fixed top-0 left-0 z-20 h-12 w-full bg-background" />
       <LogoButton />
       <div className="flex flex-col items-center justify-center pt-12 3xl:pr-[100px]">
         <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center p-[2.4px] pt-2 xl:max-w-[72vw] xl:pt-0 2xl:max-w-[100vw]">

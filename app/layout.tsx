@@ -41,7 +41,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <QueryProvider>
             <SettingsProvider>
               <ThemeProvider attribute="class" defaultTheme="system">
-                <div className="fixed top-0 left-0 z-20 h-12 w-full bg-background" />
                 <SettingsMenu />
                 <ToastProvider />
                 <Analytics />
