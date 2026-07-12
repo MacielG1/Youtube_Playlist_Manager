@@ -21,13 +21,11 @@ export default async function fetchVideosIds(playlistId: string, videosIdsRef?: 
 
     let data = await res.json();
 
-    // Reverse only for channels (YouTube returns oldest-first for channel uploads,
-    // we want newest-first). For regular playlists, keep YouTube's native order
-    // so new videos appear at the same position as in YouTube (respects user's
-    // "Add new videos to top" setting).
+    // YouTube channel uploads return newest-first natively.
+    // Reverse so oldest upload is first (chronological order).
+    // Regular playlists keep native position order.
     if (isChannel) data = data.reverse();
 
-    // Filter out videos that were manually removed
     const newVideos = data.filter((video: Playlist) => !removedVideos.includes(video.id));
 
     if (videosIdsRef) {

@@ -365,7 +365,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
       try {
         const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
-        await player.setPlaybackRate(plRate);
+        if (player.getIframe?.()) await player.setPlaybackRate(plRate);
       } catch (err) {
         console.warn("Could not set playback rate:", err);
       }
