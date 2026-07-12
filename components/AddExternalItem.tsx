@@ -112,12 +112,21 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
             return null;
           }
 
-          const [playlistData, videosData] = await Promise.all([getPlaylistsData(id), fetchVideosIds(id)]);
+          // Channel uploads playlists (UU...) need reverse for oldest-first.
+          const isChannelPlaylist = id.startsWith("UU");
+
+          const [playlistData, videosData] = await Promise.all([
+            getPlaylistsData(id),
+            fetchVideosIds(id, undefined, isChannelPlaylist),
+          ]);
 
           await set(playlistKey, videosData);
 
           if (playlistData?.items?.length) {
-            localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0 }));
+            localStorage.setItem(
+              playlistKey,
+              JSON.stringify({ currentItem: 0, initialTime: 0, ...(isChannelPlaylist ? { isChannel: true } : {}) }),
+            );
             const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
             localStorage.setItem("playlists", JSON.stringify([...allPlaylists, id]));
 

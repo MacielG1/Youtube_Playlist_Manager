@@ -94,7 +94,17 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
         try {
           const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
-          if (player.getIframe?.()) await player.setPlaybackRate(plRate);
+          // Defer: YT IFrame API internal `this.g` (iframe ref) may be null
+          // synchronously in onReady under dev-mode double-mount. Waiting one
+          // tick lets the API finish attaching the iframe.
+          setTimeout(() => {
+            try {
+              const p = videoPlayerRef?.current?.internalPlayer;
+              if (p?.getIframe?.()) p.setPlaybackRate(plRate);
+            } catch {
+              /* iframe not ready, ignore */
+            }
+          }, 0);
         } catch (err) {
           console.warn("Could not set playback rate:", err);
         }

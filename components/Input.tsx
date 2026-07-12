@@ -87,6 +87,8 @@ export default function Input() {
         if (isChannelUrl) {
           id = url!.pathname.split("/")[2].replace("UC", "UU");
         }
+        // Channel uploads playlists (UU...) need reverse for oldest-first.
+        const isChannelPlaylist = id.startsWith("UU");
         let playlistKey = "pl=" + id;
 
         if (localStorage.getItem(playlistKey)) {
@@ -94,7 +96,7 @@ export default function Input() {
           setAddedURL("");
           return;
         }
-        const [playlistData, videosData] = await Promise.all([getPlaylistsData(id), fetchVideosIds(id)]);
+        const [playlistData, videosData] = await Promise.all([getPlaylistsData(id), fetchVideosIds(id, undefined, isChannelPlaylist)]);
 
         await set(playlistKey, videosData);
 
@@ -110,7 +112,10 @@ export default function Input() {
             };
           });
 
-          localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0 }));
+          localStorage.setItem(
+            playlistKey,
+            JSON.stringify({ currentItem: 0, initialTime: 0, ...(isChannelPlaylist ? { isChannel: true } : {}) }),
+          );
           const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
           localStorage.setItem("playlists", JSON.stringify([...allPlaylists, id]));
         } else {
