@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "../Dialog";
 
 type ModalSettingsProps = {
@@ -27,7 +27,7 @@ export default function ModalDelete({
   isLoading = false,
 }: ModalSettingsProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [wasPausedByModal, setWasPausedByModal] = useState(false);
+  const wasPausedByModalRef = useRef(false);
 
   function handleOpenModal() {
     setIsOpen((prev) => !prev);
@@ -36,19 +36,19 @@ export default function ModalDelete({
   async function handlePauseVideo() {
     if (!(await isVideoPaused())) {
       handleVideoPlayback("pause");
-      setWasPausedByModal(true);
+      wasPausedByModalRef.current = true;
     }
   }
 
   useEffect(() => {
-    if (!isOpen && wasPausedByModal) {
+    if (!isOpen && wasPausedByModalRef.current) {
       handleVideoPlayback("play");
-      setWasPausedByModal(false);
+      wasPausedByModalRef.current = false;
     }
   }, [isOpen]);
 
   async function handleDelete() {
-    setWasPausedByModal(false);
+    wasPausedByModalRef.current = false;
     await onDelete(id);
     setIsOpen(false);
   }
@@ -76,9 +76,9 @@ export default function ModalDelete({
           <div className="flex gap-3 pt-3 text-lg">
             <DialogClose
               onClick={() => {
-                if (wasPausedByModal) {
+                if (wasPausedByModalRef.current) {
                   handleVideoPlayback("play");
-                  setWasPausedByModal(false);
+                  wasPausedByModalRef.current = false;
                 }
               }}
               disabled={isLoading}

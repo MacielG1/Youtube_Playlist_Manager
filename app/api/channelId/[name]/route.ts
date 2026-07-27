@@ -12,7 +12,7 @@ export async function GET(req: Request, props: { params: Promise<Params> }): Pro
   if (!name) return new NextResponse("No Channel Name", { status: 404 });
 
   try {
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&q=${name}&type=channel&part=id`, {
+    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&q=${encodeURIComponent(name)}&type=channel&part=id`, {
       signal: AbortSignal.timeout(15000),
     });
 
@@ -30,7 +30,7 @@ export async function GET(req: Request, props: { params: Promise<Params> }): Pro
       if (!channelId) {
         return new NextResponse("No Channel Found", { status: 404 });
       } else {
-        const playlistId = channelId.replace("UC", "UU");
+        const playlistId = channelId.startsWith("UC") ? "UU" + channelId.slice(2) : channelId;
         return NextResponse.json(playlistId);
       }
     }

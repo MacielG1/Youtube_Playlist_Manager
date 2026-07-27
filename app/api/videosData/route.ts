@@ -7,10 +7,14 @@ const API_KEY = process.env.YOUTUBE_API;
 export async function POST(req: Request): Promise<NextResponse> {
   const { videosIds } = await req.json();
 
-  if (!videosIds) return new NextResponse("No Playlist Id", { status: 404 });
+  if (!videosIds || typeof videosIds !== "string") return new NextResponse("No Video Id", { status: 404 });
+
+  const ids = videosIds.split(",").filter((id: string) => id && /^[A-Za-z0-9_-]+$/.test(id));
+  if (ids.length === 0) return new NextResponse("Invalid Video Id", { status: 400 });
+  const validatedIds = ids.join(",");
 
   try {
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${videosIds}&key=${API_KEY}&maxResults=50`, {
+    const res = await fetch(`https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails&id=${validatedIds}&key=${API_KEY}&maxResults=50`, {
       signal: AbortSignal.timeout(15000),
     });
 
@@ -45,7 +49,7 @@ export async function POST(req: Request): Promise<NextResponse> {
       }),
     };
 
-    return NextResponse.json(newData);
+    return NextResponse.json(newData, { headers: { "Cache-Control": "public, max-age=300, stale-while-revalidate=3600" } });
   } catch (e) {
     console.log("Error in /api/videosData");
     return new NextResponse("Error", { status: 404 });

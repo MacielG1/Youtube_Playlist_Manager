@@ -4,7 +4,7 @@ export function getThumbnailInfo(thumbnails?: Thumbnails) {
   let thumbnailURL;
   let hasBlackBars;
 
-  if (window.innerWidth <= 720) {
+  if (typeof window !== "undefined" && window.innerWidth <= 720) {
     thumbnailURL = thumbnails?.medium?.url || thumbnails?.default?.url || "";
     hasBlackBars = true;
   } else {

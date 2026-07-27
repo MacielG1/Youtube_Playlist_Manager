@@ -4,6 +4,7 @@ import useIsExportable from "@/hooks/useIsExportable";
 import { useQueryClient } from "@tanstack/react-query";
 import { toastError, toastSuccess } from "@/utils/toastStyles";
 import getVideosData from "@/utils/getVideosData";
+import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
 import { set } from "idb-keyval";
 
 // import { set } from "idb-keyval";
@@ -17,8 +18,8 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
   // funciton that export the timers to a json file and create a download link with React
   function exportTimers() {
     // object all the keys from local sotrage that starts with pl
-    const savedPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-    const savedVideos = JSON.parse(localStorage.getItem("videos") || "[]");
+    const savedPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
+    const savedVideos = safeParse<string[]>(localStorage.getItem("videos"), []);
 
     const allKeys = Object.keys(localStorage);
 
@@ -27,10 +28,10 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
 
     allKeys.forEach((key) => {
       if (key.startsWith("pl=")) {
-        const data: PlaylistItem = JSON.parse(localStorage.getItem(key) || "{}");
+        const data: PlaylistItem = safeParse<PlaylistItem>(localStorage.getItem(key), {} as PlaylistItem);
         allPlaylistData.push({ key, data });
       } else if (key.startsWith("v=")) {
-        const data: VideoItem = JSON.parse(localStorage.getItem(key) || "{}");
+        const data: VideoItem = safeParse<VideoItem>(localStorage.getItem(key), {} as VideoItem);
         allVideoData.push({ key, data });
       }
     });
@@ -93,8 +94,8 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
       }
 
       // Getting the Current Saved Playlists and Videos
-      const currentSavedPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-      const currentSavedVideos = JSON.parse(localStorage.getItem("videos") || "[]");
+      const currentSavedPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
+      const currentSavedVideos = safeParse<string[]>(localStorage.getItem("videos"), []);
 
       const allKeys = Object.keys(localStorage);
       const currentAllPlaylistData: SavedItem[] = [];
@@ -102,10 +103,10 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
 
       allKeys.forEach((key) => {
         if (key.startsWith("pl=")) {
-          const data: PlaylistItem = JSON.parse(localStorage.getItem(key) || "{}");
+          const data: PlaylistItem = safeParse<PlaylistItem>(localStorage.getItem(key), {} as PlaylistItem);
           currentAllPlaylistData.push({ key, data });
         } else if (key.startsWith("v=")) {
-          const data: VideoItem = JSON.parse(localStorage.getItem(key) || "{}");
+          const data: VideoItem = safeParse<VideoItem>(localStorage.getItem(key), {} as VideoItem);
           currentAllVideoData.push({ key, data });
         }
       });
@@ -124,19 +125,19 @@ export default function ImportExportTimers({ setModalOpen }: { setModalOpen: Rea
       const mergedVideos = [...currentSavedVideos, ...uniqueNewVideos];
 
       try {
-        localStorage.setItem("playlists", JSON.stringify(mergedPlaylists));
-        localStorage.setItem("videos", JSON.stringify(mergedVideos));
+        safeSetItem("playlists", JSON.stringify(mergedPlaylists));
+        safeSetItem("videos", JSON.stringify(mergedVideos));
 
         // Merging Playlist and Video Data
         const mergedAllPlaylistData = [...currentAllPlaylistData, ...jsonData.allPlaylistData];
         const mergedAllVideoData = [...currentAllVideoData, ...jsonData.allVideoData];
 
         for (const playlist of mergedAllPlaylistData) {
-          localStorage.setItem(playlist.key, JSON.stringify(playlist.data));
+          safeSetItem(playlist.key, JSON.stringify(playlist.data));
         }
 
         for (const video of mergedAllVideoData) {
-          localStorage.setItem(video.key, JSON.stringify(video.data));
+          safeSetItem(video.key, JSON.stringify(video.data));
         }
       } catch (e) {
         console.error("localStorage quota exceeded during import:", e);

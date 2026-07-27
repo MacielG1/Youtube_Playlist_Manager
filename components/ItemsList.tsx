@@ -3,6 +3,7 @@ import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import type { Items, Playlist } from "@/types";
 import Item from "./Item";
 import { useQueryClient } from "@tanstack/react-query";
+import { safeSetItem } from "@/utils/safeLocalStorage";
 
 type Props = {
   setItems: React.Dispatch<React.SetStateAction<Playlist[]>>;
@@ -36,7 +37,7 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
         let overIndex = prev?.items.findIndex((item) => item.id === over?.id);
         let items = arrayMove(prev?.items, activeIndex, overIndex);
 
-        localStorage.setItem(type, JSON.stringify(items.map((item) => item.id)));
+        safeSetItem(type, JSON.stringify(items.map((item) => item.id)));
         setter(items);
         return { items };
       });

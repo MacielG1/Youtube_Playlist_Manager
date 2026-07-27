@@ -8,12 +8,13 @@ type Params = {
   playlistId: string;
 };
 
-let MAX_AMOUNT_OF_PAGES = 50;
+const MAX_AMOUNT_OF_PAGES = 50;
+const ID_RE = /^[A-Za-z0-9_-]+$/;
 export async function POST(req: Request, props: { params: Promise<Params> }): Promise<NextResponse> {
   const params = await props.params;
   const playlistsToFetch = params.playlistId;
 
-  if (!playlistsToFetch) return new NextResponse("No Playlist Id", { status: 404 });
+  if (!playlistsToFetch || !ID_RE.test(playlistsToFetch)) return new NextResponse("No Playlist Id", { status: 404 });
 
   let pagesCounter = 0;
   let nextPageToken = "";
@@ -64,7 +65,7 @@ export async function POST(req: Request, props: { params: Promise<Params> }): Pr
       }
     });
 
-    return NextResponse.json(newData);
+    return NextResponse.json(newData, { headers: { "Cache-Control": "private, max-age=300" } });
   } catch (e) {
     console.log("Error in /api/fetch_write_videos/[playlistId]", e);
     return new NextResponse("Error", { status: 404 });

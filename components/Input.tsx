@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Items } from "@/types";
 import { toastError } from "@/utils/toastStyles";
+import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
 import { set } from "idb-keyval";
 import getChannelId from "@/utils/createChannelPlaylist";
 import toast from "react-hot-toast";
@@ -72,9 +73,9 @@ export default function Input() {
             };
           });
 
-          localStorage.setItem(videoKey, JSON.stringify({ initialTime: 0 }));
-          const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
-          localStorage.setItem("videos", JSON.stringify([...allVideos, videoId]));
+          safeSetItem(videoKey, JSON.stringify({ initialTime: 0 }));
+          const allVideos = safeParse<string[]>(localStorage.getItem("videos"), []);
+          safeSetItem("videos", JSON.stringify([...allVideos, videoId]));
         } else {
           toast.error("Video is Invalid or Private!", toastError);
           localStorage.removeItem(videoKey);
@@ -85,7 +86,8 @@ export default function Input() {
       if (playlistID || isChannelUrl) {
         let id = playlistID || "";
         if (isChannelUrl) {
-          id = url!.pathname.split("/")[2].replace("UC", "UU");
+          const channelIdFromUrl = url!.pathname.split("/")[2];
+          id = channelIdFromUrl.startsWith("UC") ? "UU" + channelIdFromUrl.slice(2) : channelIdFromUrl;
         }
         // Channel uploads playlists (UU...) need reverse for oldest-first.
         const isChannelPlaylist = id.startsWith("UU");
@@ -112,12 +114,12 @@ export default function Input() {
             };
           });
 
-          localStorage.setItem(
+          safeSetItem(
             playlistKey,
             JSON.stringify({ currentItem: 0, initialTime: 0, ...(isChannelPlaylist ? { isChannel: true } : {}) }),
           );
-          const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-          localStorage.setItem("playlists", JSON.stringify([...allPlaylists, id]));
+          const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
+          safeSetItem("playlists", JSON.stringify([...allPlaylists, id]));
         } else {
           toast.error("Playlist is Invalid or Private!", toastError);
           localStorage.removeItem(playlistKey);
@@ -156,9 +158,9 @@ export default function Input() {
             };
           });
 
-          localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0, isChannel: true }));
-          const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-          localStorage.setItem("playlists", JSON.stringify([...allPlaylists, channelId]));
+          safeSetItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0, isChannel: true }));
+          const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
+          safeSetItem("playlists", JSON.stringify([...allPlaylists, channelId]));
         } else {
           toast.error("Playlist is Invalid or Private!", toastError);
           localStorage.removeItem(playlistKey);

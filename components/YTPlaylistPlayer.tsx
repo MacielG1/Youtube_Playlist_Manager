@@ -7,6 +7,8 @@ import YouTube, { type YouTubeEvent, type YouTubeProps } from "react-youtube";
 import dynamic from "next/dynamic";
 import { useAudioToggle } from "@/providers/SettingsProvider";
 import { shuffle } from "@/utils/shuffle";
+import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
+import useIsClient from "@/hooks/useIsClient";
 import { del, get, set } from "idb-keyval";
 import { useMediaQuery } from "usehooks-ts";
 import fetchVideosIds from "@/utils/fetchVideosIds";
@@ -66,7 +68,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   const [videosList, setVideosList] = useState<Items["items"]>([]);
   const [currentTime, setCurrentTime] = useState(0);
   const [publishedAt, setPublishedAt] = useState<string | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
+  const isMounted = useIsClient();
   const [isRemoving, setIsRemoving] = useState(false);
   const [currentVideoIdState, setCurrentVideoIdState] = useState<string>("");
 
@@ -92,23 +94,26 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   const playlistId = params.list;
   const item = `pl=${playlistId}`;
-  const currentChannelName = playlistId.replace("UU", "UC");
+  const currentChannelName = playlistId.startsWith("UU") ? "UC" + playlistId.slice(2) : playlistId;
 
   let plVideos: PlVideos = { videosIds: [] };
   let isBrowser = typeof window !== "undefined";
   let isChannel = false;
 
   if (isBrowser) {
-    isChannel = JSON.parse(localStorage.getItem(item) || "[]")?.isChannel || false;
+    isChannel = safeParse<{ isChannel?: boolean }>(localStorage.getItem(item), {})?.isChannel || false;
     const savedData = localStorage.getItem(`plVideos=${playlistId}`);
 
-    if (savedData) plVideos = JSON.parse(savedData);
+    if (savedData) plVideos = safeParse<PlVideos>(savedData, { videosIds: [] });
   }
 
   let playlistInfo = { currentItem: 0, initialTime: 0, currentPage: 0, isChannel: false };
 
   if (isBrowser) {
-    playlistInfo = JSON.parse(localStorage.getItem(item) || JSON.stringify({ currentItem: 0, initialTime: 0, currentPage: 1, isChannel: false }));
+    playlistInfo = safeParse<{ currentItem: number; initialTime: number; currentPage: number; isChannel: boolean }>(
+      localStorage.getItem(item),
+      { currentItem: 0, initialTime: 0, currentPage: 1, isChannel: false },
+    );
   }
   const { currentItem, initialTime, currentPage } = playlistInfo;
 
@@ -145,7 +150,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
       // Update idb + localStorage with full fresh array (for next session)
       await set(`pl=${playlistId}`, data);
-      localStorage.setItem(
+      safeSetItem(
         `plVideos=${playlistId}`,
         JSON.stringify({
           videosIds: data.map((v: PlaylistAPI) => v.id),
@@ -270,7 +275,6 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }, [isShuffled, playlistId]);
 
   useEffect(() => {
-    setIsMounted(true);
     return () => {
       if (autoSkipTimerRef.current) clearTimeout(autoSkipTimerRef.current);
       if (autoSkipCountdownRef.current) clearInterval(autoSkipCountdownRef.current);
@@ -364,7 +368,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       }
 
       try {
-        const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
+        const plRate = safeParse<{ playbackSpeed?: number }>(localStorage.getItem(item), {})?.playbackSpeed || 1;
         // Defer: YT IFrame API internal `this.g` (iframe ref) may be null
         // synchronously in onReady under dev-mode double-mount. Waiting one
         // tick lets the API finish attaching the iframe.
@@ -550,10 +554,10 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }
 
   function onSpeedChange(e: YouTubeEvent) {
-    const currentData = JSON.parse(localStorage.getItem(item) || "[]");
+    const currentData = safeParse<{ playbackSpeed?: number } & Record<string, unknown>>(localStorage.getItem(item), {});
     currentData.playbackSpeed = e.data;
 
-    localStorage.setItem(item, JSON.stringify(currentData));
+    safeSetItem(item, JSON.stringify(currentData));
   }
 
   async function previousVideo() {
@@ -731,9 +735,9 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     plLengthRef.current = videosIdsRef.current.length;
     updatePlaylistVideosCache(newPl);
 
-    const plVideos = JSON.parse(localStorage.getItem(`plVideos=${playlistId}`) || "{}");
+    const plVideos = safeParse<{ videosIds?: string[]; updatedTime?: number } & Record<string, unknown>>(localStorage.getItem(`plVideos=${playlistId}`), {});
     plVideos.videosIds = videosIdsRef.current;
-    localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify(plVideos));
+    safeSetItem(`plVideos=${playlistId}`, JSON.stringify(plVideos));
 
     if (plLengthRef.current === 0) {
       setVideosList(newPl);
@@ -882,7 +886,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     [params.title]
   );
 
-  const isSmaller = useMediaQuery("(max-width: 1740px)");
+  const isSmaller = useMediaQuery("(max-width: 1780px)");
 
   if (!isMounted) return null;
 

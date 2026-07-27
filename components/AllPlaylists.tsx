@@ -1,7 +1,7 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-import type { Playlist } from "@/types";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
+import type { Items, Playlist } from "@/types";
 import getPlaylistsData from "@/utils/getPlaylistsData";
 import getVideosData from "@/utils/getVideosData";
 import Link from "next/link";
@@ -10,11 +10,9 @@ import Spin from "@/assets/icons/Spin";
 import Empty from "@/assets/icons/Empty";
 
 export default function AllPlaylists() {
-  const [playlistItems, setPlaylistItems] = useState<Playlist[]>([]);
-  const [videoItems, setVideoItems] = useState<Playlist[]>([]);
+  const queryClient = useQueryClient();
 
   const {
-    dataUpdatedAt: plDataUpdatedAt,
     isError: isPlError,
     isFetching: isPlFetching,
     data: plData,
@@ -29,7 +27,6 @@ export default function AllPlaylists() {
   });
 
   const {
-    dataUpdatedAt: vidDataUpdatedAt,
     data: vidData,
     isFetching: isVidFetching,
     isFetched: isVidFetched,
@@ -42,13 +39,27 @@ export default function AllPlaylists() {
     refetchOnMount: false,
   });
 
-  useEffect(() => {
-    setPlaylistItems(plData?.items || []);
-  }, [plData, plDataUpdatedAt]);
+  const playlistItems = plData?.items ?? [];
+  const videoItems = vidData?.items ?? [];
 
-  useEffect(() => {
-    setVideoItems(vidData?.items || []);
-  }, [vidData, vidDataUpdatedAt]);
+  // ItemsList reorders via setQueryData itself; this setter keeps the
+  // Dispatch<SetStateAction> contract by also writing the resolved array
+  // to the query cache so the derived `playlistItems` stays in sync.
+  const setPlaylistItems = useCallback(
+    (next: Playlist[] | ((prev: Playlist[]) => Playlist[])) => {
+      const resolved = typeof next === "function" ? next(playlistItems) : next;
+      queryClient.setQueryData<Items>(["playlists"], { items: resolved });
+    },
+    [playlistItems, queryClient],
+  );
+
+  const setVideoItems = useCallback(
+    (next: Playlist[] | ((prev: Playlist[]) => Playlist[])) => {
+      const resolved = typeof next === "function" ? next(videoItems) : next;
+      queryClient.setQueryData<Items>(["videos"], { items: resolved });
+    },
+    [videoItems, queryClient],
+  );
 
   if ((isPlFetching || isVidFetching) && !isPlFetched) {
     return (

@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useMemo } from "react";
 import { useLocalStorage } from "usehooks-ts";
 type SettingsContextProps = {
   isAudioMuted: boolean;
@@ -16,10 +16,13 @@ const SettingsContext = createContext<SettingsContextProps>(defaultSettingsConte
 export default function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [isAudioMuted, setIsAudioMuted] = useLocalStorage("isAudioMuted", false);
 
-  const contextValue: SettingsContextProps = {
-    isAudioMuted,
-    setIsAudioMuted,
-  };
+  const contextValue: SettingsContextProps = useMemo(
+    () => ({
+      isAudioMuted,
+      setIsAudioMuted,
+    }),
+    [isAudioMuted, setIsAudioMuted],
+  );
 
   return <SettingsContext.Provider value={contextValue}>{children}</SettingsContext.Provider>;
 }

@@ -1,4 +1,4 @@
-import { NextFetchEvent, NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { ipAddress } from "@vercel/functions";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
@@ -24,7 +24,7 @@ const longRangeLimiter = new Ratelimit({
 
 const isDev = process.env.NODE_ENV === "development";
 
-export default async function middleware(request: NextRequest, event: NextFetchEvent): Promise<Response | undefined> {
+export default async function middleware(request: NextRequest): Promise<Response | undefined> {
   if (isDev) return NextResponse.next();
 
   const ip = ipAddress(request) ?? "127.0.0.1";

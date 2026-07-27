@@ -1,5 +1,6 @@
 "use client";
 import { toastError, toastSuccess } from "@/utils/toastStyles";
+import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
 import toast from "react-hot-toast";
 import getVideosData from "@/utils/getVideosData";
 import getPlaylistsData from "@/utils/getPlaylistsData";
@@ -30,14 +31,14 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
 
           // Double check both IndexedDB and localStorage array
           let isVideoSaved = await get(videoKey);
-          const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
+          const allVideos = safeParse<string[]>(localStorage.getItem("videos"), []);
           const isInLocalStorage = allVideos.includes(id);
 
           // If in localStorage but not in IndexedDB, remove from localStorage and allow re-adding
           if (!isVideoSaved && isInLocalStorage) {
             console.log("Video found in localStorage but not in IndexedDB, cleaning up localStorage...");
             const updatedVideos = allVideos.filter((videoId: string) => videoId !== id);
-            localStorage.setItem("videos", JSON.stringify(updatedVideos));
+            safeSetItem("videos", JSON.stringify(updatedVideos));
             localStorage.removeItem(videoKey); // Remove any localStorage entry for this video
           }
 
@@ -59,9 +60,9 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
           await set(videoKey, { id: id, description: data.items[0].description });
 
           if (data?.items?.length) {
-            localStorage.setItem(videoKey, JSON.stringify({ initialTime: 0 }));
-            const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
-            localStorage.setItem("videos", JSON.stringify([...allVideos, id]));
+            safeSetItem(videoKey, JSON.stringify({ initialTime: 0 }));
+            const allVideos = safeParse<string[]>(localStorage.getItem("videos"), []);
+            safeSetItem("videos", JSON.stringify([...allVideos, id]));
 
             await queryClient.ensureQueryData({
               queryKey: ["videos"],
@@ -89,14 +90,14 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
 
           // Double check both IndexedDB and localStorage array
           let isPlSaved = await get(playlistKey);
-          const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
+          const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
           const isInLocalStorage = allPlaylists.includes(id);
 
           // If in localStorage but not in IndexedDB, remove from localStorage and allow re-adding
           if (!isPlSaved && isInLocalStorage) {
             console.log("Playlist found in localStorage but not in IndexedDB, cleaning up localStorage...");
             const updatedPlaylists = allPlaylists.filter((playlistId: string) => playlistId !== id);
-            localStorage.setItem("playlists", JSON.stringify(updatedPlaylists));
+            safeSetItem("playlists", JSON.stringify(updatedPlaylists));
             localStorage.removeItem(playlistKey); // Remove any localStorage entry for this playlist
           }
 
@@ -123,12 +124,12 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
           await set(playlistKey, videosData);
 
           if (playlistData?.items?.length) {
-            localStorage.setItem(
+            safeSetItem(
               playlistKey,
               JSON.stringify({ currentItem: 0, initialTime: 0, ...(isChannelPlaylist ? { isChannel: true } : {}) }),
             );
-            const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-            localStorage.setItem("playlists", JSON.stringify([...allPlaylists, id]));
+            const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
+            safeSetItem("playlists", JSON.stringify([...allPlaylists, id]));
 
             await queryClient.ensureQueryData({
               queryKey: ["playlists"],
@@ -162,14 +163,14 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
 
           // Double check both IndexedDB and localStorage array
           let isChannelSaved = await get(playlistKey);
-          const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
+          const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
           const isInLocalStorage = allPlaylists.includes(channelId);
 
           // If in localStorage but not in IndexedDB, remove from localStorage and allow re-adding
           if (!isChannelSaved && isInLocalStorage) {
             console.log("Channel found in localStorage but not in IndexedDB, cleaning up localStorage...");
             const updatedPlaylists = allPlaylists.filter((playlistId: string) => playlistId !== channelId);
-            localStorage.setItem("playlists", JSON.stringify(updatedPlaylists));
+            safeSetItem("playlists", JSON.stringify(updatedPlaylists));
             localStorage.removeItem(playlistKey); // Remove any localStorage entry for this channel
           }
 
@@ -190,9 +191,9 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
           await set(playlistKey, videosData);
 
           if (playlistData?.items?.length) {
-            localStorage.setItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0, isChannel: true }));
-            const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
-            localStorage.setItem("playlists", JSON.stringify([...allPlaylists, channelId]));
+            safeSetItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0, isChannel: true }));
+            const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
+            safeSetItem("playlists", JSON.stringify([...allPlaylists, channelId]));
 
             await queryClient.ensureQueryData({
               queryKey: ["playlists"],

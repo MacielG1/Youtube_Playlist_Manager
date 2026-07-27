@@ -1,3 +1,5 @@
+import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
+
 export default function onDeleteItems(itemId: string, type: "playlists" | "videos") {
   if (type === "playlists") {
     localStorage.removeItem(`pl=${itemId}`);
@@ -7,8 +9,8 @@ export default function onDeleteItems(itemId: string, type: "playlists" | "video
   }
 
   // remove playlist from playlists array
-  const allPlaylists = JSON.parse(localStorage.getItem(type) || "[]");
+  const allPlaylists = safeParse<string[]>(localStorage.getItem(type), []);
   const newPlaylists = allPlaylists.filter((i: string) => i !== itemId);
 
-  localStorage.setItem(type, JSON.stringify(newPlaylists));
+  safeSetItem(type, JSON.stringify(newPlaylists));
 }

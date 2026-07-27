@@ -1,5 +1,6 @@
 import { VideoAPI } from "@/types";
 import { set } from "idb-keyval";
+import { safeParse } from "@/utils/safeLocalStorage";
 
 export default async function getVideosData(newVideoId?: string) {
   let videosIds = "";
@@ -7,7 +8,7 @@ export default async function getVideosData(newVideoId?: string) {
   if (newVideoId) {
     videosIds = newVideoId;
   } else {
-    const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
+    const allVideos = safeParse<string[]>(localStorage.getItem("videos"), []);
 
     if (!allVideos.length) return {};
     videosIds = allVideos.join(",");

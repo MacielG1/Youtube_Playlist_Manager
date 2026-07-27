@@ -1,4 +1,5 @@
 import type { Playlist, Thumbnails } from "@/types";
+import { safeParse } from "@/utils/safeLocalStorage";
 
 export default async function getPlaylistsData(newPlaylistId?: string) {
   let playlistsIds = "";
@@ -6,7 +7,7 @@ export default async function getPlaylistsData(newPlaylistId?: string) {
   if (newPlaylistId) {
     playlistsIds = newPlaylistId;
   } else {
-    const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
+    const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
 
     if (allPlaylists.length === 0) {
       return {};
@@ -38,7 +39,7 @@ export default async function getPlaylistsData(newPlaylistId?: string) {
     }
 
     // Apply custom thumbnails if set
-    const customThumbnails = JSON.parse(localStorage.getItem("customPlaylistThumbnails") || "{}");
+    const customThumbnails = safeParse<Record<string, Thumbnails>>(localStorage.getItem("customPlaylistThumbnails"), {});
     if (data.items && Object.keys(customThumbnails).length > 0) {
       data.items = data.items.map((item: Playlist) => {
         if (customThumbnails[item.id]) {

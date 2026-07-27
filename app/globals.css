@@ -88,17 +88,17 @@
 
 @media (max-height : 950px) {
     .videoPlayer {
-        max-width: 1250px;
+        max-width: 1390px;
     }
 }
 @media (max-height : 800px) {
     .videoPlayer {
-        max-width: 840px;
+        max-width: 1070px;
     }
 }
 @media (max-height : 600px) {
     .videoPlayer {
-        max-width: 770px;
+        max-width: 890px;
     }
 }
 @media (max-height : 500px) {
@@ -115,6 +115,26 @@
     .videoPlayer {
         max-width: 150px;
     }
+}
+
+/* Hide scrollbar on player/playlist pages but keep scroll */
+html:has(.videoPlayer),
+body:has(.videoPlayer) {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+html:has(.videoPlayer)::-webkit-scrollbar,
+body:has(.videoPlayer)::-webkit-scrollbar {
+    display: none;
+}
+
+/* Sidebar: hide scrollbar but keep scroll */
+.custom-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.custom-scrollbar::-webkit-scrollbar {
+    display: none;
 }
 
 /* Settings modal animations */

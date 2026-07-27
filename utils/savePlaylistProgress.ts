@@ -1,18 +1,23 @@
 import { YouTubePlayer } from "react-youtube";
+import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
 
 export default async function savePlaylistsProgress(videoPlayer: YouTubePlayer, playlistId: string, page: number, index?: number) {
-  const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
+  const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
 
   const i = allPlaylists.indexOf(playlistId);
   if (i === -1) return; // if playlist is not in the list, return
 
   const item = `pl=${playlistId}`;
 
-  const currentPl = JSON.parse(localStorage.getItem(item) || "[]");
+  const currentPl = safeParse<{ currentItem?: number; currentPage?: number; initialTime?: number; isChannel?: boolean }>(
+    localStorage.getItem(item),
+    {},
+  );
 
-  if (!videoPlayer || !videoPlayer.getCurrentTime()) return;
+  if (!videoPlayer) return;
 
   const currentTime = ((await videoPlayer?.getCurrentTime()) as number) || 0;
+  if (!currentTime) return;
   const duration = ((await videoPlayer?.getDuration()) as number) || 0;
   const currentIndex = index !== undefined ? index : ((await videoPlayer?.getPlaylistIndex()) as number) || 0;
 
@@ -48,5 +53,5 @@ export default async function savePlaylistsProgress(videoPlayer: YouTubePlayer, 
     currentPage: nextPage,
   };
 
-  localStorage.setItem(item, JSON.stringify(data));
+  safeSetItem(item, JSON.stringify(data));
 }

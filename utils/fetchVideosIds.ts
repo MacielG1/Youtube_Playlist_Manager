@@ -1,6 +1,7 @@
 import { Playlist } from "@/types";
 import { get } from "idb-keyval";
 import { RefObject } from "react";
+import { safeSetItem } from "@/utils/safeLocalStorage";
 
 export default async function fetchVideosIds(playlistId: string, videosIdsRef?: RefObject<string[]>, isChannel?: boolean) {
   try {
@@ -34,7 +35,7 @@ export default async function fetchVideosIds(playlistId: string, videosIdsRef?: 
 
     const allVideosIds = newVideos.map((item: Playlist) => item.id);
 
-    localStorage.setItem(`plVideos=${playlistId}`, JSON.stringify({ videosIds: allVideosIds, updatedTime: Date.now() }));
+    safeSetItem(`plVideos=${playlistId}`, JSON.stringify({ videosIds: allVideosIds, updatedTime: Date.now() }));
 
     return newVideos;
   } catch (error) {

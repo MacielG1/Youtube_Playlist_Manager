@@ -1,9 +1,11 @@
 import { useTheme } from "next-themes";
 import Sun from "@/assets/icons/Sun";
 import Moon from "@/assets/icons/Moon";
+import useIsClient from "@/hooks/useIsClient";
 
 export default function ThemeToggler() {
   const { setTheme, resolvedTheme } = useTheme();
+  const mounted = useIsClient();
 
   function onThemeChange() {
     if (resolvedTheme === "dark") {
@@ -11,6 +13,18 @@ export default function ThemeToggler() {
     } else {
       setTheme("dark");
     }
+  }
+
+  if (!mounted) {
+    return (
+      <button
+        type="button"
+        className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-neutral-700 transition-colors duration-150 hover:bg-neutral-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:text-neutral-200 dark:hover:bg-neutral-700/50"
+      >
+        <span className="h-4 w-4" />
+        <span>Theme</span>
+      </button>
+    );
   }
 
   return (

@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import LinkWrapper from "./LinkWrapper";
 import { getThumbnailInfo } from "@/utils/getThumbnailInfo";
+import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
 import { del } from "idb-keyval";
 import { Roboto } from "next/font/google";
 import Delete from "@/assets/icons/Delete";
@@ -44,15 +45,15 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
         localStorage.removeItem(`plVideos=${id}`);
 
         // remove playlist from playlists array
-        const allPlaylists = JSON.parse(localStorage.getItem("playlists") || "[]");
+        const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
         const newPlaylists = allPlaylists.filter((pl: string) => pl !== id);
 
-        localStorage.setItem("playlists", JSON.stringify(newPlaylists));
+        safeSetItem("playlists", JSON.stringify(newPlaylists));
 
         queryClient.setQueryData<Items>(["playlists"], (prev) => {
           if (prev === undefined) return prev;
 
-          const newPlaylistsData = prev.items.filter((item: any) => item.id !== id);
+          const newPlaylistsData = prev.items.filter((item) => item.id !== id);
           const newPlaylists = { ...prev, items: newPlaylistsData };
           return newPlaylists;
         });
@@ -62,10 +63,10 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
         localStorage.removeItem(`v=${id}`);
 
         // remove video from videos array
-        const allVideos = JSON.parse(localStorage.getItem("videos") || "[]");
+        const allVideos = safeParse<string[]>(localStorage.getItem("videos"), []);
         const newVideos = allVideos.filter((v: string) => v !== id);
 
-        localStorage.setItem("videos", JSON.stringify(newVideos));
+        safeSetItem("videos", JSON.stringify(newVideos));
 
         queryClient.setQueryData<Items>(["videos"], (prev) => {
           if (prev === undefined) return prev;
@@ -79,8 +80,11 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
       }
     },
   });
-  const storedItem = localStorage.getItem(`v=${id}`);
-  const currentTime = useRef(storedItem ? JSON.parse(storedItem) : null);
+  const [savedProgress, setSavedProgress] = useState<{ initialTime?: number } | null>(null);
+
+  useEffect(() => {
+    setSavedProgress(safeParse<{ initialTime?: number } | null>(localStorage.getItem(`v=${id}`), null));
+  }, [id]);
 
   function onDelete(id?: string) {
     if (!id) return;
@@ -101,7 +105,7 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
 
   let formattedTitle = type === "Video" ? reduceStringLength(title, 65) : reduceStringLength(title, 90);
 
-  const width = currentTime.current?.initialTime && duration ? `${(currentTime.current?.initialTime / convertTimeToSeconds(duration)) * 100}%` : "0%";
+  const width = savedProgress?.initialTime && duration ? `${(savedProgress.initialTime / convertTimeToSeconds(duration)) * 100}%` : "0%";
   return (
     <div className={`mt-2 flex flex-col items-center outline-hidden ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
       <div className="relative flex cursor-default flex-col items-center justify-center overflow-hidden rounded-md rounded-tr-[3.2px] md:rounded-[9.6px]">

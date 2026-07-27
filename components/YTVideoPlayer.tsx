@@ -5,6 +5,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { Items, Video } from "@/types";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 import seekTime from "@/utils/seekTime";
+import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
+import useIsClient from "@/hooks/useIsClient";
 import LogoButton from "./LogoButton";
 import saveVideoProgress from "@/utils/saveVideoProgress";
 import ModalDelete from "./modals/ModalDelete";
@@ -34,7 +36,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [embedError, setEmbedError] = useState(false);
   const [videoData, setVideoData] = useState<Video | null>(null);
-  const [isMounted, setIsMounted] = useState(false);
+  const isMounted = useIsClient();
   const { isAudioMuted } = useAudioToggle();
 
   const queryClient = useQueryClient();
@@ -74,10 +76,6 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     }
   }, [isAudioMuted]);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
   async function onReady(e: YouTubeEvent) {
     try {
       if (!e.target) return;
@@ -93,7 +91,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         setIsLoaded(true);
 
         try {
-          const plRate = JSON.parse(localStorage.getItem(item) || "[]")?.playbackSpeed || 1;
+          const plRate = safeParse<{ playbackSpeed?: number }>(localStorage.getItem(item), {})?.playbackSpeed || 1;
           // Defer: YT IFrame API internal `this.g` (iframe ref) may be null
           // synchronously in onReady under dev-mode double-mount. Waiting one
           // tick lets the API finish attaching the iframe.
@@ -139,10 +137,10 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     }
   }
   function onSpeedChange(e: YouTubeEvent) {
-    let currentData = JSON.parse(localStorage.getItem(item) || "[]");
+    let currentData = safeParse<{ playbackSpeed?: number } & Record<string, unknown>>(localStorage.getItem(item), {});
     currentData.playbackSpeed = e.data;
 
-    localStorage.setItem(item, JSON.stringify(currentData));
+    safeSetItem(item, JSON.stringify(currentData));
   }
 
   function onStateChange(e: YouTubeEvent) {
@@ -207,7 +205,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   let initialTime = 0;
 
   if (isBrowser) {
-    initialTime = JSON.parse(localStorage.getItem(item) || "[]")?.initialTime || 0;
+    initialTime = safeParse<{ initialTime?: number }>(localStorage.getItem(item), {})?.initialTime || 0;
   }
 
   const vidOptions: YouTubeProps["opts"] = useMemo(() => {
@@ -237,7 +235,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
       <LogoButton />
 
       <div className="flex min-h-screen flex-col items-center justify-center pt-12">
-        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center pt-2 max-xl:p-[2.4px] 2xl:max-w-[71vw]">
+        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center pt-2 max-xl:p-[2.4px] 2xl:max-w-[78vw]">
           <div className="relative w-full overflow-auto pb-[56.25%]">
             {!isLoaded && (
               <div className="fixed inset-0 -mt-16 flex items-center justify-center md:-mt-10">

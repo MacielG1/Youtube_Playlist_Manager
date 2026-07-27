@@ -4,9 +4,10 @@ import { Items, Thumbnails } from "@/types";
 import { cn } from "@/utils/cn";
 import { getThumbnailInfo } from "@/utils/getThumbnailInfo";
 import reduceStringSize from "@/utils/reduceStringLength";
+import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
@@ -23,21 +24,36 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
   const queryClient = useQueryClient();
   const sidebarRef = useRef<HTMLDivElement | null>(null);
   const isInitialMount = useRef(true);
-  const [scrollTop, setScrollTop] = useState(0);
   const [viewportWidth, setViewportWidth] = useState(0);
-
-  useEffect(() => {
-    const updateViewportWidth = () => setViewportWidth(window.innerWidth);
-    updateViewportWidth();
-    window.addEventListener("resize", updateViewportWidth);
-    return () => window.removeEventListener("resize", updateViewportWidth);
-  }, []);
+  const [viewportHeight, setViewportHeight] = useState(900);
 
   const is700 = viewportWidth <= 700;
   const is1280 = viewportWidth <= 1280;
   const is1500 = viewportWidth <= 1500;
 
   const itemHeight = is1280 && !is700 ? 184 : is1500 && !is1280 ? 122 : 132;
+
+  const [scrollTop, setScrollTop] = useState(() => {
+    if (currentVideoIndex === null || currentVideoIndex === undefined) return 0;
+    if (typeof window === "undefined") return 0;
+    let scrollOffset;
+    if (window.innerWidth < 500) scrollOffset = 500;
+    else if (window.innerWidth < 700) scrollOffset = 610;
+    else if (window.innerWidth < 900) scrollOffset = 700;
+    else if (window.innerWidth < 1280) scrollOffset = 850;
+    else scrollOffset = 10;
+    return Math.max(0, (currentVideoIndex - 1) * itemHeight - scrollOffset);
+  });
+
+  useEffect(() => {
+    const updateViewport = () => {
+      setViewportWidth(window.innerWidth);
+      setViewportHeight(sidebarRef.current?.clientHeight || 900);
+    };
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+    return () => window.removeEventListener("resize", updateViewport);
+  }, []);
 
   useEffect(() => {
     if (sidebarRef.current && currentVideoIndex !== null) {
@@ -57,8 +73,9 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
       const scrollAmount = (currentVideoIndex - 1) * itemHeight - scrollOffset;
 
       if (isInitialMount.current) {
+        // scrollTop state is already initialized to this value via the
+        // useState initializer above — just sync the DOM node, no setState.
         sidebarRef.current.scrollTop = scrollAmount;
-        setScrollTop(scrollAmount);
         isInitialMount.current = false;
       } else {
         sidebarRef.current.scrollTo({
@@ -69,26 +86,51 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
     }
   }, [currentVideoIndex, itemHeight, videosList.length]);
 
-  function leftClickHandler(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, oneBasedIndex: number) {
-    if (e.button === 0) {
+  const leftClickHandler = useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, oneBasedIndex: number) => {
+      if (e.button === 0) {
+        e.preventDefault();
+        playVideoAt(oneBasedIndex);
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }
+    },
+    [playVideoAt],
+  );
+
+  const setAsPlaylistThumbnail = useCallback(
+    (e: React.MouseEvent, thumbnails?: Thumbnails) => {
       e.preventDefault();
-      playVideoAt(oneBasedIndex);
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth",
+      e.stopPropagation();
+      if (!playlistId || !thumbnails) return;
+
+      const customThumbnails = safeParse<Record<string, Thumbnails>>(localStorage.getItem("customPlaylistThumbnails"), {});
+      customThumbnails[playlistId] = thumbnails;
+      safeSetItem("customPlaylistThumbnails", JSON.stringify(customThumbnails));
+
+      queryClient.setQueryData<Items>(["playlists"], (oldData) => {
+        if (!oldData) return oldData;
+        return {
+          ...oldData,
+          items: oldData.items.map((item) => (item.id === playlistId ? { ...item, thumbnails: thumbnails as Thumbnails } : item)),
+        };
       });
-    }
-  }
+
+      toast.success("Playlist thumbnail updated!", { position: "top-right", duration: 1500 });
+    },
+    [playlistId, queryClient],
+  );
 
   const visibleRange = useMemo(() => {
-    const viewportHeight = sidebarRef.current?.clientHeight || 900;
     const overscan = 8;
     const viewportItems = Math.ceil(viewportHeight / itemHeight);
     const start = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
     const end = Math.min(videosList.length, start + viewportItems + overscan * 2);
 
     return { start, end };
-  }, [itemHeight, scrollTop, videosList.length]);
+  }, [itemHeight, scrollTop, videosList.length, viewportHeight]);
 
   const processedVideos = useMemo(
     () =>
@@ -126,27 +168,6 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
           const isUnavailable = unavailableVideoIds?.has(video.id);
           const oneBasedIndex = video.originalIndex + 1;
 
-          function setAsPlaylistThumbnail(e: React.MouseEvent) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (!playlistId || !thumbnails) return;
-
-            const customThumbnails = JSON.parse(localStorage.getItem("customPlaylistThumbnails") || "{}");
-            customThumbnails[playlistId] = thumbnails;
-            localStorage.setItem("customPlaylistThumbnails", JSON.stringify(customThumbnails));
-
-            queryClient.setQueryData<Items>(["playlists"], (oldData) => {
-              if (!oldData) return oldData;
-              return {
-                ...oldData,
-                items: oldData.items.map((item) =>
-                  item.id === playlistId ? { ...item, thumbnails: thumbnails as Thumbnails } : item
-                ),
-              };
-            });
-
-            toast.success("Playlist thumbnail updated!", { position: "top-right", duration: 1500 });
-          }
           return (
             <div className={`relative flex cursor-default flex-col items-center justify-center text-center first:pt-3 last:pb-3 ${isUnavailable ? "opacity-45" : ""}`} key={video.id}>
               <div className="group flex aspect-video items-center justify-center gap-2 rounded-xl">
@@ -160,12 +181,14 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                   <Link onClick={(e) => leftClickHandler(e, oneBasedIndex)} href={url} className="flex transition duration-300">
                     <div className="h-auto cursor-pointer overflow-hidden rounded-xl">
                       <Image
-                        src={thumbnailURL}
+                     src={thumbnailURL}
                         alt={video.title}
                         width={is700 ? 150 : is1280 ? 240 : is1500 ? 130 : 150}
                         height={is700 ? 84 : is1280 ? 135 : is1500 ? 73 : 84}
                         className={`rounded-xl transition duration-300 group-hover:scale-[1.03] ${hasBlackBars ? "-my-[14px]" : "-my-[1px]"} `}
-                        loading="lazy"
+                        style={{ height: "auto" }}
+                        loading={oneBasedIndex === 1 ? "eager" : "lazy"}
+                        priority={oneBasedIndex === 1}
                         unoptimized
                       />
                     </div>
@@ -177,7 +200,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                   )}
                   {playlistId && (
                     <button
-                      onClick={setAsPlaylistThumbnail}
+                      onClick={(e) => setAsPlaylistThumbnail(e, thumbnails)}
                       className="absolute top-0 left-0 z-10 cursor-pointer rounded-br-md bg-neutral-800/80 p-1 text-neutral-300 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-neutral-900 hover:text-indigo-400"
                       title="Set as playlist thumbnail"
                     >

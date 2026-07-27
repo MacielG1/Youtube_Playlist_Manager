@@ -1,7 +1,7 @@
 import Reset from "@/assets/icons/Reset";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogOverlay, DialogTitle, DialogTrigger } from "../Dialog";
+import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "../Dialog";
 import { Checkbox } from "../Checkbox";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type ModalSettingsProps = {
   resetPlaylist: (isChecked: boolean) => void;
@@ -12,7 +12,7 @@ type ModalSettingsProps = {
 export default function ResetPlaylistModal({ handleVideoPlayback, resetPlaylist, isVideoPaused }: ModalSettingsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-  const [wasPausedByModal, setWasPausedByModal] = useState(false);
+  const wasPausedByModalRef = useRef(false);
 
   function handleCheckboxChange(checked: boolean) {
     setIsChecked(checked);
@@ -25,14 +25,14 @@ export default function ResetPlaylistModal({ handleVideoPlayback, resetPlaylist,
   async function handlePauseVideo() {
     if (!(await isVideoPaused())) {
       handleVideoPlayback("pause");
-      setWasPausedByModal(true);
+      wasPausedByModalRef.current = true;
     }
   }
 
   useEffect(() => {
-    if (!isOpen && wasPausedByModal) {
+    if (!isOpen && wasPausedByModalRef.current) {
       handleVideoPlayback("play");
-      setWasPausedByModal(false);
+      wasPausedByModalRef.current = false;
     }
   }, [isOpen]);
 
