@@ -93,7 +93,7 @@
 }
 @media (max-height : 800px) {
     .videoPlayer {
-        max-width: 1070px;
+        max-width: 940px;
     }
 }
 @media (max-height : 600px) {
