@@ -1,11 +1,11 @@
 import Reset from "@/assets/icons/Reset";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "../Dialog";
 import { Checkbox } from "../Checkbox";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type ModalSettingsProps = {
   resetPlaylist: (isChecked: boolean) => void;
-  handleVideoPlayback: (play: "play" | "pause") => void;
+  handleVideoPlayback: (play: "play" | "pause") => void | Promise<void>;
   isVideoPaused: () => Promise<boolean>;
 };
 
@@ -13,31 +13,66 @@ export default function ResetPlaylistModal({ handleVideoPlayback, resetPlaylist,
   const [isOpen, setIsOpen] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
   const wasPausedByModalRef = useRef(false);
+  const pauseGenerationRef = useRef(0);
+  const mountedRef = useRef(false);
+  const openRef = useRef(false);
+  const confirmedRef = useRef(false);
+
+  const bumpPauseGeneration = useCallback(() => {
+    pauseGenerationRef.current++;
+  }, []);
 
   function handleCheckboxChange(checked: boolean) {
     setIsChecked(checked);
   }
 
-  function handleOpenModal() {
-    setIsOpen((prev) => !prev);
-  }
-
   async function handlePauseVideo() {
-    if (!(await isVideoPaused())) {
-      handleVideoPlayback("pause");
+    const generation = ++pauseGenerationRef.current;
+    try {
+      const paused = await isVideoPaused();
+      if (generation !== pauseGenerationRef.current) return;
+      if (paused) return;
+      await handleVideoPlayback("pause");
+      if (generation !== pauseGenerationRef.current) {
+        if (mountedRef.current) {
+          if (!openRef.current && !confirmedRef.current) {
+            await Promise.resolve(handleVideoPlayback("play")).catch(() => {});
+            return;
+          }
+          wasPausedByModalRef.current = true;
+        }
+        return;
+      }
       wasPausedByModalRef.current = true;
+    } catch (error) {
+      console.error("Error pausing video:", error);
     }
   }
 
   useEffect(() => {
     if (!isOpen && wasPausedByModalRef.current) {
-      handleVideoPlayback("play");
+      void Promise.resolve(handleVideoPlayback("play")).catch(() => {});
       wasPausedByModalRef.current = false;
     }
-  }, [isOpen]);
+  }, [isOpen, handleVideoPlayback]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      bumpPauseGeneration();
+    };
+  }, [bumpPauseGeneration]);
+
+  function handleOpenChange(open: boolean) {
+    openRef.current = open;
+    if (open) confirmedRef.current = false;
+    else pauseGenerationRef.current++;
+    setIsOpen(open);
+  }
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenModal}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <button
           onClick={handlePauseVideo}
@@ -59,7 +94,12 @@ export default function ResetPlaylistModal({ handleVideoPlayback, resetPlaylist,
         <div className="mx-auto flex gap-3 pt-3 text-lg">
           <DialogClose asChild>
             <button
-              onClick={() => handleVideoPlayback("play")}
+              onClick={() => {
+                if (wasPausedByModalRef.current) {
+                  void Promise.resolve(handleVideoPlayback("play")).catch(() => {});
+                  wasPausedByModalRef.current = false;
+                }
+              }}
               className="ring-offset-background cursor-pointer rounded-xl bg-neutral-700 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-2xs ring-offset-2 transition-all duration-300 hover:bg-neutral-600 hover:ring-2 hover:ring-neutral-700"
             >
               Cancel
@@ -67,7 +107,12 @@ export default function ResetPlaylistModal({ handleVideoPlayback, resetPlaylist,
           </DialogClose>
           <DialogClose asChild>
             <button
-              onClick={() => resetPlaylist(isChecked)}
+              onClick={() => {
+                confirmedRef.current = true;
+                wasPausedByModalRef.current = false;
+                bumpPauseGeneration();
+                resetPlaylist(isChecked);
+              }}
               className="ring-offset-background cursor-pointer rounded-xl bg-red-700 px-4 py-2.5 text-center text-sm font-semibold text-white shadow-2xs ring-offset-2 transition-all duration-300 hover:bg-red-600 hover:ring-2 hover:ring-red-700"
             >
               Restart

@@ -1,16 +1,21 @@
 import { Thumbnails } from "@/types";
 
-export function getThumbnailInfo(thumbnails?: Thumbnails) {
-  let thumbnailURL;
-  let hasBlackBars;
+const FALLBACK_ORDER: (keyof Thumbnails)[] = ["medium", "maxres", "standard", "high", "default"];
 
-  if (typeof window !== "undefined" && window.innerWidth <= 720) {
-    thumbnailURL = thumbnails?.medium?.url || thumbnails?.default?.url || "";
-    hasBlackBars = true;
-  } else {
-    thumbnailURL = thumbnails?.maxres?.url || thumbnails?.standard?.url || thumbnails?.high?.url || thumbnails?.medium?.url || "";
-    hasBlackBars = !/(maxres|medium)/.test(thumbnailURL);
+export function getThumbnailInfo(thumbnails?: Thumbnails) {
+  let thumbnailURL = "";
+  let chosenKey: keyof Thumbnails | undefined;
+
+  for (const key of FALLBACK_ORDER) {
+    const url = thumbnails?.[key]?.url;
+    if (url) {
+      thumbnailURL = url;
+      chosenKey = key;
+      break;
+    }
   }
+
+  const hasBlackBars = chosenKey !== "medium" && chosenKey !== "maxres";
 
   return { thumbnailURL, hasBlackBars };
 }

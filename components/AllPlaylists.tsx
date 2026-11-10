@@ -30,6 +30,7 @@ export default function AllPlaylists() {
     data: vidData,
     isFetching: isVidFetching,
     isFetched: isVidFetched,
+    isError: isVidError,
   } = useQuery({
     queryKey: ["videos"],
     queryFn: async () => {
@@ -47,32 +48,35 @@ export default function AllPlaylists() {
   // to the query cache so the derived `playlistItems` stays in sync.
   const setPlaylistItems = useCallback(
     (next: Playlist[] | ((prev: Playlist[]) => Playlist[])) => {
-      const resolved = typeof next === "function" ? next(playlistItems) : next;
-      queryClient.setQueryData<Items>(["playlists"], { items: resolved });
+      queryClient.setQueryData<Items>(["playlists"], (prev) => {
+        const resolved = typeof next === "function" ? next(prev?.items ?? []) : next;
+        return { items: resolved };
+      });
     },
-    [playlistItems, queryClient],
+    [queryClient],
   );
 
   const setVideoItems = useCallback(
     (next: Playlist[] | ((prev: Playlist[]) => Playlist[])) => {
-      const resolved = typeof next === "function" ? next(videoItems) : next;
-      queryClient.setQueryData<Items>(["videos"], { items: resolved });
+      queryClient.setQueryData<Items>(["videos"], (prev) => {
+        const resolved = typeof next === "function" ? next(prev?.items ?? []) : next;
+        return { items: resolved };
+      });
     },
-    [videoItems, queryClient],
+    [queryClient],
   );
 
-  if ((isPlFetching || isVidFetching) && !isPlFetched) {
+  if ((isPlFetching && !isPlFetched) || (isVidFetching && !isVidFetched)) {
     return (
       <div className="mx-auto flex justify-center pt-2">
         <Spin className="mt-5 h-7 w-7 animate-spin text-indigo-500" />
       </div>
     );
   }
-  if (isPlError) return <div className="text-center text-neutral-800 dark:text-neutral-300">Error Fetching the Data</div>;
 
   return (
     <>
-      {!vidData?.items?.length && !plData?.items?.length && isPlFetched && isVidFetched && (
+      {!vidData?.items?.length && !plData?.items?.length && isPlFetched && isVidFetched && !isPlError && !isVidError && (
         <div className="flex flex-col items-center gap-3 pt-10">
           <h3 className="text-lg font-semibold tracking-wide text-neutral-500 dark:text-neutral-400">No Items Added</h3>
           <Empty className="h-12 w-12 text-neutral-400 dark:text-neutral-500" />
@@ -86,7 +90,9 @@ export default function AllPlaylists() {
       )}
 
       <section className="x-4 pb-2 max-md:pb-6">
+        {isPlError && <div className="text-center text-neutral-800 dark:text-neutral-300">Error Fetching the Data</div>}
         <ItemsList title="Playlist" setItems={setPlaylistItems} items={playlistItems} otherTypeVideos={videoItems} />
+        {isVidError && <div className="text-center text-neutral-800 dark:text-neutral-300">Error Fetching the Data</div>}
         <ItemsList title="Video" setItems={setVideoItems} items={videoItems} otherTypeVideos={playlistItems} />
       </section>
     </>

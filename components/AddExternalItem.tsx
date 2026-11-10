@@ -1,16 +1,10 @@
 "use client";
 import { toastError, toastSuccess } from "@/utils/toastStyles";
-import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
+import addLibraryItem, { type AddItemType } from "@/utils/addLibraryItem";
 import toast from "react-hot-toast";
-import getVideosData from "@/utils/getVideosData";
-import getPlaylistsData from "@/utils/getPlaylistsData";
-import fetchVideosIds from "@/utils/fetchVideosIds";
-import { get, set } from "idb-keyval";
-import { Items } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import getChannelId from "@/utils/createChannelPlaylist";
 import Loading from "@/assets/icons/Loading";
 
 export default function AddExternalItem({ searchParams }: { searchParams: { type: string; id: string } }) {
@@ -18,211 +12,33 @@ export default function AddExternalItem({ searchParams }: { searchParams: { type
   const router = useRouter();
 
   useEffect(() => {
+    let cancelled = false;
+
     async function run() {
-      if (typeof window === "undefined") return null;
-
-      if (!searchParams.type || !searchParams.id) return null;
-      const id = searchParams.id;
-
       try {
-        // VIDEO
-        if (searchParams.type === "video") {
-          let videoKey = "v=" + id;
-
-          // Double check both IndexedDB and localStorage array
-          let isVideoSaved = await get(videoKey);
-          const allVideos = safeParse<string[]>(localStorage.getItem("videos"), []);
-          const isInLocalStorage = allVideos.includes(id);
-
-          // If in localStorage but not in IndexedDB, remove from localStorage and allow re-adding
-          if (!isVideoSaved && isInLocalStorage) {
-            console.log("Video found in localStorage but not in IndexedDB, cleaning up localStorage...");
-            const updatedVideos = allVideos.filter((videoId: string) => videoId !== id);
-            safeSetItem("videos", JSON.stringify(updatedVideos));
-            localStorage.removeItem(videoKey); // Remove any localStorage entry for this video
-          }
-
-          // If in IndexedDB but not in localStorage, clean it up
-          if (isVideoSaved && !isInLocalStorage) {
-            console.log("Video found in IndexedDB but not in localStorage, cleaning up...");
-            isVideoSaved = null;
-          }
-
-          // Only block if it's in both storage locations
-          if (isVideoSaved && isInLocalStorage) {
-            console.log("Video Already Added!");
-            toast.error("Video Already Added!", toastError);
-            return;
-          }
-
-          const data = await getVideosData(id);
-
-          await set(videoKey, { id: id, description: data.items[0].description });
-
-          if (data?.items?.length) {
-            safeSetItem(videoKey, JSON.stringify({ initialTime: 0 }));
-            const allVideos = safeParse<string[]>(localStorage.getItem("videos"), []);
-            safeSetItem("videos", JSON.stringify([...allVideos, id]));
-
-            await queryClient.ensureQueryData({
-              queryKey: ["videos"],
-            });
-
-            queryClient.setQueryData<Items>(["videos"], (prev) => {
-              if (!prev || !prev?.items?.length) return data;
-              return {
-                ...data,
-                items: [...prev.items, ...data.items],
-              };
-            });
-            // }
-
-            return toast.success("Video Added!", toastSuccess);
-          } else {
-            toast.error("Video is Invalid or Private!", toastError);
-            localStorage.removeItem(videoKey);
-          }
-        }
-
-        // PLAYLIST or CHANNEL ID
-        if (searchParams.type === "playlist") {
-          let playlistKey = "pl=" + id;
-
-          // Double check both IndexedDB and localStorage array
-          let isPlSaved = await get(playlistKey);
-          const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
-          const isInLocalStorage = allPlaylists.includes(id);
-
-          // If in localStorage but not in IndexedDB, remove from localStorage and allow re-adding
-          if (!isPlSaved && isInLocalStorage) {
-            console.log("Playlist found in localStorage but not in IndexedDB, cleaning up localStorage...");
-            const updatedPlaylists = allPlaylists.filter((playlistId: string) => playlistId !== id);
-            safeSetItem("playlists", JSON.stringify(updatedPlaylists));
-            localStorage.removeItem(playlistKey); // Remove any localStorage entry for this playlist
-          }
-
-          // If in IndexedDB but not in localStorage, clean it up
-          if (isPlSaved && !isInLocalStorage) {
-            console.log("Playlist found in IndexedDB but not in localStorage, cleaning up...");
-            isPlSaved = null;
-          }
-
-          // Only block if it's in both storage locations
-          if (isPlSaved && isInLocalStorage) {
-            toast.error("Playlist Already Added!", toastError);
-            return null;
-          }
-
-          // Channel uploads playlists (UU...) need reverse for oldest-first.
-          const isChannelPlaylist = id.startsWith("UU");
-
-          const [playlistData, videosData] = await Promise.all([
-            getPlaylistsData(id),
-            fetchVideosIds(id, undefined, isChannelPlaylist),
-          ]);
-
-          await set(playlistKey, videosData);
-
-          if (playlistData?.items?.length) {
-            safeSetItem(
-              playlistKey,
-              JSON.stringify({ currentItem: 0, initialTime: 0, ...(isChannelPlaylist ? { isChannel: true } : {}) }),
-            );
-            const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
-            safeSetItem("playlists", JSON.stringify([...allPlaylists, id]));
-
-            await queryClient.ensureQueryData({
-              queryKey: ["playlists"],
-            });
-
-            queryClient.setQueryData<Items>(["playlists"], (prev) => {
-              if (!prev || !prev?.items?.length) return playlistData;
-
-              return {
-                ...playlistData,
-                items: [...prev.items, ...playlistData.items],
-              };
-            });
-
-            return toast.success("Playlist Added!", toastSuccess);
-          } else {
-            toast.error("Playlist is Invalid or Private!", toastError);
-            localStorage.removeItem(playlistKey);
-          }
-        }
-
-        // CHANNEL NAME
-        if (searchParams.type === "channel") {
-          const channelId = await getChannelId(id);
-
-          if (!channelId) {
-            toast.error("Invalid Channel!", toastError);
-            return null;
-          }
-          const playlistKey = "pl=" + channelId;
-
-          // Double check both IndexedDB and localStorage array
-          let isChannelSaved = await get(playlistKey);
-          const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
-          const isInLocalStorage = allPlaylists.includes(channelId);
-
-          // If in localStorage but not in IndexedDB, remove from localStorage and allow re-adding
-          if (!isChannelSaved && isInLocalStorage) {
-            console.log("Channel found in localStorage but not in IndexedDB, cleaning up localStorage...");
-            const updatedPlaylists = allPlaylists.filter((playlistId: string) => playlistId !== channelId);
-            safeSetItem("playlists", JSON.stringify(updatedPlaylists));
-            localStorage.removeItem(playlistKey); // Remove any localStorage entry for this channel
-          }
-
-          // If in IndexedDB but not in localStorage, clean it up
-          if (isChannelSaved && !isInLocalStorage) {
-            console.log("Channel found in IndexedDB but not in localStorage, cleaning up...");
-            isChannelSaved = null;
-          }
-
-          // Only block if it's in both storage locations
-          if (isChannelSaved && isInLocalStorage) {
-            toast.error("Channel Already Added!", toastError);
-            return null;
-          }
-
-          const [playlistData, videosData] = await Promise.all([getPlaylistsData(channelId), fetchVideosIds(channelId, undefined, true)]);
-
-          await set(playlistKey, videosData);
-
-          if (playlistData?.items?.length) {
-            safeSetItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0, isChannel: true }));
-            const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
-            safeSetItem("playlists", JSON.stringify([...allPlaylists, channelId]));
-
-            await queryClient.ensureQueryData({
-              queryKey: ["playlists"],
-            });
-
-            queryClient.setQueryData<Items>(["playlists"], (prev) => {
-              // if no playlists saved, return the new one
-              if (!prev || !prev?.items?.length) return playlistData;
-
-              return {
-                ...playlistData,
-                items: [...prev.items, playlistData.items[0]],
-              };
-            });
-
-            return toast.success("Channel Added!", toastSuccess);
-          } else {
-            toast.error("Playlist is Invalid or Private!", toastError);
-            localStorage.removeItem(playlistKey);
-          }
+        const result = await addLibraryItem(queryClient, searchParams.type as AddItemType, searchParams.id);
+        if (cancelled) return;
+        if (result.status === "duplicate") {
+          const label = result.type === "video" ? "Video" : result.type === "channel" ? "Channel" : "Playlist";
+          toast.error(`${label} Already Added!`, toastError);
+        } else {
+          const label = result.type === "video" ? "Video" : result.type === "channel" ? "Channel" : "Playlist";
+          toast.success(`${label} Added!`, toastSuccess);
         }
       } catch (error) {
         console.log(error);
+        if (!cancelled) toast.error("Something went wrong. Please try again later.", toastError);
       } finally {
-        router.push("/");
+        if (!cancelled) router.push("/");
       }
     }
-    run();
-  }, []);
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [queryClient, router, searchParams.id, searchParams.type]);
+
   return (
     <div className="flex min-h-[10vh] w-full items-center justify-center gap-2">
       <span className="text-base tracking-wide text-indigo-100">Adding Item</span>

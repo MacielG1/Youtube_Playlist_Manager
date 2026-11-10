@@ -1,22 +1,26 @@
 import { YouTubePlayer } from "react-youtube";
-import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
+import { getSavedIds, safeGetItem, safeParse, safeSetItem } from "@/utils/safeLocalStorage";
 
-export default function saveVideoProgress(videoPlayer: YouTubePlayer, videoId: string) {
-  const item = `v=${videoId}`;
+export default async function saveVideoProgress(videoPlayer: YouTubePlayer, videoId: string) {
+  try {
+    const item = `v=${videoId}`;
 
-  const currentData = safeParse<{ initialTime?: number; videoId?: string } | null>(localStorage.getItem(item), null);
+    if (!videoPlayer) return;
+    const t = await videoPlayer.getCurrentTime();
+    if (typeof t !== "number" || !Number.isFinite(t) || t < 0) return;
 
-  if (!currentData) return;
+    const currentData = safeParse<{ initialTime?: number; videoId?: string } | null>(safeGetItem(item), null);
+    if (!currentData || typeof currentData !== "object" || Array.isArray(currentData)) return;
+    if (!getSavedIds("videos").includes(videoId)) return;
 
-  if (!videoPlayer) return;
-  const t = videoPlayer.getCurrentTime();
-  if (!t) return;
+    const data = {
+      ...currentData,
+      videoId,
+      initialTime: t,
+    };
 
-  const data = {
-    ...currentData,
-    videoId,
-    initialTime: t as number,
-  };
-
-  safeSetItem(item, JSON.stringify(data));
+    safeSetItem(item, JSON.stringify(data));
+  } catch {
+    return;
+  }
 }

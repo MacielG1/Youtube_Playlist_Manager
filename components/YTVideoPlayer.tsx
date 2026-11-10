@@ -1,11 +1,11 @@
 "use client";
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Items, Video } from "@/types";
 import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
 import seekTime from "@/utils/seekTime";
-import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
+import { safeGetItem, safeParse, safeSetItem } from "@/utils/safeLocalStorage";
 import useIsClient from "@/hooks/useIsClient";
 import LogoButton from "./LogoButton";
 import saveVideoProgress from "@/utils/saveVideoProgress";
@@ -65,12 +65,20 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     };
   }, [videoId]);
 
+  const disposedRef = useRef(false);
+  useEffect(() => {
+    disposedRef.current = false;
+    return () => {
+      disposedRef.current = true;
+    };
+  }, []);
+
   useEffect(() => {
     const player = videoPlayerRef?.current?.internalPlayer;
     if (!player) return;
 
     try {
-      isAudioMuted ? player.mute() : player.unMute();
+      void Promise.resolve(isAudioMuted ? player.mute() : player.unMute()).catch(() => {});
     } catch (error) {
       console.error("Error setting mute state:", error);
     }
@@ -91,24 +99,28 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         setIsLoaded(true);
 
         try {
-          const plRate = safeParse<{ playbackSpeed?: number }>(localStorage.getItem(item), {})?.playbackSpeed || 1;
+          const plRate = safeParse<{ playbackSpeed?: number }>(safeGetItem(item), {})?.playbackSpeed || 1;
           // Defer: YT IFrame API internal `this.g` (iframe ref) may be null
           // synchronously in onReady under dev-mode double-mount. Waiting one
           // tick lets the API finish attaching the iframe.
           setTimeout(() => {
-            try {
-              const p = videoPlayerRef?.current?.internalPlayer;
-              if (p?.getIframe?.()) p.setPlaybackRate(plRate);
-            } catch {
-              /* iframe not ready, ignore */
-            }
+            void (async () => {
+              try {
+                const p = videoPlayerRef?.current?.internalPlayer;
+                const iframe = await p?.getIframe?.();
+                if (disposedRef.current || !iframe || videoPlayerRef?.current?.internalPlayer !== p) return;
+                await p.setPlaybackRate(plRate);
+              } catch {
+                /* iframe not ready, ignore */
+              }
+            })();
           }, 0);
         } catch (err) {
           console.warn("Could not set playback rate:", err);
         }
 
-        let data = await get(`v=${videoId}`);
-        setVideoData(data);
+        let data = await get(`v=${videoId}`).catch(() => undefined);
+        if (!disposedRef.current) setVideoData(data);
       } catch (err) {
         console.warn("Error initializing player:", err);
       }
@@ -120,24 +132,25 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
   function onPlay(e: YouTubeEvent) {
     if (!e.target) return;
     isPlayingVideoRef.current = true;
-    saveVideoProgress(e.target, videoId);
+    void saveVideoProgress(e.target, videoId);
   }
 
   function onPause(e: YouTubeEvent) {
     if (!e.target) return;
     isPlayingVideoRef.current = false;
-    saveVideoProgress(e.target, videoId);
+    void saveVideoProgress(e.target, videoId);
   }
   function onError(e: YouTubeEvent) {
     console.log("Video error:", e);
 
-    if (e.data === 101 || e.data === 150) {
+    if (e.data === 100 || e.data === 101 || e.data === 150 || e.data === 2 || e.data === 5) {
       setEmbedError(true);
       console.log("Video unavailable - showing error modal");
     }
   }
   function onSpeedChange(e: YouTubeEvent) {
-    let currentData = safeParse<{ playbackSpeed?: number } & Record<string, unknown>>(localStorage.getItem(item), {});
+    if (!Number.isFinite(e.data)) return;
+    let currentData = safeParse<{ playbackSpeed?: number } & Record<string, unknown>>(safeGetItem(item), {});
     currentData.playbackSpeed = e.data;
 
     safeSetItem(item, JSON.stringify(currentData));
@@ -170,20 +183,20 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
     });
   }
 
-  async function isVideoPaused() {
+  const isVideoPaused = useCallback(async () => {
     try {
       const player = videoPlayerRef.current?.internalPlayer;
       if (!player) return true;
 
       const playerState = await player.getPlayerState();
-      return playerState === 2;
+      return playerState !== 1;
     } catch (error) {
       console.error("Error checking video pause state:", error);
       return true;
     }
-  }
+  }, []);
 
-  async function handleVideoPlayback(mode: "play" | "pause") {
+  const handleVideoPlayback = useCallback(async (mode: "play" | "pause") => {
     try {
       const player = videoPlayerRef.current?.internalPlayer;
       if (!player) return;
@@ -191,24 +204,20 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
       const playerState = await player.getPlayerState();
 
       if (mode === "play" && playerState === 2) {
-        player.playVideo();
+        await player.playVideo();
         isPaused.current = false;
       } else if (mode === "pause" && playerState === 1) {
-        player.pauseVideo();
+        await player.pauseVideo();
         isPaused.current = true;
       }
     } catch (error) {
       console.error("Error handling video playback:", error);
     }
-  }
+  }, []);
 
-  let initialTime = 0;
-
-  if (isBrowser) {
-    initialTime = safeParse<{ initialTime?: number }>(localStorage.getItem(item), {})?.initialTime || 0;
-  }
-
-  const vidOptions: YouTubeProps["opts"] = useMemo(() => {
+  const [vidOptions] = useState<YouTubeProps["opts"]>(() => {
+    const rawInitialTime = isBrowser ? safeParse<{ initialTime?: number }>(safeGetItem(item), {})?.initialTime : 0;
+    const initialTime = typeof rawInitialTime === "number" && Number.isFinite(rawInitialTime) && rawInitialTime >= 0 ? rawInitialTime : 0;
     return {
       height: "100%",
       width: "100%",
@@ -219,7 +228,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
         mute: isAudioMuted || false,
       },
     };
-  }, []);
+  });
 
   // Memoize title computation
   const videoTitle = useMemo(
@@ -235,7 +244,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
       <LogoButton />
 
       <div className="flex min-h-screen flex-col items-center justify-center pt-12">
-        <div className="videoPlayer flex w-full min-w-[400px] items-center justify-center pt-2 max-xl:p-[2.4px] 2xl:max-w-[78vw]">
+        <div className="videoPlayer flex w-full min-w-0 items-center justify-center pt-2 max-xl:p-[2.4px] 2xl:max-w-[78vw]">
           <div className="relative w-full overflow-auto pb-[56.25%]">
             {!isLoaded && (
               <div className="fixed inset-0 -mt-16 flex items-center justify-center md:-mt-10">
@@ -295,44 +304,52 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
             <div className="xs:gap-3 flex justify-center gap-1 pt-1">
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger>
-                    <span
+                  <TooltipTrigger asChild>
+                    <button
+                      aria-label="Restart video"
                       className="cursor-pointer text-neutral-600 outline-hidden transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={() => videoPlayerRef?.current?.internalPlayer.seekTo(0)}
                     >
                       <SkipBack className="h-8 w-8" />
-                    </span>
+                    </button>
                   </TooltipTrigger>
                   <TooltipContent>Restart</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
-                  <TooltipTrigger>
-                    <span
+                  <TooltipTrigger asChild>
+                    <button
+                      aria-label="Rewind 10 seconds"
                       className="cursor-pointer text-neutral-600 outline-hidden transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, -10)}
                     >
                       <Rewind10 className="h-8 w-8" />
-                    </span>
+                    </button>
                   </TooltipTrigger>
                   <TooltipContent>Rewind 10s</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
-                  <TooltipTrigger>
-                    <span
+                  <TooltipTrigger asChild>
+                    <button
+                      aria-label="Skip 10 seconds"
                       className="cursor-pointer text-neutral-600 outline-hidden transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
                       onClick={() => seekTime(isPlayingVideoRef, videoPlayerRef, 10)}
                     >
                       <Skip10 className="h-8 w-8" />
-                    </span>
+                    </button>
                   </TooltipTrigger>
                   <TooltipContent>Skip 10s</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
-                  <TooltipTrigger>
-                    <Link href={`https://www.youtube.com/watch?v=${videoId}&t=${Math.floor(currentTime)}`} target="_blank" rel="noopener noreferrer">
+                  <TooltipTrigger asChild>
+                    <Link
+                      href={`https://www.youtube.com/watch?v=${videoId}&t=${Math.floor(currentTime)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Open on YouTube"
+                    >
                       <Youtube className="mx-[2.4px] h-8 w-8 fill-neutral-200 px-[0.56px] pb-[0.8px] text-neutral-600 transition duration-300 hover:text-neutral-950 dark:fill-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-200" />
                     </Link>
                   </TooltipTrigger>
@@ -340,7 +357,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                 </Tooltip>
 
                 <Tooltip>
-                  <TooltipTrigger>
+                  <TooltipTrigger asChild>
                     <Link
                       href={
                         videoData?.channelId
@@ -349,6 +366,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                       }
                       target="_blank"
                       rel="noopener noreferrer"
+                      aria-label="Open channel"
                       className="mx-1px"
                     >
                       <Channel className="h-8 w-8 text-neutral-600 transition duration-300 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-neutral-200" />
@@ -358,17 +376,19 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
                 </Tooltip>
 
                 <Tooltip>
-                  <TooltipTrigger>
-                    <ModalDelete
-                      icon={<Close className="h-8 w-8" />}
-                      deleteText="Delete"
-                      type="Video"
-                      id={videoId}
-                      title={videoData?.title ?? ""}
-                      onDelete={onDelete}
-                      handleVideoPlayback={handleVideoPlayback}
-                      isVideoPaused={isVideoPaused}
-                    />
+                  <TooltipTrigger asChild>
+                    <div className="flex items-center">
+                      <ModalDelete
+                        icon={<Close className="h-8 w-8" />}
+                        deleteText="Delete"
+                        type="Video"
+                        id={videoId}
+                        title={videoData?.title ?? ""}
+                        onDelete={onDelete}
+                        handleVideoPlayback={handleVideoPlayback}
+                        isVideoPaused={isVideoPaused}
+                      />
+                    </div>
                   </TooltipTrigger>
                   <TooltipContent>Delete Video</TooltipContent>
                 </Tooltip>

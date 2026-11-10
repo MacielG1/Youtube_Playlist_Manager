@@ -1,21 +1,17 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { Items } from "@/types";
 import { toastError } from "@/utils/toastStyles";
-import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
-import { set } from "idb-keyval";
-import getChannelId from "@/utils/createChannelPlaylist";
+import addLibraryItem from "@/utils/addLibraryItem";
 import toast from "react-hot-toast";
-import getVideosData from "@/utils/getVideosData";
-import getPlaylistsData from "@/utils/getPlaylistsData";
-import fetchVideosIds from "@/utils/fetchVideosIds";
+import parseYouTubeInput from "@/utils/parseYouTubeInput";
 import Search from "@/assets/icons/Search";
 import Spin from "@/assets/icons/Spin";
 
 export default function Input() {
   const [addedURL, setAddedURL] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const isSubmittingRef = useRef(false);
   const queryClient = useQueryClient();
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -24,6 +20,8 @@ export default function Input() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     try {
       setIsLoading(true);
       const inputValue = addedURL.trim();
@@ -32,161 +30,28 @@ export default function Input() {
         toast.error("Please Enter a URL!", toastError);
         return;
       }
-      let isChannelName = false;
-      let playlistID, videoId, isChannelUrl, isChannelNameUrl, url;
 
-      try {
-        url = new URL(inputValue);
-      } catch (error) {
-        isChannelName = true; // if not url is a entered name
-      }
-
-      if (url) {
-        playlistID = url.searchParams.get("list");
-        videoId = url.searchParams.get("v");
-        isChannelUrl = url.pathname.includes("channel");
-        isChannelNameUrl = url.pathname.startsWith("/@");
-
-        if (url.hostname === "youtu.be") {
-          videoId = url.pathname.split("/").pop();
-        }
-      }
-
-      // Video
-      if (videoId && !playlistID) {
-        let videoKey = "v=" + videoId;
-        if (localStorage.getItem(videoKey)) {
-          toast.error("Video Already Added!", toastError);
-          return setAddedURL("");
-        }
-
-        const data = await getVideosData(videoId);
-
-        // Updating the query data with the new playlist
-        if (data?.items?.length) {
-          queryClient.setQueryData<Items>(["videos"], (prev) => {
-            if (!prev || !prev?.items?.length) return data;
-
-            return {
-              ...data,
-              items: [...prev.items, ...data.items],
-            };
-          });
-
-          safeSetItem(videoKey, JSON.stringify({ initialTime: 0 }));
-          const allVideos = safeParse<string[]>(localStorage.getItem("videos"), []);
-          safeSetItem("videos", JSON.stringify([...allVideos, videoId]));
-        } else {
-          toast.error("Video is Invalid or Private!", toastError);
-          localStorage.removeItem(videoKey);
-        }
-        return setAddedURL("");
-      }
-      // Playlist or Channel Url
-      if (playlistID || isChannelUrl) {
-        let id = playlistID || "";
-        if (isChannelUrl) {
-          const channelIdFromUrl = url!.pathname.split("/")[2];
-          id = channelIdFromUrl.startsWith("UC") ? "UU" + channelIdFromUrl.slice(2) : channelIdFromUrl;
-        }
-        // Channel uploads playlists (UU...) need reverse for oldest-first.
-        const isChannelPlaylist = id.startsWith("UU");
-        let playlistKey = "pl=" + id;
-
-        if (localStorage.getItem(playlistKey)) {
-          toast.error("Playlist Already Added!", toastError);
-          setAddedURL("");
-          return;
-        }
-        const [playlistData, videosData] = await Promise.all([getPlaylistsData(id), fetchVideosIds(id, undefined, isChannelPlaylist)]);
-
-        await set(playlistKey, videosData);
-
-        // Updating the query data with the new playlist
-        if (playlistData?.items?.length) {
-          queryClient.setQueryData<Items>(["playlists"], (prev) => {
-            // if no playlists saved, return the new one
-            if (!prev || !prev?.items?.length) return playlistData;
-
-            return {
-              ...playlistData,
-              items: [...prev.items, ...playlistData.items],
-            };
-          });
-
-          safeSetItem(
-            playlistKey,
-            JSON.stringify({ currentItem: 0, initialTime: 0, ...(isChannelPlaylist ? { isChannel: true } : {}) }),
-          );
-          const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
-          safeSetItem("playlists", JSON.stringify([...allPlaylists, id]));
-        } else {
-          toast.error("Playlist is Invalid or Private!", toastError);
-          localStorage.removeItem(playlistKey);
-        }
-        return setAddedURL("");
-      }
-
-      // Channel Name or URL with Channel Name
-      if (isChannelName || isChannelNameUrl) {
-        const name = isChannelNameUrl ? url!.pathname.split("/")[1] : inputValue;
-
-        const channelId = await getChannelId(name);
-        setAddedURL("");
-
-        if (!channelId) {
-          toast.error("Invalid Channel!", toastError);
-          return null;
-        }
-        const playlistKey = "pl=" + channelId;
-        if (localStorage.getItem(playlistKey)) {
-          toast.error("Channel Already Added!", toastError);
-          return null;
-        }
-
-        const [playlistData, videosData] = await Promise.all([getPlaylistsData(channelId), fetchVideosIds(channelId, undefined, true)]);
-
-        await set(playlistKey, videosData);
-        if (playlistData?.items?.length) {
-          queryClient.setQueryData<Items>(["playlists"], (prev) => {
-            // if no playlists saved, return the new one
-            if (!prev || !prev?.items?.length) return playlistData;
-
-            return {
-              ...playlistData,
-              items: [...prev.items, playlistData.items[0]],
-            };
-          });
-
-          safeSetItem(playlistKey, JSON.stringify({ currentItem: 0, initialTime: 0, isChannel: true }));
-          const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
-          safeSetItem("playlists", JSON.stringify([...allPlaylists, channelId]));
-        } else {
-          toast.error("Playlist is Invalid or Private!", toastError);
-          localStorage.removeItem(playlistKey);
-        }
-        return setAddedURL("");
-      }
-
-      try {
-        let params = new URL(inputValue).searchParams;
-        playlistID = params.get("list");
-        videoId = params.get("v");
-      } catch (error) {
-        return console.log(error);
-      }
-
-      setAddedURL("");
-      if (!isChannelName && !videoId && !playlistID && !isChannelUrl && !isChannelNameUrl) {
-        setAddedURL("");
+      const parsed = parseYouTubeInput(inputValue);
+      if (parsed.type === "invalid") {
         toast.error("Please Enter a Valid URL or a Channel Name!", toastError);
         return;
       }
+
+      const type = parsed.type === "channelName" ? "channel" : parsed.type;
+      const result = await addLibraryItem(queryClient, type, parsed.id);
+      setAddedURL("");
+
+      if (result.status === "duplicate") {
+        const label = result.type === "video" ? "Video" : result.type === "channel" ? "Channel" : "Playlist";
+        toast.error(`${label} Already Added!`, toastError);
+      }
+      return;
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message, toastError);
       }
     } finally {
+      isSubmittingRef.current = false;
       setIsLoading(false);
     }
   }
@@ -200,14 +65,16 @@ export default function Input() {
               type="text"
               value={addedURL}
               id="input"
+              aria-label="Video or Playlist URL or Channel Name"
               onChange={handleInputChange}
               placeholder="Enter a Video or Playlist URL or Channel Name"
-              className="xs:placeholder:text-base peer h-11 w-full rounded-xl border border-neutral-300 bg-white/80 px-4 pr-3 text-neutral-900 shadow-sm backdrop-blur-sm transition-all duration-200 placeholder:text-sm placeholder:text-neutral-400 hover:border-neutral-400 hover:bg-white focus:border-blue-500 focus:bg-white focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)] focus:outline-none sm:text-base dark:border-neutral-700 dark:bg-neutral-900/80 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:hover:border-neutral-600 dark:hover:bg-neutral-900 dark:focus:border-blue-500 dark:focus:bg-neutral-900 dark:focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]"
+              className="xs:placeholder:text-base peer h-11 w-full rounded-xl border border-neutral-300 bg-white/80 px-4 pr-3 text-neutral-900 shadow-sm backdrop-blur-sm transition-all duration-200 placeholder:text-sm placeholder:text-neutral-400 hover:border-neutral-400 hover:bg-neutral-100 focus:border-blue-500 focus:bg-white focus:shadow-[0_0_0_3px_rgba(59,130,246,0.1)] focus:outline-none sm:text-base dark:border-neutral-700 dark:bg-neutral-900/80 dark:text-neutral-100 dark:placeholder:text-neutral-500 dark:hover:border-neutral-600 dark:hover:bg-neutral-900 dark:focus:border-blue-500 dark:focus:bg-neutral-900 dark:focus:shadow-[0_0_0_3px_rgba(59,130,246,0.15)]"
             />
           </div>
           <button
             type="submit"
             disabled={isLoading}
+            aria-label="Search"
             className="group relative flex h-11 w-11 cursor-pointer items-center justify-center overflow-hidden rounded-xl bg-linear-to-b from-blue-500 to-blue-600 text-white shadow-md transition-all duration-200 hover:from-blue-600 hover:to-blue-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:from-neutral-400 disabled:to-neutral-500 disabled:shadow-none dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-500 dark:hover:to-blue-600 dark:focus:ring-offset-neutral-900 dark:disabled:from-neutral-700 dark:disabled:to-neutral-800"
           >
             <Search className="h-5 w-5 transition-transform duration-300 group-hover:scale-105" />

@@ -1,9 +1,9 @@
 import { DndContext, DragEndEvent, MouseSensor, TouchSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
-import type { Items, Playlist } from "@/types";
+import type { Playlist } from "@/types";
 import Item from "./Item";
-import { useQueryClient } from "@tanstack/react-query";
-import { safeSetItem } from "@/utils/safeLocalStorage";
+import { getSavedIds, safeSetItem } from "@/utils/safeLocalStorage";
+import reorderSavedIds from "@/utils/reorderSavedIds";
 
 type Props = {
   setItems: React.Dispatch<React.SetStateAction<Playlist[]>>;
@@ -23,29 +23,26 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
 
   const sensors = useSensors(mouseSensor, touchSensor);
 
-  const queryClient = useQueryClient();
   let type = title === "Playlist" ? "playlists" : "videos";
 
-  function handleDragEnd(e: DragEndEvent, setter: React.Dispatch<React.SetStateAction<Playlist[]>>) {
+  function handleDragEnd(e: DragEndEvent) {
     const { active, over } = e;
 
-    if (active.id !== over?.id) {
-      queryClient.setQueryData<Items>([type], (prev) => {
-        if (!prev) return { items: [] };
+    if (!over || active.id === over.id) return;
 
-        let activeIndex = prev?.items.findIndex((item) => item.id === active.id);
-        let overIndex = prev?.items.findIndex((item) => item.id === over?.id);
-        let items = arrayMove(prev?.items, activeIndex, overIndex);
+    const activeIndex = items.findIndex((item) => item.id === active.id);
+    const overIndex = items.findIndex((item) => item.id === over.id);
+    if (activeIndex === -1 || overIndex === -1) return;
 
-        safeSetItem(type, JSON.stringify(items.map((item) => item.id)));
-        setter(items);
-        return { items };
-      });
-    }
+    const reordered = arrayMove(items, activeIndex, overIndex);
+    const newSavedIds = reorderSavedIds(getSavedIds(type), reordered.map((item) => item.id));
+    if (!newSavedIds) return;
+    if (!safeSetItem(type, JSON.stringify(newSavedIds))) return;
+    setItems(reordered);
   }
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(e, setItems)}>
+    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       {items?.length > 0 && (
         <SortableContext items={items}>
           <>
@@ -60,7 +57,7 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
                 title === "Video" && "pb-12"
               }`}
             >
-              {items?.map((item) => {
+              {items?.map((item, index) => {
                 return (
                   <Item
                     key={item.id}
@@ -70,6 +67,7 @@ export default function ItemsList({ setItems, items, title, otherTypeVideos }: P
                     thumbnails={item.thumbnails}
                     type={title}
                     channel={item.channel}
+                    priority={index < 4}
                   />
                 );
               })}

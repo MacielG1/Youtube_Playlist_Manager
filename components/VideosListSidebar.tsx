@@ -4,7 +4,7 @@ import { Items, Thumbnails } from "@/types";
 import { cn } from "@/utils/cn";
 import { getThumbnailInfo } from "@/utils/getThumbnailInfo";
 import reduceStringSize from "@/utils/reduceStringLength";
-import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
+import { safeGetItem, safeParse, safeSetItem } from "@/utils/safeLocalStorage";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useMemo, useState } from "react";
@@ -88,7 +88,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
 
   const leftClickHandler = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>, oneBasedIndex: number) => {
-      if (e.button === 0) {
+      if (e.button === 0 && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.altKey) {
         e.preventDefault();
         playVideoAt(oneBasedIndex);
         window.scrollTo({
@@ -106,7 +106,7 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
       e.stopPropagation();
       if (!playlistId || !thumbnails) return;
 
-      const customThumbnails = safeParse<Record<string, Thumbnails>>(localStorage.getItem("customPlaylistThumbnails"), {});
+      const customThumbnails = safeParse<Record<string, Thumbnails>>(safeGetItem("customPlaylistThumbnails"), {});
       customThumbnails[playlistId] = thumbnails;
       safeSetItem("customPlaylistThumbnails", JSON.stringify(customThumbnails));
 
@@ -180,7 +180,8 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                 <div className="relative">
                   <Link onClick={(e) => leftClickHandler(e, oneBasedIndex)} href={url} className="flex transition duration-300">
                     <div className="h-auto cursor-pointer overflow-hidden rounded-xl">
-                      <Image
+                      {thumbnailURL ? (
+                        <Image
                      src={thumbnailURL}
                         alt={video.title}
                         width={is700 ? 150 : is1280 ? 240 : is1500 ? 130 : 150}
@@ -191,6 +192,14 @@ export default function VideosListSidebar({ videosList, playVideoAt, currentVide
                         priority={oneBasedIndex === 1}
                         unoptimized
                       />
+                      ) : (
+                        <div
+                          role="img"
+                          aria-label={`No thumbnail available for ${video.title}`}
+                          className="rounded-xl bg-neutral-200 dark:bg-neutral-800"
+                          style={{ width: is700 ? 150 : is1280 ? 240 : is1500 ? 130 : 150, height: is700 ? 84 : is1280 ? 135 : is1500 ? 73 : 84 }}
+                        />
+                      )}
                     </div>
                   </Link>
                   {isUnavailable && (

@@ -20,7 +20,7 @@
 // //
 export default function convertDurationTime(duration: string): string {
   // Use a single regular expression to extract days, hours, minutes, and seconds
-  const regex = /P(?:([0-9]+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
+  const regex = /P(?:([0-9]+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:([\d.]+)S)?)?/;
 
   // Use regex to match and extract days, hours, minutes, and seconds
   const [, days, hours, minutes, seconds] = duration.match(regex) || [];
@@ -29,7 +29,7 @@ export default function convertDurationTime(duration: string): string {
   const d = Number(days) || 0;
   const h = Number(hours) || 0;
   const m = Number(minutes) || 0;
-  const s = Number(seconds) || 0;
+  const s = Math.floor(Number(seconds) || 0);
 
   // If there are days, perform additional calculations
   if (d > 0) {

@@ -1,16 +1,25 @@
-import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
+import { getSavedIds, safeGetItem, safeParse, writeStorageBatch } from "@/utils/safeLocalStorage";
 
 export default function onDeleteItems(itemId: string, type: "playlists" | "videos") {
+  const entries: Array<readonly [string, string | null]> = [];
+
   if (type === "playlists") {
-    localStorage.removeItem(`pl=${itemId}`);
-    localStorage.removeItem(`plVideos=${itemId}`);
+    entries.push([`pl=${itemId}`, null], [`plVideos=${itemId}`, null]);
+
+    const customThumbnails = safeParse<Record<string, unknown>>(safeGetItem("customPlaylistThumbnails"), {});
+    if (Object.hasOwn(customThumbnails, itemId)) {
+      delete customThumbnails[itemId];
+      entries.push(["customPlaylistThumbnails", JSON.stringify(customThumbnails)]);
+    }
   } else {
-    localStorage.removeItem(`v=${itemId}`);
+    entries.push([`v=${itemId}`, null]);
   }
 
   // remove playlist from playlists array
-  const allPlaylists = safeParse<string[]>(localStorage.getItem(type), []);
-  const newPlaylists = allPlaylists.filter((i: string) => i !== itemId);
+  const allItems = getSavedIds(type);
+  const newItems = allItems.filter((i: string) => i !== itemId);
 
-  safeSetItem(type, JSON.stringify(newPlaylists));
+  entries.push([type, JSON.stringify(newItems)]);
+
+  writeStorageBatch(entries);
 }

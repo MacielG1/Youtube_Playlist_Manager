@@ -1,49 +1,33 @@
-import { VideoAPI } from "@/types";
-import { set } from "idb-keyval";
-import { safeParse } from "@/utils/safeLocalStorage";
+import { Video } from "@/types";
+import { setMany } from "idb-keyval";
+import { fetchMetadata } from "@/utils/fetchMetadata";
+import { getSavedIds } from "@/utils/safeLocalStorage";
 
 export default async function getVideosData(newVideoId?: string) {
-  let videosIds = "";
+  const videosIds = newVideoId
+    ? newVideoId
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean)
+    : getSavedIds("videos");
 
-  if (newVideoId) {
-    videosIds = newVideoId;
-  } else {
-    const allVideos = safeParse<string[]>(localStorage.getItem("videos"), []);
-
-    if (!allVideos.length) return {};
-    videosIds = allVideos.join(",");
+  if (videosIds.length === 0) {
+    return { items: [] };
   }
 
   try {
-    const res = await fetch("/api/videosData", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: JSON.stringify({ videosIds }),
+    const items = await fetchMetadata<Video>(videosIds, {
+      endpoint: "/api/videosData",
+      bodyKey: "videosIds",
     });
-    if (!res.ok) {
-      console.log("Error", res);
-      if (res.status === 429) {
-        throw new Error("Too many requests. Please try again later.");
-      } else {
-        throw new Error("Something went wrong. Please try again later.");
-      }
+
+    try {
+      await setMany(items.map((item) => [`v=${item.id}`, item]));
+    } catch (cacheError) {
+      console.warn("getVideosData cache write failed", cacheError);
     }
 
-    const data = await res.json();
-
-    if (!data) {
-      console.log("Error", res.statusText);
-      return {};
-    }
-    await Promise.all(
-      data.items.map(async (item: VideoAPI) => {
-        await set(`v=${item.id}`, item);
-      }),
-    );
-
-    return data;
+    return { items };
   } catch (err) {
     console.log("Error in getVideosData", err);
     throw err;

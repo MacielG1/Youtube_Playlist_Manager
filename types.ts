@@ -70,15 +70,20 @@ export type PlaylistItem = {
   currentItem: number;
   currentPage?: number;
   initialTime: number;
+  playlistId?: string;
+  isChannel?: boolean;
+  playbackSpeed?: number;
 };
 
 export type VideoItem = {
   initialTime: number;
+  videoId?: string;
+  playbackSpeed?: number;
 };
 
 export type SavedItem = {
   key: string;
-  data: Playlist | VideoItem;
+  data: PlaylistItem | VideoItem;
 };
 
 export type PlVideos = {

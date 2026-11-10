@@ -1,57 +1,59 @@
 import { YouTubePlayer } from "react-youtube";
-import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
+import { getSavedIds, safeGetItem, safeParse, safeSetItem } from "@/utils/safeLocalStorage";
 
 export default async function savePlaylistsProgress(videoPlayer: YouTubePlayer, playlistId: string, page: number, index?: number) {
-  const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
+  try {
+    if (!Number.isInteger(page) || page < 1) return;
+    if (index !== undefined && (!Number.isInteger(index) || index < 0)) return;
 
-  const i = allPlaylists.indexOf(playlistId);
-  if (i === -1) return; // if playlist is not in the list, return
+    if (!getSavedIds("playlists").includes(playlistId)) return; // if playlist is not in the list, return
 
-  const item = `pl=${playlistId}`;
+    const item = `pl=${playlistId}`;
 
-  const currentPl = safeParse<{ currentItem?: number; currentPage?: number; initialTime?: number; isChannel?: boolean }>(
-    localStorage.getItem(item),
-    {},
-  );
+    if (!videoPlayer) return;
 
-  if (!videoPlayer) return;
+    const currentTime = (await videoPlayer?.getCurrentTime()) as number;
+    if (typeof currentTime !== "number" || !Number.isFinite(currentTime) || currentTime < 0) return;
+    const duration = (await videoPlayer?.getDuration()) as number;
+    const currentIndex = index !== undefined ? index : ((await videoPlayer?.getPlaylistIndex()) as number);
+    if (!Number.isInteger(currentIndex) || currentIndex < 0 || currentIndex > 199) return;
 
-  const currentTime = ((await videoPlayer?.getCurrentTime()) as number) || 0;
-  if (!currentTime) return;
-  const duration = ((await videoPlayer?.getDuration()) as number) || 0;
-  const currentIndex = index !== undefined ? index : ((await videoPlayer?.getPlaylistIndex()) as number) || 0;
+    if (!getSavedIds("playlists").includes(playlistId)) return;
 
-  const remainingSeconds = duration - currentTime;
-  const watchedThresholdSeconds = duration > 0 ? Math.min(30, Math.max(5, duration * 0.01)) : 0;
-  const isVideoFinished = duration > 0 && remainingSeconds <= watchedThresholdSeconds;
+    const currentPl = safeParse<{ currentItem?: number; currentPage?: number; initialTime?: number; isChannel?: boolean } | null>(safeGetItem(item), null);
+    if (!currentPl || typeof currentPl !== "object" || Array.isArray(currentPl)) return;
 
-  let nextIndex = currentIndex;
-  let nextPage = page && page > 0 ? page : 1;
+    const plVideosParsed = safeParse<{ videosIds?: unknown }>(safeGetItem(`plVideos=${playlistId}`), {});
+    const totalVideos = Array.isArray(plVideosParsed.videosIds) ? plVideosParsed.videosIds.length : 0;
 
-  if (isVideoFinished) {
-    const savedItem = currentPl.currentItem || 0;
-    const savedPage = currentPl.currentPage || 1;
+    const remainingSeconds = duration - currentTime;
+    const watchedThresholdSeconds = duration > 0 ? Math.min(30, Math.max(5, duration * 0.01), duration * 0.1) : 0;
+    const isVideoFinished = duration > 0 && remainingSeconds <= watchedThresholdSeconds;
 
-    const savedAbsoluteIndex = savedItem + (savedPage - 1) * 200;
-    const currentAbsoluteIndex = currentIndex + (page - 1) * 200;
+    let nextIndex = currentIndex;
+    let nextPage = page;
 
-    if (savedAbsoluteIndex <= currentAbsoluteIndex) {
-      nextIndex = currentIndex + 1;
+    if (isVideoFinished) {
+      const currentAbsoluteIndex = currentIndex + (page - 1) * 200;
+      const lastAbsoluteIndex = totalVideos > 0 ? totalVideos - 1 : Number.MAX_SAFE_INTEGER;
+      const nextAbsoluteIndex = Math.min(currentAbsoluteIndex + 1, lastAbsoluteIndex);
 
-      if (nextIndex >= 200) {
-        nextIndex = 0;
-        nextPage = nextPage + 1;
+      if (nextAbsoluteIndex !== currentAbsoluteIndex) {
+        nextPage = Math.floor(nextAbsoluteIndex / 200) + 1;
+        nextIndex = nextAbsoluteIndex % 200;
       }
     }
+
+    const data = {
+      ...currentPl,
+      playlistId,
+      currentItem: isVideoFinished ? nextIndex : currentIndex,
+      initialTime: isVideoFinished ? 0 : currentTime,
+      currentPage: nextPage,
+    };
+
+    safeSetItem(item, JSON.stringify(data));
+  } catch {
+    return;
   }
-
-  const data = {
-    ...currentPl,
-    playlistId,
-    currentItem: isVideoFinished ? nextIndex : currentIndex,
-    initialTime: isVideoFinished ? 0 : currentTime,
-    currentPage: nextPage,
-  };
-
-  safeSetItem(item, JSON.stringify(data));
 }

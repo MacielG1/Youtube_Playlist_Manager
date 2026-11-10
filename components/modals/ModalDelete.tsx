@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "../Dialog";
+import toast from "react-hot-toast";
+import { toastError } from "@/utils/toastStyles";
 
 type ModalSettingsProps = {
   icon: React.ReactNode;
@@ -8,7 +10,7 @@ type ModalSettingsProps = {
   type: "Playlist" | "Video";
   title: string;
   id?: string;
-  handleVideoPlayback: (play: "play" | "pause") => void;
+  handleVideoPlayback: (play: "play" | "pause") => void | Promise<void>;
   isVideoPaused: () => Promise<boolean>;
   onDelete: (id?: string) => void;
   isLoading?: boolean;
@@ -28,41 +30,85 @@ export default function ModalDelete({
 }: ModalSettingsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const wasPausedByModalRef = useRef(false);
+  const pauseGenerationRef = useRef(0);
+  const mountedRef = useRef(false);
+  const openRef = useRef(false);
+  const confirmedRef = useRef(false);
 
-  function handleOpenModal() {
-    setIsOpen((prev) => !prev);
-  }
+  const bumpPauseGeneration = useCallback(() => {
+    pauseGenerationRef.current++;
+  }, []);
 
   async function handlePauseVideo() {
-    if (!(await isVideoPaused())) {
-      handleVideoPlayback("pause");
+    const generation = ++pauseGenerationRef.current;
+    try {
+      const paused = await isVideoPaused();
+      if (generation !== pauseGenerationRef.current) return;
+      if (paused) return;
+      await handleVideoPlayback("pause");
+      if (generation !== pauseGenerationRef.current) {
+        if (mountedRef.current) {
+          if (!openRef.current && !confirmedRef.current) {
+            await Promise.resolve(handleVideoPlayback("play")).catch(() => {});
+            return;
+          }
+          wasPausedByModalRef.current = true;
+        }
+        return;
+      }
       wasPausedByModalRef.current = true;
+    } catch (error) {
+      console.error("Error pausing video:", error);
     }
   }
 
   useEffect(() => {
     if (!isOpen && wasPausedByModalRef.current) {
-      handleVideoPlayback("play");
+      void Promise.resolve(handleVideoPlayback("play")).catch(() => {});
       wasPausedByModalRef.current = false;
     }
-  }, [isOpen]);
+  }, [isOpen, handleVideoPlayback]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      bumpPauseGeneration();
+    };
+  }, [bumpPauseGeneration]);
+
+  function handleOpenChange(open: boolean) {
+    openRef.current = open;
+    if (open) confirmedRef.current = false;
+    else pauseGenerationRef.current++;
+    setIsOpen(open);
+  }
 
   async function handleDelete() {
+    confirmedRef.current = true;
+    bumpPauseGeneration();
     wasPausedByModalRef.current = false;
-    await onDelete(id);
-    setIsOpen(false);
+    try {
+      await onDelete(id);
+      openRef.current = false;
+      setIsOpen(false);
+    } catch (error) {
+      confirmedRef.current = false;
+      console.error("Delete failed:", error);
+      toast.error("Delete failed", toastError);
+    }
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenModal}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <span
+        <button
+          type="button"
           onClick={handlePauseVideo}
           className="cursor-pointer text-neutral-600 outline-hidden transition duration-300 hover:text-neutral-950 focus:text-neutral-500 dark:text-neutral-400 dark:hover:text-neutral-200"
-          role="button"
         >
           {icon}
-        </span>
+        </button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]" aria-describedby={undefined}>
         <div className="mx-auto flex max-w-[288px] flex-col items-center justify-center gap-4 px-8 pb-6 pt-2 xs:max-w-sm sm:max-w-lg md:min-w-[288px] lg:min-w-[400px]">
@@ -77,7 +123,7 @@ export default function ModalDelete({
             <DialogClose
               onClick={() => {
                 if (wasPausedByModalRef.current) {
-                  handleVideoPlayback("play");
+                  void Promise.resolve(handleVideoPlayback("play")).catch(() => {});
                   wasPausedByModalRef.current = false;
                 }
               }}
@@ -86,13 +132,14 @@ export default function ModalDelete({
             >
               Cancel
             </DialogClose>
-            <DialogClose
+            <button
+              type="button"
               onClick={handleDelete}
               disabled={isLoading}
               className="shadow-2xs cursor-pointer rounded-xl bg-red-700 px-4 py-2.5 text-center text-sm font-semibold text-white ring-offset-2 ring-offset-background transition-all duration-300 hover:bg-red-600 hover:ring-2 hover:ring-red-700"
             >
               {deleteText}
-            </DialogClose>
+            </button>
           </div>
         </div>
       </DialogContent>

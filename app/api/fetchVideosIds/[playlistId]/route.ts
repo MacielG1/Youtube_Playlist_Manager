@@ -1,57 +1,62 @@
-import { Playlist, PlaylistAPI } from "@/types";
+import { Playlist } from "@/types";
 import { NextResponse } from "next/server";
-
-const API_KEY = process.env.YOUTUBE_API;
-export const runtime = "edge";
+import { apiErrorResponse, requireItemsArray, requireMetadataItem, UpstreamMetadataItem, validateId, youtubeApiFetch, YouTubeApiError } from "@/utils/youtubeApi";
 
 type Params = {
   playlistId: string;
 };
 
 const MAX_AMOUNT_OF_PAGES = 50;
-const ID_RE = /^[A-Za-z0-9_-]+$/;
+
 export async function POST(req: Request, props: { params: Promise<Params> }): Promise<NextResponse> {
-  const params = await props.params;
-  const playlistsToFetch = params.playlistId;
-
-  if (!playlistsToFetch || !ID_RE.test(playlistsToFetch)) return new NextResponse("No Playlist Id", { status: 404 });
-
-  let pagesCounter = 0;
-  let nextPageToken = "";
-
-  const allVideos = [];
   try {
+    const params = await props.params;
+    const playlistsToFetch = validateId(params.playlistId, "playlistId");
+
+    let pagesCounter = 0;
+    let nextPageToken = "";
+    const seenPageTokens = new Set<string>();
+
+    const allVideos: UpstreamMetadataItem[] = [];
+
     do {
-      const res = await fetch(
-        `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistsToFetch}&maxResults=50&pageToken=${nextPageToken}&key=${API_KEY}`,
-        { signal: AbortSignal.timeout(15000) },
-      );
-      if (!res.ok) {
-        console.log("Error in /api/fetchVideosIds/[playlistId]", res.status, res.statusText);
-        throw new Error("ERROR");
+      if (nextPageToken) {
+        if (seenPageTokens.has(nextPageToken)) {
+          throw new YouTubeApiError(502, "Upstream pagination error");
+        }
+        seenPageTokens.add(nextPageToken);
       }
 
-      let data = await res.json();
+      const res = await youtubeApiFetch("playlistItems", {
+        part: "snippet",
+        playlistId: playlistsToFetch,
+        maxResults: "50",
+        pageToken: nextPageToken,
+      });
 
-      if (!data.items || data.items.length === 0) {
+      const data = await res.json();
+      const items = requireItemsArray(data);
+
+      if (items.length === 0) {
+        nextPageToken = "";
         break;
       }
 
-      for (let item of data.items) {
+      for (const item of items) {
+        requireMetadataItem(item);
         allVideos.push(item);
       }
-
-      nextPageToken = data.nextPageToken;
+      nextPageToken = typeof data.nextPageToken === "string" ? data.nextPageToken : "";
       pagesCounter++;
+    } while (nextPageToken && pagesCounter < MAX_AMOUNT_OF_PAGES);
 
-      if (pagesCounter > MAX_AMOUNT_OF_PAGES) {
-        break;
-      }
-    } while (nextPageToken);
+    if (nextPageToken) {
+      throw new YouTubeApiError(422, "Playlist exceeds maximum page limit");
+    }
 
     let newData: Playlist[] = [];
 
-    allVideos.forEach((item: PlaylistAPI) => {
+    allVideos.forEach((item) => {
       const title = item.snippet.title;
 
       if (title !== "Private video" && title !== "Deleted video" && item.snippet.resourceId?.videoId) {
@@ -67,7 +72,6 @@ export async function POST(req: Request, props: { params: Promise<Params> }): Pr
 
     return NextResponse.json(newData, { headers: { "Cache-Control": "private, max-age=300" } });
   } catch (e) {
-    console.log("Error in /api/fetch_write_videos/[playlistId]", e);
-    return new NextResponse("Error", { status: 404 });
+    return apiErrorResponse(e, "/api/fetchVideosIds/[playlistId]");
   }
 }

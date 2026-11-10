@@ -1,55 +1,33 @@
 import type { Playlist, Thumbnails } from "@/types";
-import { safeParse } from "@/utils/safeLocalStorage";
+import { fetchMetadata } from "@/utils/fetchMetadata";
+import { getSavedIds, safeGetItem, safeParse } from "@/utils/safeLocalStorage";
 
 export default async function getPlaylistsData(newPlaylistId?: string) {
-  let playlistsIds = "";
+  const playlistsIds = newPlaylistId
+    ? newPlaylistId
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean)
+    : getSavedIds("playlists");
 
-  if (newPlaylistId) {
-    playlistsIds = newPlaylistId;
-  } else {
-    const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
-
-    if (allPlaylists.length === 0) {
-      return {};
-    }
-    playlistsIds = allPlaylists.join(",");
+  if (playlistsIds.length === 0) {
+    return { items: [] };
   }
+
   try {
-    const res = await fetch(`/api/playlistsData`, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      method: "POST",
-      body: JSON.stringify({ playlistsIds }),
+    const items = await fetchMetadata<Playlist>(playlistsIds, {
+      endpoint: "/api/playlistsData",
+      bodyKey: "playlistsIds",
     });
 
-    if (!res.ok) {
-      console.log("Error", res);
-      if (res.status === 429) {
-        throw new Error("Too many requests. Please try again later.");
-      } else {
-        throw new Error("Something went wrong. Please try again later.");
-      }
-    }
-
-    let data = await res.json();
-    if (!data) {
-      console.log("Error", res.statusText);
-      return {};
-    }
-
     // Apply custom thumbnails if set
-    const customThumbnails = safeParse<Record<string, Thumbnails>>(localStorage.getItem("customPlaylistThumbnails"), {});
-    if (data.items && Object.keys(customThumbnails).length > 0) {
-      data.items = data.items.map((item: Playlist) => {
-        if (customThumbnails[item.id]) {
-          return { ...item, thumbnails: customThumbnails[item.id] as Thumbnails };
-        }
-        return item;
-      });
-    }
+    const customThumbnails = safeParse<Record<string, Thumbnails>>(safeGetItem("customPlaylistThumbnails"), {});
+    const itemsWithThumbnails =
+      Object.keys(customThumbnails).length > 0
+        ? items.map((item) => (Object.hasOwn(customThumbnails, item.id) ? { ...item, thumbnails: customThumbnails[item.id] as Thumbnails } : item))
+        : items;
 
-    return data;
+    return { items: itemsWithThumbnails };
   } catch (error) {
     console.log("Error in getPlaylistsData", error);
     throw error;

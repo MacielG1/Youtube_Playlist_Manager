@@ -14,7 +14,7 @@ const defaultSettingsContext: SettingsContextProps = {
 const SettingsContext = createContext<SettingsContextProps>(defaultSettingsContext);
 
 export default function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [isAudioMuted, setIsAudioMuted] = useLocalStorage("isAudioMuted", false);
+  const [isAudioMuted, setIsAudioMuted] = useLocalStorage("isAudioMuted", false, { initializeWithValue: false });
 
   const contextValue: SettingsContextProps = useMemo(
     () => ({

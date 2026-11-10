@@ -1,41 +1,53 @@
 import { NextResponse } from "next/server";
-const API_KEY = process.env.YOUTUBE_API;
+import { apiErrorResponse, MAX_ID_LENGTH, requireItemsArray, youtubeApiFetch } from "@/utils/youtubeApi";
+
+const CHANNEL_ID_PATTERN = /^UC[A-Za-z0-9_-]+$/;
 
 type Params = {
   name: string;
 };
 
 export async function GET(req: Request, props: { params: Promise<Params> }): Promise<NextResponse> {
-  const params = await props.params;
-  const name = params.name;
-
-  if (!name) return new NextResponse("No Channel Name", { status: 404 });
-
   try {
-    const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${API_KEY}&q=${encodeURIComponent(name)}&type=channel&part=id`, {
-      signal: AbortSignal.timeout(15000),
-    });
+    const params = await props.params;
+    const rawName = params.name;
+    const name = typeof rawName === "string" ? rawName.trim() : rawName;
 
-    if (!res.ok) {
-      console.log("Error in /api/channelId/[name]", res.status, res.statusText);
-      return new NextResponse("Error", { status: 404 });
+    if (typeof name !== "string" || name.length === 0 || name === "@" || name.length > MAX_ID_LENGTH) {
+      return new NextResponse("Invalid Channel Name", { status: 400 });
     }
 
-    const data = await res.json();
-    if (!data) {
-      console.log("No Data", res.statusText);
-      return new NextResponse("No Data Found", { status: 404 });
-    } else {
-      let channelId = data?.items[0]?.id?.channelId;
-      if (!channelId) {
+    if (CHANNEL_ID_PATTERN.test(name)) {
+      return NextResponse.json("UU" + name.slice(2));
+    }
+
+    if (name.startsWith("@")) {
+      const res = await youtubeApiFetch("channels", {
+        part: "id",
+        forHandle: name.slice(1),
+      });
+      const data = await res.json();
+      const items = requireItemsArray(data);
+      const channelId = (items[0] as { id?: unknown } | undefined)?.id;
+      if (typeof channelId !== "string" || !CHANNEL_ID_PATTERN.test(channelId)) {
         return new NextResponse("No Channel Found", { status: 404 });
-      } else {
-        const playlistId = channelId.startsWith("UC") ? "UU" + channelId.slice(2) : channelId;
-        return NextResponse.json(playlistId);
       }
+      return NextResponse.json("UU" + channelId.slice(2));
     }
+
+    const res = await youtubeApiFetch("search", {
+      q: name,
+      type: "channel",
+      part: "id",
+    });
+    const data = await res.json();
+    const items = requireItemsArray(data);
+    const channelId = (items[0] as { id?: { channelId?: unknown } } | undefined)?.id?.channelId;
+    if (typeof channelId !== "string" || !CHANNEL_ID_PATTERN.test(channelId)) {
+      return new NextResponse("No Channel Found", { status: 404 });
+    }
+    return NextResponse.json("UU" + channelId.slice(2));
   } catch (e) {
-    console.log(e);
-    return new NextResponse("Error in Channel Id", { status: 404 });
+    return apiErrorResponse(e, "/api/channelId/[name]");
   }
 }

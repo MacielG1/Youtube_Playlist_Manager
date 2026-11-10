@@ -2,7 +2,7 @@ import coreWebVitals from "eslint-config-next/core-web-vitals";
 import typescript from "eslint-config-next/typescript";
 import pluginReactCompiler from "eslint-plugin-react-compiler";
 
-export default [
+const eslintConfig = [
   ...coreWebVitals,
   ...typescript,
   {
@@ -15,3 +15,5 @@ export default [
     },
   },
 ];
+
+export default eslintConfig;

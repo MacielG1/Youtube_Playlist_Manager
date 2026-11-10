@@ -2,9 +2,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { clear } from "idb-keyval";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogClose, DialogContent, DialogTitle, DialogTrigger } from "../Dialog";
-import Button from "@/components/Button";
 import { useState } from "react";
 import useIsExportable from "@/hooks/useIsExportable";
+import { safeRemoveItem } from "@/utils/safeLocalStorage";
+import toast from "react-hot-toast";
+import { toastError } from "@/utils/toastStyles";
 
 type Props = {
   closeSettingsModal: () => void;
@@ -21,19 +23,33 @@ export default function DeleteAllDataModal({ closeSettingsModal }: Props) {
   if (!isExportable) return null;
 
   async function deleteAllData() {
-    localStorage.removeItem("playlists");
-    localStorage.removeItem("videos");
+    let allKeys: string[] = [];
+    try {
+      allKeys = Object.keys(localStorage);
+    } catch {
+      toast.error("Could not access storage", toastError);
+      return;
+    }
 
-    const allKeys = Object.keys(localStorage);
     const keysToRemove = ["pl=", "v=", "plVideos="];
 
     allKeys.forEach((key) => {
       if (keysToRemove.some((prefix) => key.startsWith(prefix))) {
-        localStorage.removeItem(key);
+        safeRemoveItem(key);
       }
     });
+    safeRemoveItem("playlists");
+    safeRemoveItem("videos");
+    safeRemoveItem("customPlaylistThumbnails");
 
-    await clear();
+    try {
+      await clear();
+    } catch (error) {
+      console.error("IndexedDB clear failed:", error);
+      toast.error("Failed to delete all data", toastError);
+      return;
+    }
+
     queryClient.clear();
     closeSettingsModal();
     router.push("/", { scroll: false });

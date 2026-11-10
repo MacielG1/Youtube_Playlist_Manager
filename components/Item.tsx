@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -8,7 +8,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import LinkWrapper from "./LinkWrapper";
 import { getThumbnailInfo } from "@/utils/getThumbnailInfo";
-import { safeParse, safeSetItem } from "@/utils/safeLocalStorage";
+import { safeGetItem, safeParse, subscribeStorageChange } from "@/utils/safeLocalStorage";
+import onDeleteItems from "@/utils/onDeleteItem";
 import { del } from "idb-keyval";
 import { Roboto } from "next/font/google";
 import Delete from "@/assets/icons/Delete";
@@ -25,9 +26,10 @@ type Params = {
   type: "Playlist" | "Video";
   duration?: string;
   channel?: string;
+  priority?: boolean;
 };
 
-export default function Item({ title, thumbnails, id, type, duration, channel }: Params) {
+export default function Item({ title, thumbnails, id, type, duration, channel, priority = false }: Params) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging, isSorting } = useSortable({ id, disabled: isModalOpen });
@@ -41,14 +43,8 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
   const { mutate, isPending } = useMutation({
     mutationFn: async (id: string) => {
       if (type === "Playlist") {
-        localStorage.removeItem(`pl=${id}`);
-        localStorage.removeItem(`plVideos=${id}`);
-
         // remove playlist from playlists array
-        const allPlaylists = safeParse<string[]>(localStorage.getItem("playlists"), []);
-        const newPlaylists = allPlaylists.filter((pl: string) => pl !== id);
-
-        safeSetItem("playlists", JSON.stringify(newPlaylists));
+        onDeleteItems(id, "playlists");
 
         queryClient.setQueryData<Items>(["playlists"], (prev) => {
           if (prev === undefined) return prev;
@@ -59,14 +55,10 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
         });
 
         await del(`pl=${id}`);
+        await del(`plRemoved=${id}`);
       } else if (type === "Video") {
-        localStorage.removeItem(`v=${id}`);
-
         // remove video from videos array
-        const allVideos = safeParse<string[]>(localStorage.getItem("videos"), []);
-        const newVideos = allVideos.filter((v: string) => v !== id);
-
-        safeSetItem("videos", JSON.stringify(newVideos));
+        onDeleteItems(id, "videos");
 
         queryClient.setQueryData<Items>(["videos"], (prev) => {
           if (prev === undefined) return prev;
@@ -76,15 +68,17 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
           return newVideos;
         });
 
-        await del(id);
+        await del(`v=${id}`);
       }
     },
   });
-  const [savedProgress, setSavedProgress] = useState<{ initialTime?: number } | null>(null);
+  const progressJson = useSyncExternalStore(
+    subscribeStorageChange,
+    () => safeGetItem(`v=${id}`),
+    () => null,
+  );
+  const savedProgress = useMemo(() => safeParse<{ initialTime?: number } | null>(progressJson, null), [progressJson]);
 
-  useEffect(() => {
-    setSavedProgress(safeParse<{ initialTime?: number } | null>(localStorage.getItem(`v=${id}`), null));
-  }, [id]);
 
   function onDelete(id?: string) {
     if (!id) return;
@@ -105,7 +99,9 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
 
   let formattedTitle = type === "Video" ? reduceStringLength(title, 65) : reduceStringLength(title, 90);
 
-  const width = savedProgress?.initialTime && duration ? `${(savedProgress.initialTime / convertTimeToSeconds(duration)) * 100}%` : "0%";
+  const durationSeconds = duration ? convertTimeToSeconds(duration) : 0;
+  const rawProgress = savedProgress?.initialTime && durationSeconds > 0 ? (savedProgress.initialTime / durationSeconds) * 100 : 0;
+  const width = `${Math.min(100, Math.max(0, Number.isFinite(rawProgress) ? rawProgress : 0))}%`;
   return (
     <div className={`mt-2 flex flex-col items-center outline-hidden ${isDragging ? "z-50" : "z-10"}`} ref={setNodeRef} style={style}>
       <div className="relative flex cursor-default flex-col items-center justify-center overflow-hidden rounded-md rounded-tr-[3.2px] md:rounded-[9.6px]">
@@ -131,18 +127,23 @@ export default function Item({ title, thumbnails, id, type, duration, channel }:
           />
           <div className="transition duration-300 peer-hover:scale-105 hover:scale-105" {...attributes} {...listeners}>
             <LinkWrapper href={url} className="cursor-pointer">
-              <Image
+              {thumbnailURL ? (
+                <Image
                 src={thumbnailURL}
                 alt={title}
                 width={350}
                 height={350}
                 style={{ width: "100%", height: "auto" }}
                 className={` ${isDragging ? "cursor-grabbing" : "cursor-pointer"} aspect-video ${hasBlackBars && "object-cover"}`}
-                priority
+                priority={priority}
+                loading={priority ? "eager" : "lazy"}
                 unoptimized
                 placeholder="blur"
                 blurDataURL="data:image/webp;base64,UklGRgACAABXRUJQVlA4WAoAAAAgAAAANQMAzgEASUNDUMgBAAAAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADZWUDhMEQAAAC81g3MAB1CKUpSi/4GI6H8AAA=="
               />
+              ) : (
+                <div role="img" aria-label={`No thumbnail available for ${title}`} className="aspect-video w-full bg-neutral-200 dark:bg-neutral-800" />
+              )}
             </LinkWrapper>
           </div>
 
