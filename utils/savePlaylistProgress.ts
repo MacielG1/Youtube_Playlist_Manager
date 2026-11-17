@@ -1,59 +1,124 @@
 import { YouTubePlayer } from "react-youtube";
 import { getSavedIds, safeGetItem, safeParse, safeSetItem } from "@/utils/safeLocalStorage";
+import mapPlaylistPositions from "./mapPlaylistPositions";
 
-export default async function savePlaylistsProgress(videoPlayer: YouTubePlayer, playlistId: string, page: number, index?: number) {
-  try {
-    if (!Number.isInteger(page) || page < 1) return;
-    if (index !== undefined && (!Number.isInteger(index) || index < 0)) return;
 
-    if (!getSavedIds("playlists").includes(playlistId)) return; // if playlist is not in the list, return
+const pendingSaves = new Map<string, symbol>();
 
-    const item = `pl=${playlistId}`;
+function isThenable(v: unknown): v is PromiseLike<unknown> {
+  return !!v && typeof (v as PromiseLike<unknown>).then === "function";
+}
 
-    if (!videoPlayer) return;
+interface PlSnapshot {
+  currentTime: unknown;
+  duration: unknown;
+  index: unknown;
+  playlist: unknown;
+}
 
-    const currentTime = (await videoPlayer?.getCurrentTime()) as number;
-    if (typeof currentTime !== "number" || !Number.isFinite(currentTime) || currentTime < 0) return;
-    const duration = (await videoPlayer?.getDuration()) as number;
-    const currentIndex = index !== undefined ? index : ((await videoPlayer?.getPlaylistIndex()) as number);
-    if (!Number.isInteger(currentIndex) || currentIndex < 0 || currentIndex > 199) return;
+function commit(item: string, playlistId: string, page: number, snap: PlSnapshot, indexOverride?: number): boolean {
+  if (!Number.isInteger(page) || page < 1) return false;
+  const currentTime = snap.currentTime;
+  if (typeof currentTime !== "number" || !Number.isFinite(currentTime) || currentTime < 0) return false;
+  const duration = typeof snap.duration === "number" ? snap.duration : 0;
+  const rawIndex = indexOverride !== undefined ? indexOverride : snap.index;
+  if (!Number.isInteger(rawIndex) || (rawIndex as number) < 0 || (rawIndex as number) > 199) return false;
 
-    if (!getSavedIds("playlists").includes(playlistId)) return;
+  // if playlist is not in the list, return
+  if (!getSavedIds("playlists").includes(playlistId)) return false;
 
-    const currentPl = safeParse<{ currentItem?: number; currentPage?: number; initialTime?: number; isChannel?: boolean } | null>(safeGetItem(item), null);
-    if (!currentPl || typeof currentPl !== "object" || Array.isArray(currentPl)) return;
+  const currentPl = safeParse<Record<string, unknown>>(safeGetItem(item), {});
+  if (typeof currentPl !== "object" || !currentPl || Array.isArray(currentPl)) return false;
 
-    const plVideosParsed = safeParse<{ videosIds?: unknown }>(safeGetItem(`plVideos=${playlistId}`), {});
-    const totalVideos = Array.isArray(plVideosParsed.videosIds) ? plVideosParsed.videosIds.length : 0;
+  const plVideosParsed = safeParse<{ videosIds?: unknown }>(safeGetItem(`plVideos=${playlistId}`), {});
+  const canonicalIds = Array.isArray(plVideosParsed.videosIds) ? plVideosParsed.videosIds : [];
+  const totalVideos = canonicalIds.length;
 
-    const remainingSeconds = duration - currentTime;
-    const watchedThresholdSeconds = duration > 0 ? Math.min(30, Math.max(5, duration * 0.01), duration * 0.1) : 0;
-    const isVideoFinished = duration > 0 && remainingSeconds <= watchedThresholdSeconds;
+  const actualPlaylist = Array.isArray(snap.playlist) && snap.playlist.every((id) => typeof id === "string") ? (snap.playlist as string[]) : null;
 
-    let nextIndex = currentIndex;
-    let nextPage = page;
+  // Map the raw player index through the actually loaded playlist into canonical order.
+  const offset = (page - 1) * 200;
+  const positions = actualPlaylist ? mapPlaylistPositions(canonicalIds.slice(offset, offset + 200), actualPlaylist) : null;
+  let absoluteIndex: number;
+  if (actualPlaylist) {
+    const canonicalLocal = positions?.[rawIndex as number];
+    if (canonicalLocal === undefined) return false;
+    absoluteIndex = offset + canonicalLocal;
+  } else {
+    absoluteIndex = (rawIndex as number) + offset;
+  }
 
-    if (isVideoFinished) {
-      const currentAbsoluteIndex = currentIndex + (page - 1) * 200;
-      const lastAbsoluteIndex = totalVideos > 0 ? totalVideos - 1 : Number.MAX_SAFE_INTEGER;
-      const nextAbsoluteIndex = Math.min(currentAbsoluteIndex + 1, lastAbsoluteIndex);
+  const remainingSeconds = duration - (currentTime as number);
+  const watchedThresholdSeconds = duration > 0 ? Math.min(30, Math.max(5, duration * 0.01), duration * 0.1) : 0;
+  const isVideoFinished = duration > 0 && totalVideos > 0 && remainingSeconds <= watchedThresholdSeconds;
 
-      if (nextAbsoluteIndex !== currentAbsoluteIndex) {
-        nextPage = Math.floor(nextAbsoluteIndex / 200) + 1;
-        nextIndex = nextAbsoluteIndex % 200;
+  let nextAbsolute = absoluteIndex;
+
+  if (isVideoFinished) {
+    if (actualPlaylist && positions) {
+      const nextLocal = positions[(rawIndex as number) + 1];
+      if (nextLocal !== undefined) {
+        const pos = offset + nextLocal;
+        if (pos > absoluteIndex) nextAbsolute = pos;
+      } else {
+        // End of the loaded slice: first canonical slot of the next 200-item page, if it exists.
+        const nextPageFirst = page * 200;
+        if (nextPageFirst < totalVideos && nextPageFirst > absoluteIndex) nextAbsolute = nextPageFirst;
       }
+    } else if (!actualPlaylist) {
+      nextAbsolute = Math.min(absoluteIndex + 1, totalVideos - 1);
+    }
+  }
+
+  const data = {
+    ...currentPl,
+    playlistId,
+    currentItem: nextAbsolute % 200,
+    initialTime: isVideoFinished ? 0 : (currentTime as number),
+    currentPage: Math.floor(nextAbsolute / 200) + 1,
+  };
+
+  safeSetItem(item, JSON.stringify(data));
+  return true;
+}
+
+export default function savePlaylistsProgress(videoPlayer: YouTubePlayer, playlistId: string, page: number, index?: number): Promise<void> {
+  const item = `pl=${playlistId}`;
+
+  if (!Number.isInteger(page) || page < 1) return Promise.resolve();
+  if (index !== undefined && (!Number.isInteger(index) || index < 0)) return Promise.resolve();
+  if (!getSavedIds("playlists").includes(playlistId)) return Promise.resolve(); // if playlist is not in the list, return
+  if (!videoPlayer) return Promise.resolve();
+
+  const token = Symbol();
+  pendingSaves.set(item, token);
+
+  try {
+    const currentTime = videoPlayer?.getCurrentTime();
+    const duration = videoPlayer?.getDuration();
+    const currentIndex = index !== undefined ? index : videoPlayer?.getPlaylistIndex();
+    const playlist = typeof videoPlayer?.getPlaylist === "function" ? videoPlayer.getPlaylist() : undefined;
+
+    const needsAsync = isThenable(currentTime) || isThenable(duration) || isThenable(currentIndex) || isThenable(playlist);
+    if (needsAsync) {
+      return Promise.all([Promise.resolve(currentTime), Promise.resolve(duration), Promise.resolve(currentIndex), Promise.resolve(playlist)])
+        .then(([t, d, i, pl]) => {
+          if (pendingSaves.get(item) !== token) return;
+          commit(item, playlistId, page, { currentTime: t, duration: d, index: i, playlist: pl }, index !== undefined ? index : undefined);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (pendingSaves.get(item) === token) pendingSaves.delete(item);
+        });
     }
 
-    const data = {
-      ...currentPl,
-      playlistId,
-      currentItem: isVideoFinished ? nextIndex : currentIndex,
-      initialTime: isVideoFinished ? 0 : currentTime,
-      currentPage: nextPage,
-    };
-
-    safeSetItem(item, JSON.stringify(data));
+    if (pendingSaves.get(item) === token) {
+      commit(item, playlistId, page, { currentTime, duration, index: currentIndex, playlist }, index !== undefined ? index : undefined);
+      pendingSaves.delete(item);
+    }
+    return Promise.resolve();
   } catch {
-    return;
+    if (pendingSaves.get(item) === token) pendingSaves.delete(item);
+    return Promise.resolve();
   }
 }

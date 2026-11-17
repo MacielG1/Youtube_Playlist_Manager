@@ -3,8 +3,8 @@ import { get } from "idb-keyval";
 import { RefObject } from "react";
 import { safeSetItem } from "@/utils/safeLocalStorage";
 
-export default async function fetchVideosIds(playlistId: string, videosIdsRef?: RefObject<string[]>, isChannel?: boolean, options?: { allowCacheFallback?: boolean }) {
-  const removedRaw = await get(`plRemoved=${playlistId}`).catch(() => []);
+export default async function fetchVideosIds(playlistId: string, videosIdsRef?: RefObject<string[]>, isChannel?: boolean, options?: { allowCacheFallback?: boolean; persistCache?: boolean; removedVideoIds?: readonly string[] }) {
+  const removedRaw = options?.removedVideoIds !== undefined ? options.removedVideoIds : await get(`plRemoved=${playlistId}`).catch(() => []);
   const removedVideos = new Set<string>(Array.isArray(removedRaw) ? removedRaw : []);
 
   try {
@@ -44,7 +44,9 @@ export default async function fetchVideosIds(playlistId: string, videosIdsRef?: 
 
     const allVideosIds = newVideos.map((item: Playlist) => item.id);
 
-    safeSetItem(`plVideos=${playlistId}`, JSON.stringify({ videosIds: allVideosIds, updatedTime: Date.now() }));
+    if (options?.persistCache !== false) {
+      safeSetItem(`plVideos=${playlistId}`, JSON.stringify({ videosIds: allVideosIds, updatedTime: Date.now() }));
+    }
 
     return newVideos;
   } catch (error) {

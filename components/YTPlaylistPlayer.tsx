@@ -3,7 +3,7 @@ import type { Items, Playlist, PlaylistAPI } from "@/types";
 import { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import YouTube, { type YouTubeEvent, type YouTubeProps } from "react-youtube";
+import YouTube, { type YouTubeEvent, type YouTubeProps, type YouTubePlayer } from "react-youtube";
 import dynamic from "next/dynamic";
 import { useAudioToggle } from "@/providers/SettingsProvider";
 import { shuffle } from "@/utils/shuffle";
@@ -16,7 +16,10 @@ import getVideosSlice from "@/utils/getVideosSlice";
 import seekTime from "@/utils/seekTime";
 import LogoButton from "./LogoButton";
 import savePlaylistsProgress from "@/utils/savePlaylistProgress";
+import useProgressSaver from "@/hooks/useProgressSaver";
+import restorePlaylist from "@/utils/restorePlaylist";
 import loadPlaylist from "@/utils/loadPlaylist";
+import mapPlaylistPositions from "@/utils/mapPlaylistPositions";
 import ModalDelete from "./modals/ModalDelete";
 import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
@@ -109,6 +112,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   const disposedRef = useRef(false);
   const mutedRef = useRef(isAudioMuted);
   const operationRef = useRef(false);
+  const initialRestoreRef = useRef<{ ids: string[]; page: number; index: number; startSeconds: number } | null>(null);
+  const restoreRef = useRef<{ player: YouTubePlayer; controller: AbortController } | null>(null);
+  const restoreTargetRef = useRef<YouTubePlayer | null>(null);
+  const loadedPageEndRef = useRef(0);
+  const restoringRef = useRef(true);
 
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -126,17 +134,16 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     const savedAbsolute = (snapshot.currentPage - 1) * 200 + snapshot.currentItem;
     const absolute = savedAbsolute < ids.length ? savedAbsolute : 0;
     pageRef.current = Math.floor(absolute / 200) + 1;
+    if (!initialRestoreRef.current && ids.length > 0) {
+      initialRestoreRef.current = { ids: getVideosSlice(ids, Math.floor(absolute / 200) + 1), page: Math.floor(absolute / 200) + 1, index: absolute % 200, startSeconds: absolute === savedAbsolute ? snapshot.initialTime : 0 };
+    }
     setInitialOptions((previous: YouTubeProps["opts"] | null) => previous ?? {
       height: "100%",
       width: "100%",
       playerVars: {
-        autoplay: 1,
-        listType: "playlist",
-        index: absolute % 200,
-        start: absolute === savedAbsolute ? Math.floor(snapshot.initialTime) : 0,
+        autoplay: 0,
         origin: window.location.origin,
         mute: mutedRef.current,
-        playlist: getVideosSlice(ids, Math.floor(absolute / 200) + 1).join(","),
       },
     });
     setHasValidVideoIds(ids.length > 0);
@@ -162,15 +169,12 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }
 
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [restoreError, setRestoreError] = useState<string | null>(null);
 
   const refreshPlaylistFromYouTube = useCallback(async () => {
     try {
-      const data = await fetchVideosIds(playlistId, undefined, isChannel);
-      if (disposedRef.current) return;
-
-      // Update idb + localStorage with full fresh array (for next session)
-      await set(`pl=${playlistId}`, data).catch(() => {});
-      if (disposedRef.current) return;
+      const data = await fetchVideosIds(playlistId, undefined, isChannel, { allowCacheFallback: false, persistCache: false });
+      if (disposedRef.current || shuffledRef.current || operationRef.current) return;
 
       const fetchedById = new Map<string, Playlist>(data.map((v: Playlist) => [v.id, v]));
       const existingIds = new Set(videosIdsRef.current);
@@ -178,17 +182,23 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
       lastFetchedCountRef.current = data.length;
 
-      if (newVideos.length > 0) {
-        videosIdsRef.current = [...videosIdsRef.current, ...newVideos.map((v: Playlist) => v.id)];
-        plLengthRef.current = videosIdsRef.current.length;
-      }
+      // Canonical order: keep the active order, append only new upstream IDs.
+      const canonicalIds = [...videosIdsRef.current, ...newVideos.map((v: Playlist) => v.id)];
 
       for (const v of data) playlistVideosByIdRef.current.set(v.id, v);
+      const canonicalVideos = canonicalIds.map((id) => fetchedById.get(id) ?? playlistVideosByIdRef.current.get(id)).filter((v): v is Playlist => Boolean(v));
 
-      setVideosList((prev) => {
-        const prevById = new Map(prev.map((v) => [v.id, v]));
-        return videosIdsRef.current.map((id) => fetchedById.get(id) ?? prevById.get(id)).filter((v): v is Playlist => Boolean(v));
-      });
+      videosIdsRef.current = canonicalIds;
+      plLengthRef.current = canonicalIds.length;
+
+      const plVideos = safeParse<{ videosIds?: string[]; updatedTime?: number } & Record<string, unknown>>(safeGetItem(`plVideos=${playlistId}`), {});
+      plVideos.videosIds = canonicalIds;
+      plVideos.updatedTime = Date.now();
+      safeSetItem(`plVideos=${playlistId}`, JSON.stringify(plVideos));
+
+      setVideosList(canonicalVideos);
+      // Update idb with the canonical ordered metadata (for next session)
+      void set(`pl=${playlistId}`, canonicalVideos).catch(() => {});
     } catch (error) {
       console.warn("[refreshPlaylistFromYouTube] Background refresh failed:", error);
     }
@@ -277,22 +287,20 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     }
   }, [isAudioMuted]);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const player = PlaylistPlayerRef.current?.internalPlayer;
-      if (isPlayingVideoRef.current && !shuffledRef.current && !operationRef.current && player) {
-        try {
-          savePlaylistsProgress(player, playlistId, pageRef.current);
-        } catch (error) {
-          console.error("Error saving playlist progress:", error);
-        }
-      }
-    }, 15000);
-
-    return () => {
-      clearInterval(timer);
-    };
-  }, [isShuffled, playlistId]);
+  const progressPlayerRef = useRef<YouTubePlayer | null>(null);
+  const hasPlayedRef = useRef(false);
+  useProgressSaver((flush) => {
+    if (restoringRef.current) return;
+    const player = progressPlayerRef.current;
+    if (!player || !hasPlayedRef.current || isPlayingVideoRef.current === null) return;
+    if (shuffledRef.current || operationRef.current) return;
+    if (!flush && !isPlayingVideoRef.current) return;
+    try {
+      return savePlaylistsProgress(player, playlistId, pageRef.current);
+    } catch (error) {
+      console.error("Error saving playlist progress:", error);
+    }
+  });
 
   useEffect(() => {
     return () => {
@@ -353,71 +361,79 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
     }
   }
 
+  useEffect(() => {
+    return () => {
+      restoreRef.current?.controller.abort();
+    };
+  }, []);
+
   async function onReady(e: YouTubeEvent) {
+    if (!e.target || disposedRef.current) return;
+    const owner = PlaylistPlayerRef.current?.getInternalPlayer();
+    if (!owner) return;
+    // Ignore late ready events from an iframe replaced by react-youtube.
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
     try {
-      if (!e.target || isFetchingVideos) return;
+      const iframe = await owner.getIframe();
+      if (disposedRef.current || PlaylistPlayerRef.current?.getInternalPlayer() !== owner || !iframe?.isConnected || e.target.getIframe() !== iframe) return;
+    } catch {
+      return;
+    }
+    const target = initialRestoreRef.current;
+    if (!target || !target.ids.length) return;
 
+    const existing = restoreRef.current;
+    if (existing !== null && existing.player === e.target && !existing.controller.signal.aborted) return;
+    existing?.controller.abort();
+
+    const controller = new AbortController();
+    restoreRef.current = { player: e.target, controller };
+    restoreTargetRef.current = e.target;
+    progressPlayerRef.current = e.target;
+    restoringRef.current = true;
+    hasPlayedRef.current = false;
+    isPlayingVideoRef.current = false;
+    setIsPlayerReady(false);
+    setRestoreError(null);
+
+    try {
+      const restored = await restorePlaylist(e.target, target.ids, target.index, target.startSeconds, controller.signal);
+      if (controller.signal.aborted || disposedRef.current || restoreRef.current?.player !== e.target) return;
+      pageRef.current = target.page;
+      const state = await e.target.getPlayerState();
+      if (controller.signal.aborted || disposedRef.current || restoreRef.current?.player !== e.target) return;
+      isPlayingVideoRef.current = state === 1;
+      hasPlayedRef.current = state === 1;
+      loadedPageEndRef.current = (target.page - 1) * 200 + target.ids.length;
+      restoringRef.current = false;
       setIsPlayerReady(true);
-
-      try {
-        const videoData = e.target.getVideoData();
-        if (videoData && videoData.title) {
-          setCurrentVideoTitle(videoData.title);
-        }
-      } catch (err) {
-        console.warn("Could not get video title:", err);
-      }
-
-      const player = PlaylistPlayerRef.current?.internalPlayer;
-      if (!player) return;
-
-      try {
-        const playlistIndex = await player.getPlaylistIndex();
-        if (typeof playlistIndex === "number") {
-          const index = playlistIndex + 1 + (pageRef.current - 1) * 200;
-          setCurrentVideoIndex(index);
-        }
-      } catch (err) {
-        console.warn("Could not get playlist index:", err);
-      }
-
-      const vidsData = await get(`pl=${playlistId}`);
-      if (vidsData) {
-        updatePlaylistVideosCache(vidsData);
-        setVideosList(vidsData);
-      }
+      setCurrentVideoIndex((target.page - 1) * 200 + restored.canonicalIndex + 1);
+      void onStateChange({ target: e.target, data: state });
 
       try {
         const plRate = safeParse<{ playbackSpeed?: number }>(safeGetItem(item), {})?.playbackSpeed || 1;
-        // Defer: YT IFrame API internal `this.g` (iframe ref) may be null
-        // synchronously in onReady under dev-mode double-mount. Waiting one
-        // tick lets the API finish attaching the iframe.
-        setTimeout(() => {
-          void (async () => {
-            try {
-              const p = PlaylistPlayerRef.current?.internalPlayer;
-              const iframe = await p?.getIframe?.();
-              if (disposedRef.current || !iframe || PlaylistPlayerRef.current?.internalPlayer !== p) return;
-              await p.setPlaybackRate(plRate);
-            } catch {
-              /* iframe not ready, ignore */
-            }
-          })();
-        }, 0);
+        await e.target.setPlaybackRate(plRate);
       } catch (err) {
         console.warn("Could not set playback rate:", err);
       }
     } catch (error) {
+      if (controller.signal.aborted || disposedRef.current || restoreRef.current?.player !== e.target) return;
+      controller.abort();
+      restoringRef.current = true;
+      setIsPlayerReady(false);
       console.error("Error in onReady:", error);
-      setIsPlayerReady(true);
+      setRestoreError("Could not restore playlist.");
+      toast.error("Could not restore playlist. Reload to retry.");
     }
   }
 
   async function onPlay(e: YouTubeEvent) {
     try {
-      if (!e.target) return;
+      if (!e.target || restoringRef.current || e.target !== restoreRef.current?.player) return;
+      progressPlayerRef.current = e.target;
+      hasPlayedRef.current = true;
       isPlayingVideoRef.current = true;
-      if (!shuffledRef.current) await savePlaylistsProgress(e.target, playlistId, pageRef.current);
+      if (!shuffledRef.current && !operationRef.current) await savePlaylistsProgress(e.target, playlistId, pageRef.current);
     } catch (error) {
       console.error("Error in onPlay:", error);
     }
@@ -425,15 +441,18 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   async function onPause(e: YouTubeEvent) {
     try {
-      if (!e.target) return;
+      if (!e.target || restoringRef.current || e.target !== restoreRef.current?.player) return;
+      progressPlayerRef.current = e.target;
       isPlayingVideoRef.current = false;
-      if (!shuffledRef.current) await savePlaylistsProgress(e.target, playlistId, pageRef.current);
+      if (!hasPlayedRef.current) return;
+      if (!shuffledRef.current && !operationRef.current) await savePlaylistsProgress(e.target, playlistId, pageRef.current);
     } catch (error) {
       console.error("Error in onPause:", error);
     }
   }
 
   async function onError(e: YouTubeEvent) {
+    if (e.target && e.target !== restoreRef.current?.player) return;
     console.log("error", e.data);
 
     if (e.data === 100 || e.data === 101 || e.data === 150) {
@@ -454,7 +473,10 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
         }
 
         const currentIndex = await e.target.getPlaylistIndex();
-        const index = currentIndex + 1 + (pageRef.current - 1) * 200;
+        const errorPlaylist = typeof e.target.getPlaylist === "function" ? e.target.getPlaylist() : undefined;
+        const errorPositions = mapPlaylistPositions(videosIdsRef.current.slice((pageRef.current - 1) * 200, pageRef.current * 200), errorPlaylist);
+        const errorLocal = errorPositions?.[currentIndex];
+        const index = errorLocal !== undefined ? (pageRef.current - 1) * 200 + errorLocal + 1 : currentIndex + 1 + (pageRef.current - 1) * 200;
         setCurrentVideoIndex(index);
 
         if (index > plLengthRef.current) {
@@ -507,7 +529,10 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   async function onStateChange(e: YouTubeEvent) {
     try {
-      if (!e.target) return;
+      if (!e.target || restoringRef.current || e.target !== restoreRef.current?.player) return;
+
+      progressPlayerRef.current = e.target;
+      if (e.data === 1) hasPlayedRef.current = true;
 
       // -1 (unstarted)
       // 0 (ended)
@@ -516,7 +541,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       // 3 (buffering)
       // 5 (video cued)
 
-      const index = (await e.target.getPlaylistIndex()) + 1 + (pageRef.current - 1) * 200;
+      const rawIndex = await e.target.getPlaylistIndex();
+      const actualPlaylist = typeof e.target.getPlaylist === "function" ? e.target.getPlaylist() : undefined;
+      const statePositions = mapPlaylistPositions(videosIdsRef.current.slice((pageRef.current - 1) * 200, pageRef.current * 200), actualPlaylist);
+      const canonicalLocal = statePositions?.[rawIndex];
+      const index = canonicalLocal !== undefined ? (pageRef.current - 1) * 200 + canonicalLocal + 1 : rawIndex + 1 + (pageRef.current - 1) * 200;
       if (e.data === 1) {
         setCurrentVideoIndex(index);
         if (embedErrorRef.current) {
@@ -551,14 +580,14 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
   async function onEnd(e: YouTubeEvent) {
     try {
-      if (!e.target) return;
+      if (!e.target || restoringRef.current || e.target !== restoreRef.current?.player || operationRef.current) return;
       isPlayingVideoRef.current = false;
 
       if (embedErrorRef.current) {
         return;
       }
 
-      if (!shuffledRef.current && !operationRef.current) {
+      if (!shuffledRef.current) {
         await savePlaylistsProgress(e.target, playlistId, pageRef.current).catch(() => {});
       }
 
@@ -567,19 +596,19 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
       if (!playlist) return;
 
-      if (currentIndex < playlist.length - 1) {
-        e.target.playVideoAt(currentIndex + 1);
-        e.target.seekTo(0);
-      } else {
-        // At end of player's loaded playlist. Check if more videos exist in videosIdsRef
-        const loadedCount = (pageRef.current - 1) * 200 + playlist.length;
-        if (plLengthRef.current > loadedCount) {
-          const nextGlobalOneBased = loadedCount + 1;
-          const nextZeroBased = nextGlobalOneBased - 1;
-          const nextPage = Math.floor(nextZeroBased / 200) + 1;
-          const nextPaginatedIndex = nextZeroBased % 200;
-          pageRef.current = nextPage;
-          await loadPlaylist(e.target, videosIdsRef.current, nextPage, nextPaginatedIndex);
+      const endPositions = mapPlaylistPositions(videosIdsRef.current.slice((pageRef.current - 1) * 200, pageRef.current * 200), playlist);
+      const nextLocal = endPositions?.[currentIndex + 1];
+      if (nextLocal !== undefined) {
+        await playVideoAt((pageRef.current - 1) * 200 + nextLocal + 1);
+        return;
+      }
+
+      // End of the loaded slice: first canonical index past the requested loaded extent, if it exists.
+      // New videos appended within the same page reload at the old requested end; filtered holes are included in it.
+      if (currentIndex + 1 >= playlist.length) {
+        const nextAbsolute = loadedPageEndRef.current;
+        if (nextAbsolute < plLengthRef.current) {
+          await playVideoAt(nextAbsolute + 1);
         }
       }
     } catch (error) {
@@ -588,6 +617,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }
 
   function onSpeedChange(e: YouTubeEvent) {
+    if (restoringRef.current || (e.target && e.target !== restoreRef.current?.player)) return;
     const currentData = safeParse<{ playbackSpeed?: number } & Record<string, unknown>>(safeGetItem(item), {});
     currentData.playbackSpeed = e.data;
 
@@ -599,12 +629,20 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       const player = PlaylistPlayerRef.current?.getInternalPlayer();
       if (!player) return;
 
-      const playlistIndex = await player.getPlaylistIndex();
-      const globalIndex = playlistIndex + 1 + (pageRef.current - 1) * 200;
-      const prevIndex = globalIndex - 1;
+      const [playlistIndex, playlist] = await Promise.all([player.getPlaylistIndex(), player.getPlaylist().catch(() => null)]);
+      const prevPositions = mapPlaylistPositions(videosIdsRef.current.slice((pageRef.current - 1) * 200, pageRef.current * 200), playlist);
+      const prevLocal = prevPositions?.[playlistIndex - 1];
+      if (prevLocal !== undefined) {
+        await playVideoAt((pageRef.current - 1) * 200 + prevLocal + 1);
+        return;
+      }
 
-      if (prevIndex >= 1) {
-        await playVideoAt(prevIndex);
+      // At the start of the loaded slice: last canonical index of the previous 200-item page.
+      if (playlistIndex === 0) {
+        const prevAbsolute = (pageRef.current - 1) * 200 - 1;
+        if (prevAbsolute >= 0) {
+          await playVideoAt(prevAbsolute + 1);
+        }
       }
     } catch (error) {
       console.error("Error in previousVideo:", error);
@@ -616,12 +654,20 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       const player = PlaylistPlayerRef.current?.getInternalPlayer();
       if (!player) return;
 
-      const playlistIndex = await player.getPlaylistIndex();
-      const globalIndex = playlistIndex + 1 + (pageRef.current - 1) * 200;
-      const nextIndex = globalIndex + 1;
+      const [playlistIndex, playlist] = await Promise.all([player.getPlaylistIndex(), player.getPlaylist().catch(() => null)]);
+      const nextPositions = mapPlaylistPositions(videosIdsRef.current.slice((pageRef.current - 1) * 200, pageRef.current * 200), playlist);
+      const nextLocal = nextPositions?.[playlistIndex + 1];
+      if (nextLocal !== undefined) {
+        await playVideoAt((pageRef.current - 1) * 200 + nextLocal + 1);
+        return;
+      }
 
-      if (nextIndex <= plLengthRef.current) {
-        await playVideoAt(nextIndex);
+      // At the end of the loaded slice: first canonical index past the requested loaded extent.
+      if (Array.isArray(playlist) && playlistIndex + 1 >= playlist.length) {
+        const nextAbsolute = loadedPageEndRef.current;
+        if (nextAbsolute < plLengthRef.current) {
+          await playVideoAt(nextAbsolute + 1);
+        }
       }
     } catch (error) {
       console.error("Error in nextVideo:", error);
@@ -638,9 +684,11 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
       const player = PlaylistPlayerRef.current?.getInternalPlayer();
       if (player) {
-        const playlistIndex = await player.getPlaylistIndex();
-        const currentIdx = playlistIndex + 1 + (pageRef.current - 1) * 200;
-        await skipToIndex(currentIdx + 1);
+        const [playlistIndex, playlist] = await Promise.all([player.getPlaylistIndex(), player.getPlaylist().catch(() => null)]);
+        const errNextPositions = mapPlaylistPositions(videosIdsRef.current.slice((pageRef.current - 1) * 200, pageRef.current * 200), playlist);
+        const errNextLocal = errNextPositions?.[playlistIndex + 1];
+        const nextAbs = errNextLocal !== undefined ? (pageRef.current - 1) * 200 + errNextLocal + 1 : loadedPageEndRef.current + 1;
+        await skipToIndex(nextAbs);
       }
     } catch (error) {
       console.error("Error in nextVideoOnError:", error);
@@ -648,6 +696,9 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }
 
   async function playVideoAt(index: number) {
+    if (operationRef.current || restoringRef.current) return;
+    operationRef.current = true;
+    const prevPage = pageRef.current;
     try {
       const player = PlaylistPlayerRef.current?.getInternalPlayer();
       if (!player) return;
@@ -658,67 +709,59 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       const zeroBasedIndex = index - 1;
       const targetPage = Math.floor(zeroBasedIndex / 200) + 1;
       const paginatedIndex = zeroBasedIndex % 200;
-
-      // Check if target is beyond player's currently loaded playlist.
-      // New videos appended to videosIdsRef after mount are not in player's internal
-      let playerPlaylistLength = 0;
+      let actualPosition = -1;
       try {
         const playlist = await player.getPlaylist();
-        playerPlaylistLength = playlist ? playlist.length : 0;
+        // Find the actual playlist position whose canonical slot on the target page is the requested local index.
+        const targetSlice = videosIdsRef.current.slice((targetPage - 1) * 200, targetPage * 200);
+        const positions = mapPlaylistPositions(targetSlice, playlist);
+        if (positions) actualPosition = positions.indexOf(paginatedIndex);
       } catch (err) {
-        console.warn("Could not get player playlist length:", err);
+        console.warn("Could not get player playlist:", err);
       }
 
-      const needsReload = targetPage !== pageRef.current || paginatedIndex >= playerPlaylistLength;
-
-      if (needsReload) {
-        pageRef.current = targetPage;
-        // loadPlaylist(videosArr, index) already auto-plays at index — no need for playVideoAt after
-        await loadPlaylist(player, videosIdsRef.current, targetPage, paginatedIndex);
+      if (targetPage === pageRef.current && actualPosition >= 0) {
+        // Same canonical page and the target survived filtering — jump by its actual position.
+        await player.playVideoAt(actualPosition);
       } else {
-        // Same page, index within player's loaded range — just jump
-        await player.playVideoAt(paginatedIndex);
+        pageRef.current = targetPage;
+        // Filtered-safe loader handles missing target fallback.
+        await loadPlaylist(player, videosIdsRef.current, targetPage, paginatedIndex);
+        loadedPageEndRef.current = Math.min(targetPage * 200, videosIdsRef.current.length);
       }
     } catch (error) {
+      pageRef.current = prevPage;
       console.error("Error in playVideoAt:", error);
+    } finally {
+      operationRef.current = false;
     }
   }
 
   async function resetPlaylist(reAddRemoved = false) {
-    if (operationRef.current) return;
+    if (operationRef.current || restoringRef.current) return;
     operationRef.current = true;
     try {
       setIsLoading(true);
-      pageRef.current = 1;
-      setIsShuffled(false);
       cancelAutoSkip();
-
-      let removedSnapshot: string[] = [];
-      if (reAddRemoved) {
-        removedSnapshot = ((await get(`plRemoved=${playlistId}`).catch(() => [])) || []) as string[];
-        await del(`plRemoved=${playlistId}`).catch(() => {});
-      }
 
       // Refresh from YouTube; fall back to cache if fetch fails
       let pl = await get(`pl=${playlistId}`).catch(() => undefined);
-      let refreshed = false;
       try {
-        const freshData = await fetchVideosIds(playlistId, videosIdsRef, isChannel, { allowCacheFallback: !reAddRemoved });
-        if (freshData && freshData.length) {
+        const freshData = await fetchVideosIds(playlistId, undefined, isChannel, {
+          allowCacheFallback: !reAddRemoved,
+          persistCache: false,
+          removedVideoIds: reAddRemoved ? [] : undefined,
+        });
+        if (freshData) {
           pl = freshData;
-          refreshed = true;
-          await set(`pl=${playlistId}`, freshData).catch(() => {});
         }
       } catch (err) {
+        if (reAddRemoved) throw err;
         console.warn("Could not refresh playlist from YouTube, using cache:", err);
-      }
-      if (reAddRemoved && !refreshed && removedSnapshot.length) {
-        await set(`plRemoved=${playlistId}`, removedSnapshot).catch(() => {});
       }
 
       if (!pl || !pl.length) {
-        console.error("No playlist data found for reset");
-        return;
+        throw new Error("No playable playlist data found for reset");
       }
 
       const player = PlaylistPlayerRef.current?.getInternalPlayer();
@@ -727,22 +770,37 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
         return;
       }
 
-      updateEmbedError(false);
+      const targetIds = pl.map((video: PlaylistAPI) => video.id);
 
-      videosIdsRef.current = pl.map((video: PlaylistAPI) => video.id);
-      plLengthRef.current = videosIdsRef.current.length;
-      updatePlaylistVideosCache(pl);
+      const loaded = await loadPlaylist(player, targetIds, 1, 0);
+
+      // Commit staged state only after the target load succeeds.
+      updateEmbedError(false);
+      pageRef.current = 1;
+      videosIdsRef.current = targetIds;
+      plLengthRef.current = targetIds.length;
+      playlistVideosByIdRef.current = new Map(pl.map((video: PlaylistAPI) => [video.id, video]));
+      normalOrderVideosRef.current = pl;
       setVideosList(pl);
       lastFetchedCountRef.current = pl.length;
-
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      await loadPlaylist(player, videosIdsRef.current, pageRef.current, 0);
       shuffledRef.current = false;
+      setIsShuffled(false);
+      loadedPageEndRef.current = Math.min(200, targetIds.length);
 
+      void set(`pl=${playlistId}`, pl).catch(() => {});
+      if (reAddRemoved) {
+        void del(`plRemoved=${playlistId}`).catch(() => {});
+      }
+
+      const plVideos = safeParse<{ videosIds?: string[]; updatedTime?: number } & Record<string, unknown>>(safeGetItem(`plVideos=${playlistId}`), {});
+      plVideos.videosIds = targetIds;
+      plVideos.updatedTime = Date.now();
+      safeSetItem(`plVideos=${playlistId}`, JSON.stringify(plVideos));
+
+      const savedAbsolute = loaded.canonicalIndex;
       const existingPl = safeParse<Record<string, unknown>>(safeGetItem(item), {});
-      safeSetItem(item, JSON.stringify({ ...existingPl, playlistId, currentItem: 0, currentPage: 1, initialTime: 0 }));
-      setCurrentVideoIndex(1);
+      safeSetItem(item, JSON.stringify({ ...existingPl, playlistId, currentItem: savedAbsolute % 200, currentPage: Math.floor(savedAbsolute / 200) + 1, initialTime: 0 }));
+      setCurrentVideoIndex(savedAbsolute + 1);
     } catch (e) {
       console.error("Error resetting playlist:", e);
       toast.error("Failed to reset playlist. Try refreshing the page.");
@@ -753,7 +811,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }
 
   async function removeVideo() {
-    if (isRemoving || operationRef.current) return;
+    if (isRemoving || operationRef.current || restoringRef.current) return;
 
     if (shuffledRef.current) {
       toast.error("Unshuffle before removing videos");
@@ -800,6 +858,9 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
         [`plRemoved=${playlistId}`, updatedRemovedVideos],
       ]);
 
+      const removedPositions = mapPlaylistPositions(videosIdsRef.current.slice((pageRef.current - 1) * 200, pageRef.current * 200), currentPlaylist);
+      const removedLocal = removedPositions?.[currentIndex];
+      const removedAbs = removedLocal !== undefined ? (pageRef.current - 1) * 200 + removedLocal : -1;
       videosIdsRef.current = newPl.map((video: PlaylistAPI) => video.id);
       plLengthRef.current = videosIdsRef.current.length;
       updatePlaylistVideosCache(newPl);
@@ -814,16 +875,18 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
         return;
       }
 
-      const targetGlobal = Math.min((pageRef.current - 1) * 200 + currentIndex, newPl.length - 1);
+      const targetGlobal = Math.min(removedAbs >= 0 ? removedAbs : (pageRef.current - 1) * 200 + currentIndex, newPl.length - 1);
       const targetPage = Math.floor(targetGlobal / 200) + 1;
       const targetLocal = targetGlobal % 200;
       pageRef.current = targetPage;
       currentVideoId.current = newPl[targetGlobal].id;
 
-      await loadPlaylist(player, videosIdsRef.current, targetPage, targetLocal);
+      const loaded = await loadPlaylist(player, videosIdsRef.current, targetPage, targetLocal);
+      loadedPageEndRef.current = Math.min(targetPage * 200, videosIdsRef.current.length);
 
+      const persistAbsolute = (targetPage - 1) * 200 + loaded.canonicalIndex;
       const existingPl = safeParse<Record<string, unknown>>(safeGetItem(item), {});
-      safeSetItem(item, JSON.stringify({ ...existingPl, playlistId, currentItem: targetLocal, currentPage: targetPage, initialTime: 0 }));
+      safeSetItem(item, JSON.stringify({ ...existingPl, playlistId, currentItem: persistAbsolute % 200, currentPage: Math.floor(persistAbsolute / 200) + 1, initialTime: 0 }));
 
       setVideosList(newPl);
       await handleVideoPlayback("pause");
@@ -856,6 +919,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }
 
   const isVideoPaused = useCallback(async () => {
+    if (restoringRef.current) return true;
     try {
       const player = PlaylistPlayerRef.current?.internalPlayer;
       if (!player) return true;
@@ -869,6 +933,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }, []);
 
   const handleVideoPlayback = useCallback(async (mode: "play" | "pause") => {
+    if (restoringRef.current) return;
     try {
       const player = PlaylistPlayerRef.current?.internalPlayer;
       if (!player) return;
@@ -888,7 +953,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }, []);
 
   async function onShuffle() {
-    if (operationRef.current || shuffledRef.current) return;
+    if (operationRef.current || restoringRef.current || shuffledRef.current) return;
 
     const playerState = await PlaylistPlayerRef.current?.internalPlayer.getPlayerState().catch(() => undefined);
     if (operationRef.current) return;
@@ -896,7 +961,10 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       return;
     }
 
-    const localIndex = await PlaylistPlayerRef.current?.internalPlayer.getPlaylistIndex().catch(() => undefined);
+    const [localIndex, actualPlaylist] = await Promise.all([
+      PlaylistPlayerRef.current?.internalPlayer.getPlaylistIndex().catch(() => undefined),
+      PlaylistPlayerRef.current?.internalPlayer.getPlaylist().catch(() => undefined),
+    ]);
 
     operationRef.current = true;
     shuffledRef.current = true;
@@ -905,9 +973,13 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
     const savedPage = pageRef.current;
     const originalIds = videosIdsRef.current;
+    const shufflePositions = mapPlaylistPositions(videosIdsRef.current.slice((savedPage - 1) * 200, savedPage * 200), actualPlaylist);
+    const mappedLocal = Number.isInteger(localIndex) ? shufflePositions?.[localIndex as number] : undefined;
+    const fallbackAbs = Number.isInteger(localIndex) ? (savedPage - 1) * 200 + (localIndex as number) : currentVideoIndex ? currentVideoIndex - 1 : 0;
+    const abs = mappedLocal !== undefined ? (savedPage - 1) * 200 + mappedLocal : fallbackAbs;
     pageAndIndexBeforeShuffle.current = {
-      page: savedPage,
-      index: Number.isInteger(localIndex) ? (localIndex as number) : currentVideoIndex ? (currentVideoIndex - 1) % 200 : 0,
+      page: Math.floor(abs / 200) + 1,
+      index: abs % 200,
     };
     pageRef.current = 1;
 
@@ -920,6 +992,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
       const shuffledIds = shuffledVideos.map((item) => item.id);
 
       await loadPlaylist(PlaylistPlayerRef.current?.getInternalPlayer(), shuffledIds, 1, 0);
+      loadedPageEndRef.current = Math.min(200, shuffledIds.length);
 
       videosIdsRef.current = shuffledIds;
       updatePlaylistVideosCache(shuffledVideos);
@@ -937,7 +1010,7 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
   }
 
   async function unShuffle() {
-    if (operationRef.current || !shuffledRef.current) return;
+    if (operationRef.current || restoringRef.current || !shuffledRef.current) return;
 
     operationRef.current = true;
     cancelAutoSkip();
@@ -948,12 +1021,12 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
 
     try {
       const cached = (await get(`pl=${playlistId}`).catch(() => undefined)) as Playlist[] | undefined;
-      const data = Array.isArray(cached) && cached.length ? cached : normalOrderVideosRef.current.length ? normalOrderVideosRef.current : videosList;
-      if (Array.isArray(cached) && cached.length) normalOrderVideosRef.current = cached;
+      const data = normalOrderVideosRef.current.length ? normalOrderVideosRef.current : Array.isArray(cached) && cached.length ? cached : videosList;
 
       const restoredIds = data.map((item) => item.id);
       pageRef.current = page;
       await loadPlaylist(PlaylistPlayerRef.current?.getInternalPlayer(), restoredIds, page, index);
+      loadedPageEndRef.current = Math.min(page * 200, restoredIds.length);
 
       videosIdsRef.current = restoredIds;
       updatePlaylistVideosCache(data);
@@ -1017,6 +1090,22 @@ export default function YoutubePlayer({ params }: { params: { list: string; titl
                   onPlaybackRateChange={onSpeedChange}
                   className="absolute top-0 right-0 left-0 h-full w-full border-none"
                 />
+
+                {restoreError && (
+                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black/70">
+                    <span className="max-w-[90%] text-center text-sm text-neutral-200">{restoreError}</span>
+                    <button
+                      onClick={() => {
+                        setRestoreError("");
+                        const target = restoreTargetRef.current;
+                        if (target) void onReady({ target, data: null } as unknown as YouTubeEvent);
+                      }}
+                      className="cursor-pointer rounded-lg bg-indigo-600 px-4 py-2 text-white transition hover:bg-indigo-700"
+                    >
+                      Retry playback
+                    </button>
+                  </div>
+                )}
 
                 {embedError && (
                   <div className="absolute right-0 bottom-0 left-0 z-20 flex flex-col items-center justify-center pb-4">

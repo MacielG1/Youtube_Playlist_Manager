@@ -3,12 +3,13 @@ import { useRef, useEffect, useState, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import type { Items, Video } from "@/types";
-import YouTube, { YouTubeEvent, YouTubeProps } from "react-youtube";
+import YouTube, { YouTubeEvent, YouTubeProps, YouTubePlayer } from "react-youtube";
 import seekTime from "@/utils/seekTime";
 import { safeGetItem, safeParse, safeSetItem } from "@/utils/safeLocalStorage";
 import useIsClient from "@/hooks/useIsClient";
 import LogoButton from "./LogoButton";
 import saveVideoProgress from "@/utils/saveVideoProgress";
+import useProgressSaver from "@/hooks/useProgressSaver";
 import ModalDelete from "./modals/ModalDelete";
 import onDeleteItems from "@/utils/onDeleteItem";
 import reduceStringSize from "@/utils/reduceStringLength";
@@ -52,18 +53,14 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   let isBrowser = typeof window !== "undefined";
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const player = videoPlayerRef?.current?.getInternalPlayer();
-      if (isPlayingVideoRef.current && player) {
-        saveVideoProgress(player, videoId);
-      }
-    }, 30000);
-
-    return () => {
-      clearInterval(timer);
-    };
-  }, [videoId]);
+  const progressPlayerRef = useRef<YouTubePlayer | null>(null);
+  const hasPlayedRef = useRef(false);
+  useProgressSaver((flush) => {
+    const player = progressPlayerRef.current;
+    if (!player || !hasPlayedRef.current || isPlayingVideoRef.current === null) return;
+    if (!flush && !isPlayingVideoRef.current) return;
+    return saveVideoProgress(player, videoId);
+  });
 
   const disposedRef = useRef(false);
   useEffect(() => {
@@ -131,13 +128,17 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   function onPlay(e: YouTubeEvent) {
     if (!e.target) return;
+    progressPlayerRef.current = e.target;
+    hasPlayedRef.current = true;
     isPlayingVideoRef.current = true;
     void saveVideoProgress(e.target, videoId);
   }
 
   function onPause(e: YouTubeEvent) {
     if (!e.target) return;
+    progressPlayerRef.current = e.target;
     isPlayingVideoRef.current = false;
+    if (!hasPlayedRef.current) return;
     void saveVideoProgress(e.target, videoId);
   }
   function onError(e: YouTubeEvent) {
@@ -158,11 +159,19 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
 
   function onStateChange(e: YouTubeEvent) {
     if (e.target) {
+      progressPlayerRef.current = e.target;
+      if (e.data === 1) hasPlayedRef.current = true;
       setCurrentTime(e.target.getCurrentTime());
     }
   }
 
   // function onEnd(e: YouTubeEvent) {}
+  function onEnd(e: YouTubeEvent) {
+    if (!e.target) return;
+    progressPlayerRef.current = e.target;
+    isPlayingVideoRef.current = false;
+    if (hasPlayedRef.current) void saveVideoProgress(e.target, videoId);
+  }
 
   async function onDelete() {
     isPlayingVideoRef.current = null;
@@ -260,6 +269,7 @@ export default function YTVideoPlayer({ params }: { params: Params }) {
               onReady={onReady}
               onPlay={onPlay}
               onPause={onPause}
+              onEnd={onEnd}
               onError={onError}
               onPlaybackRateChange={onSpeedChange}
               onStateChange={onStateChange}
